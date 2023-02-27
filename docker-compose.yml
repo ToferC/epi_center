@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  db: 
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=christopherallison
+      - POSTGRES_PASSWORD=12345 
+      - POSTGRES_DB=people_data_api 
+    ports:
+      - 5432:5432
+
+  people-data-api:
+    build: .
+    restart: always
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - DATABASE_URL=postgres://christopherallison:12345@db/people_data_api?sslmode=disable
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - 8080:8080

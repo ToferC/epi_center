@@ -1,0 +1,127 @@
+mutation {
+  postTravelGroupData(data: [{
+    familyName: "Allison",
+    givenName:"Chris",
+    additionalNames:["Stuart"],
+    birthDate:"1973-01-12T12:08:00Z",
+    gender:"male",
+    travelDocumentId: "H043534",
+    travelDocumentIssuer:"Canada",
+    approvedAccessLevel:"basic",
+    approvedAccessGranularity:"aggregate",
+    tripProvider:"Air Canada",
+    travelIdentifier: "AC-101",
+    bookingId:"YO-45677",
+    travelMode:"air",
+    originName:"London",
+    originCountryName: "United Kingdom",
+    destinationName:"Ottawa",
+    destinationCountryName:"Canada",
+    travelIntent:"return home",
+    scheduledDepartureTime:"2021-09-30T12:08:00Z"
+    scheduledArrivalTime:"2021-09-30T19:08:00Z",
+    departureTime:"2021-09-30T12:08:00Z",
+    arrivalTime:"2021-09-30T19:08:00Z",
+    tripState: "in_process",
+    smartHealthcardPk:"HKDIH8978972892",
+    vaccinations:[{
+      vaccineName:"SpikeVax"
+      providedOn:"2021-06-01T12:08:00Z",
+      doseProvider:"Walmart Pharmacy",
+      locationProvided:"Ottawa",
+      countryProvided:"Canada",
+    },
+      {
+        vaccineName:"Vaxzeria",
+        providedOn:"2021-08-30T19:08:00Z",
+        doseProvider:"Walmart Pharmacy",
+        locationProvided:"Thunder Bay",
+        countryProvided:"Canada",
+      }
+    ],
+    covidTest: {
+      testName: "AH-001",
+      testType:"molecular",
+      dateTaken:"2021-09-29T19:08:00Z"
+      testResult: false,
+    },
+    quarantinePlan:{
+      dateCreated: "2021-09-30T19:08:00Z",
+      confirmationNoVulnerable:true,
+      postalAddressId:"300 Street Street, Ontario, Canada",
+    },
+    dateTime:"2021-09-29T19:08:00Z",
+    cbsaOfficerId: "40654",
+    cbsaId:"HY-783204732-BHN",
+  },])
+}
+
+
+mutation InputTravel($data: TravelData!) {
+  postTravelGroupData(data: $data) {
+    id
+    personId
+    tripId
+    cbsaId
+    quarantineRequired
+    randomTestingReferral
+    dateTime
+    details
+  }
+}
+
+{ "data": {
+    "familyName": "Allison",
+    "givenName":"Caighlie",
+    "birthDate":"1974-08-26",
+    "gender":"male",
+    "travelDocumentId": "H043534",
+    "travelDocumentIssuer":"Canada",
+    "approvedAccessLevel":"basic",
+    "approvedAccessGranularity":"aggregate",
+    "tripProvider":"Air Canada",
+    "travelIdentifier": "AC-101",
+    "bookingId":"YO-45677",
+    "travelMode":"air",
+    "originName":"London",
+    "originCountryName": "United Kingdom",
+    "destinationName":"Ottawa",
+    "destinationCountryName":"Canada",
+    "travelIntent":"return home",
+    "scheduledDepartureTime":"2015-07-01T08:59:60.123",
+    "scheduledArrivalTime":"2015-07-01T08:59:60.123",
+    "departureTime":"2015-07-01T08:59:60.123",
+    "arrivalTime":"2015-07-01T08:59:60.123",
+    "tripState": "in_process",
+    "smartHealthcardPk":"HKDIH8978972892",
+    "vaccinations":[{
+      "vaccineName":"SpikeVax",
+      "providedOn":"2015-07-01T08:59:60.123",
+      "doseProvider":"Walmart Pharmacy",
+      "locationProvided":"Ottawa",
+      "countryProvided":"Canada"
+    },
+      {
+        "vaccineName":"Vaxzeria",
+        "providedOn":"2015-07-01T08:59:60.123",
+        "doseProvider":"Walmart Pharmacy",
+        "locationProvided":"Thunder Bay",
+        "countryProvided":"Canada"
+      }
+    ],
+    "covidTest": {
+      "testName": "AH-001",
+      "testType":"molecular",
+      "dateTaken":"2015-07-01T08:59:60.123",
+      "testResult": false
+    },
+    "quarantinePlan":{
+      "dateCreated": "2021-09-27",
+      "confirmationNoVulnerable":true,
+      "postalAddressId":"300 Street Street, Ontario, Canada"
+    },
+    "dateTime":"2015-07-01T08:59:60.123",
+    "cbsaOfficerId": "40654",
+    "cbsaId":"HY-783204732-BHN"
+	}
+}

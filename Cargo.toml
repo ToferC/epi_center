@@ -1,0 +1,62 @@
+[package]
+name = "people_data_api"
+version = "0.2.0"
+authors = ["christopherallison <cgeist7@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.3.1"
+actix-web-httpauth = { git = "https://github.com/actix/actix-web-httpauth" }
+actix-rt = "2.8.0"
+actix-multipart = "0.6.0"
+actix-service = "2.0.2"
+
+async-graphql = { version = "4.0", features = ["uuid", "chrono", "chrono-tz", "time"] }
+async-graphql-actix-web = "4.0"
+
+argon2rs = "0.2"
+argonautica = "0.2.0"
+jsonwebtoken = "7.2.0"
+strum = "0.23.0"
+strum_macros = "0.23.1"
+
+chrono = { version = "0.4.20", features = ["serde"] }
+diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono", "uuid", "serde_json"]}
+r2d2 = "0.8.8"
+diesel-derive-enum = { version = "1", features = ["postgres"]}
+diesel_migrations = "2.0.0"
+lazy_static = "1.4"
+proc-macro2 = "1"
+
+dotenv = "0.15.0"
+futures = "0.3.17"
+# rdkafka = { version = "0.28.0", features = ["cmake-build", "ssl-vendored"]}
+async-stream = "0.3.2"
+
+serde = { versuib = "1.0.137", features = ["derive"] }
+serde_derive = "1.0"
+uuid = { version = "1.3.0", features = ["serde", "v4"]}
+derive_more = "0.99.5"
+serde_json = "1.0"
+shrinkwraprs = "0.3.0"
+
+rand = "0.8.4"
+
+alcoholic_jwt = "1.0.0"
+reqwest = { version = "0.11.7", features = ["json"] }
+env_logger = "0.9.0"
+bdays = "0.1.1"
+csv = "1.1.3"
+bytes = "1.1.0"
+
+graphql_client = "0.10.0"
+dataloader = "0.14"
+async-trait = "0.1"
+
+tera = "1.3.0"
+tera-text-filters = "1.0"
+
+Inflector = "0.11.4"
+calamine = "0.18.0"
