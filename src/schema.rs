@@ -46,6 +46,7 @@ diesel::table! {
         family_name -> Varchar,
         given_name -> Varchar,
         organization_id -> Uuid,
+        peoplesoft_id -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,

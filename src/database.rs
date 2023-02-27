@@ -67,7 +67,7 @@ pub fn init() {
         
             println!("Admin created: {:?}", &admin);
 
-            pre_populate_db_schema(&conn);
+            pre_populate_db_schema();
 
             populate_db_with_demo_data(&conn);
         }
@@ -80,7 +80,199 @@ pub fn connection() -> Result<DbConnection, CustomError> {
 }
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
-pub fn pre_populate_db_schema(conn: &PgConnection) {
+pub fn pre_populate_db_schema() {
+
+    // Set up Organization
+    let mut conn = connection().unwrap();
+
+    let o = NewOrganization::new(
+        "Public Health Agency of Canada".to_string(),
+        "Agence de Sante Public de Canada".to_string(),
+        "PHAC".to_string(),
+        "ASPC".to_string(),
+        "Government".to_string(),
+    );
+
+    let org = Organization::create(&o).expect("Unable to create new organization");
+
+    // Set up Org Tiers
+
+    let mut org_tiers: Vec<OrgTier> = Vec::new();
+
+    let tt = NewOrgTier::new(
+            org.id, 
+            1, 
+            "President".to_string(), 
+            "President".to_string(), 
+            None);
+
+    let top_tier = OrgTier::create(&tt).unwrap();
+
+    // Second Tier
+
+    let adm = NewOrgTier::new(
+        org.id, 
+        2, 
+        "VP CDSB".to_string(), 
+        "VP CDSB".to_string(), 
+        Some(top_tier.id),
+    );
+
+    let adm_tier = OrgTier::create(&adm).unwrap();
+
+    // Third Tier
+    
+    let dg = NewOrgTier::new(
+        org.id, 
+        3, 
+        "DG DMIA".to_string(), 
+        "DG DMIA".to_string(), 
+        Some(adm_tier.id),
+    );
+
+    let dg_tier = OrgTier::create(&dg).unwrap();
+
+    let dg2 = NewOrgTier::new(
+        org.id, 
+        3, 
+        "DG SDPI".to_string(), 
+        "DG SDPI".to_string(), 
+        Some(adm_tier.id),
+    );
+
+    let dg_tier2 = OrgTier::create(&dg2).unwrap();
+
+    // Fourth Tier
+
+    let d1 = NewOrgTier::new(
+        org.id, 
+        4, 
+        "DIR Data Science".to_string(), 
+        "DIR Science de Donnees".to_string(), 
+        Some(dg_tier.id),
+    );
+
+    let dir1 = OrgTier::create(&d1).unwrap();
+
+    let d2 = NewOrgTier::new(
+        org.id, 
+        4, 
+        "DIR Data Policy".to_string(), 
+        "DIR Politique de Donnees".to_string(), 
+        Some(dg_tier.id),
+    );
+
+    let dir2 = OrgTier::create(&d2).unwrap();
+
+    // Fifth Tier
+
+    let m1 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR Data Ingestion".to_string(), 
+        "MGR Data Ingestion".to_string(), 
+        Some(dir1.id),
+    );
+
+    let man1 = OrgTier::create(&m1).unwrap();
+
+    let m2 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR Data Mgt".to_string(), 
+        "MGR Data Mgt".to_string(), 
+        Some(dir1.id),
+    );
+
+    let man2 = OrgTier::create(&m2).unwrap();
+
+    let m3 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR Data Ethics".to_string(), 
+        "MGR Data Ethics".to_string(), 
+        Some(dir2.id),
+    );
+
+    let man3 = OrgTier::create(&m3).unwrap();
+
+    let m4 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR Data Governance".to_string(), 
+        "MGR Data Governance".to_string(), 
+        Some(dir2.id),
+    );
+
+    let man4 = OrgTier::create(&m4).unwrap();
+
+    org_tiers.push(top_tier);
+    org_tiers.push(adm_tier);
+    org_tiers.push(dg_tier);
+    org_tiers.push(dg_tier2);
+    org_tiers.push(dir1);
+    org_tiers.push(dir2);
+    org_tiers.push(man1);
+    org_tiers.push(man2);
+    org_tiers.push(man3);
+    org_tiers.push(man4);
+
+    // Set up Persons
+    let mut rng = rand::thread_rng();
+
+    let mut people: Vec<Person> = Vec::new();
+
+    let path = "names.csv";
+
+    let mut reader = csv::Reader::from_path(path).unwrap();
+
+    for r in reader.records() {
+
+        let record = r.unwrap();
+
+        let gn: String = String::from(&record[0]);
+        let famn: String = String::from(&record[1]);
+        
+        let p = NewPerson::new(
+            uuid::Uuid::new_v4(),
+            famn,
+            gn,
+            org.id,
+            rng.gen_range(100000000..999999999).to_string(),
+        );
+
+        let person = Person::create(&p).expect("Unable to create person");
+
+        people.push(person);
+    } 
+
+    // Set up Teams
+
+    let teams = vec!["PMO", "VPO", "DGO DMIA", "DGO SPDI", "DO-Data Science",
+        "DO-Data Policy", "Data Ingestion", "Data Management", "Data Ethics", "Data Governance"];
+
+    
+    // Set up OrgTierOwnership
+
+    for ot in org_tiers {
+        // allocate people to org tiers
+
+        // if owner, also set management role for team at that tier
+
+        // remove from vec using pop
+    }
+
+
+    // Set up Teams
+
+
+    // Set up Roles
+
+
+    // Set up Team Ownership
+
+
+    // Set
     /*
     // Set up countries
     

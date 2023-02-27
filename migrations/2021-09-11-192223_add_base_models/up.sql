@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS persons (
     organization_id UUID NOT NULL,
     FOREIGN KEY(organization_id)
         REFERENCES organizations(id) ON DELETE RESTRICT,
+
+    peoplesoft_id VARCHAR NOT NULL,
     
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -72,7 +74,7 @@ CREATE TABLE IF NOT EXISTS org_tiers (
     tier_level INT NOT NULL,
     name_en VARCHAR(256) UNIQUE NOT NULL,
     name_fr VARCHAR(256) UNIQUE NOT NULL,
-    
+
     parent_tier UUID,
     FOREIGN KEY(parent_tier)
         REFERENCES org_tiers(id) ON DELETE RESTRICT,

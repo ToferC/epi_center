@@ -28,6 +28,7 @@ pub struct Person {
     pub given_name: String,
 
     pub organization_id: Uuid, // Organization 
+    pub peoplesoft_id: String,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -120,6 +121,7 @@ pub struct NewPerson {
     pub family_name: String,
     pub given_name: String,
     pub organization_id: Uuid, // Organization
+    pub peoplesoft_id: String,
 }
 
 impl NewPerson {
@@ -128,13 +130,15 @@ impl NewPerson {
         user_id: Uuid,
         family_name: String,
         given_name: String,
-        organization_id: Uuid, // Organizatio
+        organization_id: Uuid, // Organization
+        peoplesoft_id: String,
     ) -> Self {
         NewPerson {
             user_id,
             family_name,
             given_name,
             organization_id,
+            peoplesoft_id,
         }
     }
 }

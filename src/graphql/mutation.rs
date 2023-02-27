@@ -78,7 +78,7 @@ impl Mutation {
     )]
     pub async fn create_user(
         &self,
-        context: &Context<'_>,
+        _context: &Context<'_>,
         user_data: UserData,
     ) -> FieldResult<User> {
         let new_user = InsertableUser::from(user_data);
@@ -95,12 +95,9 @@ impl Mutation {
     )]
     pub async fn update_user(
         &self,
-        context: &Context<'_>,
+        _context: &Context<'_>,
         user_data: UserUpdate,
     ) -> FieldResult<User> {
-
-        let conn = get_connection_from_context(context);
-
         let mut target_user = User::get_by_id(&user_data.id)?;
 
         if let Some(s) = user_data.name {
@@ -126,12 +123,9 @@ impl Mutation {
 
     pub async fn sign_in(
         &self,
-        context: &Context<'_>,
+        _context: &Context<'_>,
         input: LoginQuery,
     ) -> Result<String, Error> {
-
-        let conn = get_connection_from_context(&context);
-
         let maybe_user = User::get_by_email(&input.email).ok();
 
         if let Some(user) = maybe_user {
