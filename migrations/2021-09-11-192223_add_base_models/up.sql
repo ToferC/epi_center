@@ -125,16 +125,16 @@ CREATE TABLE IF NOT EXISTS teams (
 CREATE TABLE IF NOT EXISTS roles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    person_id UUID UNIQUE NOT NULL,
+    person_id UUID NOT NULL,
     FOREIGN KEY(person_id)
         REFERENCES persons(id) ON DELETE RESTRICT,
 
-    team_id UUID UNIQUE NOT NULL,
+    team_id UUID NOT NULL,
     FOREIGN KEY(team_id)
         REFERENCES teams(id) ON DELETE RESTRICT,
 
-    title_en VARCHAR(256) UNIQUE NOT NULL,
-    title_fr VARCHAR(256) UNIQUE NOT NULL,
+    title_en VARCHAR(256) NOT NULL,
+    title_fr VARCHAR(256) NOT NULL,
     effort FLOAT NOT NULL,
     active bool NOT NULL,
     start_datestamp TIMESTAMP NOT NULL,

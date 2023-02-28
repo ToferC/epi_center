@@ -83,7 +83,6 @@ pub fn connection() -> Result<DbConnection, CustomError> {
 pub fn pre_populate_db_schema() {
 
     // Set up Organization
-    let mut conn = connection().unwrap();
 
     let o = NewOrganization::new(
         "Public Health Agency of Canada".to_string(),
@@ -206,16 +205,16 @@ pub fn pre_populate_db_schema() {
 
     let man4 = OrgTier::create(&m4).unwrap();
 
-    org_tiers.push(top_tier);
-    org_tiers.push(adm_tier);
-    org_tiers.push(dg_tier);
-    org_tiers.push(dg_tier2);
-    org_tiers.push(dir1);
-    org_tiers.push(dir2);
     org_tiers.push(man1);
     org_tiers.push(man2);
     org_tiers.push(man3);
     org_tiers.push(man4);
+    org_tiers.push(dir1);
+    org_tiers.push(dir2);
+    org_tiers.push(dg_tier);
+    org_tiers.push(dg_tier2);
+    org_tiers.push(adm_tier);
+    org_tiers.push(top_tier);
 
     // Set up Persons
     let mut rng = rand::thread_rng();
@@ -246,129 +245,86 @@ pub fn pre_populate_db_schema() {
         people.push(person);
     } 
 
-    // Set up Teams
+    // Set up Teams and roles data
 
-    let teams = vec!["PMO", "VPO", "DGO DMIA", "DGO SPDI", "DO-Data Science",
-        "DO-Data Policy", "Data Ingestion", "Data Management", "Data Ethics", "Data Governance"];
+    let teams = vec![("PMO", 5), ("VPO", 5), ("DGO DMIA", 5), ("DGO SPDI", 5), ("DO-Data Science", 2),
+            ("DO-Data Policy", 2), ("Data Ingestion", 10), ("Data Management", 10), ("Data Ethics", 10), ("Data Governance", 10),
+        ];
 
-    
+    let roles: Vec<&str> = "Leader Communicator Thinker Organizer Doer Builder Writer".split(" ").collect();
+
     // Set up OrgTierOwnership
 
-    for ot in org_tiers {
-        // allocate people to org tiers
+    for (ind, ot) in org_tiers.clone().iter().enumerate() {
+        // allocate people to org tiers - starting at the top
 
+        // set org_tier_owner
+        let owner = people.pop().unwrap();
+
+        let ownership = NewOrgOwnership::new(
+            people.pop().unwrap().id,
+            ot.id,
+        );
+
+        let _res = OrgOwnership::create(&ownership).unwrap();
+
+        // create team at this level
+
+        let (team_name, num_members) = teams[ind];
+
+        let new_team = NewTeam::new(
+            team_name.to_string(), 
+            format!("{}_FR", team_name),
+            org.id, 
+            ot.id, 
+            "Description_EN".to_string(), 
+            "Description_FR".to_string()
+        );
+
+        let team = Team::create(&new_team).expect("Unable to create team");
+        
         // if owner, also set management role for team at that tier
 
-        // remove from vec using pop
+        let nr = NewRole::new(
+            owner.id, 
+            team.id, 
+            ot.name_en.clone(), 
+            ot.name_fr.clone(), 
+            0.80, 
+            true, 
+            chrono::Utc::now().naive_utc(), 
+            None
+        );
+
+        let _res = Role::create(&nr).unwrap();
+
+        // Populate the rest of the team, assigning roles at random
+
+        for _i in 0..num_members {
+            let person = people.pop().unwrap();
+
+            let role = *roles.choose(&mut rng).unwrap();
+
+            let nr = NewRole::new(
+                person.id, 
+                team.id, 
+                role.to_string(), 
+                format!("{}_FR", role), 
+                0.80, 
+                true, 
+                chrono::Utc::now().naive_utc(), 
+                None
+            );
+
+            let _res = Role::create(&nr).unwrap();
+
+        }
     }
-
-
-    // Set up Teams
-
-
-    // Set up Roles
-
-
-    // Set up Team Ownership
-
-
-    // Set
-    /*
-    // Set up countries
-    
-    let mut new_countries: Vec<NewCountry> = Vec::new();
-
-    new_countries.push(NewCountry::new("United Kingdom".to_string(), 0.05));
-    new_countries.push(NewCountry::new("Canada".to_string(), 0.03));
-    new_countries.push(NewCountry::new("Singapore".to_string(), 0.02));
-    new_countries.push(NewCountry::new("USA".to_string(), 0.04));
-    new_countries.push(NewCountry::new("France".to_string(), 0.03));
-    new_countries.push(NewCountry::new("Brazil".to_string(), 0.06));
-   
-    let mut countries: Vec<Country> = Vec::new();
-
-    for np in new_countries {
-        let c = Country::create(conn, &np).unwrap();
-        countries.push(c);
-    };
-
-    // Set up places
-    let mut new_places:Vec<NewPlace> = Vec::new();
-    new_places.push(NewPlace::new("London".to_string(), countries[0].id));
-    new_places.push(NewPlace::new("Singapore".to_string(), countries[2].id));
-    new_places.push(NewPlace::new("Florida".to_string(), countries[3].id));
-    new_places.push(NewPlace::new("Paris".to_string(), countries[4].id));
-    new_places.push(NewPlace::new("Chicago".to_string(), countries[3].id));
-    new_places.push(NewPlace::new("Rio".to_string(), countries[5].id));
-    new_places.push(NewPlace::new("New York".to_string(), countries[3].id));
-    new_places.push(NewPlace::new("Ottawa".to_string(), countries[1].id));
-    new_places.push(NewPlace::new("Montreal".to_string(), countries[1].id));
-    new_places.push(NewPlace::new("Vancouver".to_string(), countries[1].id));
-    new_places.push(NewPlace::new("Calgary".to_string(), countries[1].id));
-    new_places.push(NewPlace::new("Toronto".to_string(), countries[1].id));
-
-    for np in new_places {
-        let _p = Place::create(conn, &np).unwrap();
-    };
-
-    // Add Vaccines
-    let mut new_vaccines = Vec::new();
-
-    let approved_on: NaiveDate = Utc.ymd(2021, 09, 21).naive_utc();
-
-    new_vaccines.push(
-        NewVaccine::new(
-            "Comirnaty".to_string(),
-            "Phizer".to_string(),
-            "mRNA".to_string(),
-            2,
-            true,
-            approved_on,
-            "XXX YYY".to_string()
-    ));
-
-    new_vaccines.push(
-        NewVaccine::new(
-            "SpikeVax".to_string(),
-            "Moderna".to_string(),
-            "mRNA".to_string(),
-            2,
-            true,
-            approved_on,
-            "XXX YYY".to_string()
-    ));
-
-    new_vaccines.push(
-        NewVaccine::new(
-            "Vaxzeria".to_string(),
-            "AstraZeneca".to_string(),
-            "Viral Vector-based".to_string(),
-            2,
-            true,
-            approved_on,
-            "XXX YYY".to_string()
-    ));
-
-    new_vaccines.push(
-        NewVaccine::new(
-            "Jannsen".to_string(),
-            "Johnson & Johnson".to_string(),
-            "mRNA".to_string(),
-            1,
-            true,
-            approved_on,
-            "XXX YYY".to_string()
-    ));
-
-    for v in new_vaccines {
-        let _res = Vaccine::create(conn, &v).unwrap();
-    }
-     */
 }
 
 /// Create an administrative user. An admin account is needed to create additional users and access
 /// some guarded mutations.
-pub fn create_admin_user(conn: &PgConnection) {
+pub fn create_admin_user() {
 
         println!("What is the administrator's name?");
 

@@ -91,7 +91,6 @@ impl Role {
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject)]
 #[diesel(table_name = roles)]
 pub struct NewRole {
-    pub id: Uuid,
     pub person_id: Uuid,
     pub team_id: Uuid,
     pub title_en: String,
@@ -105,7 +104,6 @@ pub struct NewRole {
 impl NewRole {
 
     pub fn new(
-        id: Uuid,
         person_id: Uuid,
         team_id: Uuid,
         title_en: String,
@@ -116,7 +114,6 @@ impl NewRole {
         end_date: Option<NaiveDateTime>,
     ) -> Self {
         NewRole {
-            id,
             person_id,
             team_id,
             title_en,
