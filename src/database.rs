@@ -69,7 +69,7 @@ pub fn init() {
 
             pre_populate_db_schema();
 
-            populate_db_with_demo_data(&conn);
+            //populate_db_with_demo_data();
         }
     }
 }
@@ -163,6 +163,27 @@ pub fn pre_populate_db_schema() {
 
     let dir2 = OrgTier::create(&d2).unwrap();
 
+
+    let d3 = NewOrgTier::new(
+        org.id, 
+        4, 
+        "DIR Data Partnerships".to_string(), 
+        "DIR Partenariat de Donnees".to_string(), 
+        Some(dg_tier2.id),
+    );
+
+    let dir3 = OrgTier::create(&d3).unwrap();
+
+    let d4 = NewOrgTier::new(
+        org.id, 
+        4, 
+        "DIR Strategic Policy".to_string(), 
+        "DIR Politique Strategique".to_string(), 
+        Some(dg_tier2.id),
+    );
+
+    let dir4 = OrgTier::create(&d4).unwrap();
+
     // Fifth Tier
 
     let m1 = NewOrgTier::new(
@@ -205,16 +226,63 @@ pub fn pre_populate_db_schema() {
 
     let man4 = OrgTier::create(&m4).unwrap();
 
+
+    let m5 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR Internal Partnerships".to_string(), 
+        "MGR Internal Partnerships".to_string(), 
+        Some(dir3.id),
+    );
+
+    let man5 = OrgTier::create(&m5).unwrap();
+
+    let m6 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR International Partnerships".to_string(), 
+        "MGR International Partnerships".to_string(), 
+        Some(dir3.id),
+    );
+
+    let man6 = OrgTier::create(&m6).unwrap();
+
+    let m7 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR MCs and TBsubs".to_string(), 
+        "MGR MCs and TBsubs".to_string(), 
+        Some(dir4.id),
+    );
+
+    let man7 = OrgTier::create(&m7).unwrap();
+
+    let m8 = NewOrgTier::new(
+        org.id, 
+        5, 
+        "MGR New Public Health".to_string(), 
+        "MGR New Public Health".to_string(), 
+        Some(dir4.id),
+    );
+
+    let man8 = OrgTier::create(&m8).unwrap();
+
+    org_tiers.push(top_tier);
+    org_tiers.push(adm_tier);
+    org_tiers.push(dg_tier);
+    org_tiers.push(dg_tier2);
+    org_tiers.push(dir1);
+    org_tiers.push(dir2);
+    org_tiers.push(dir3);
+    org_tiers.push(dir4);
     org_tiers.push(man1);
     org_tiers.push(man2);
     org_tiers.push(man3);
     org_tiers.push(man4);
-    org_tiers.push(dir1);
-    org_tiers.push(dir2);
-    org_tiers.push(dg_tier);
-    org_tiers.push(dg_tier2);
-    org_tiers.push(adm_tier);
-    org_tiers.push(top_tier);
+    org_tiers.push(man5);
+    org_tiers.push(man6);
+    org_tiers.push(man7);
+    org_tiers.push(man8);
 
     // Set up Persons
     let mut rng = rand::thread_rng();
@@ -247,8 +315,11 @@ pub fn pre_populate_db_schema() {
 
     // Set up Teams and roles data
 
-    let teams = vec![("PMO", 5), ("VPO", 5), ("DGO DMIA", 5), ("DGO SPDI", 5), ("DO-Data Science", 2),
-            ("DO-Data Policy", 2), ("Data Ingestion", 10), ("Data Management", 10), ("Data Ethics", 10), ("Data Governance", 10),
+    let teams = vec![("PMO", 5), ("VPO", 5), ("DGO DMIA", 5), ("DGO SPDI", 5), 
+            ("DO-Data Science", 2), ("DO-Data Policy", 2), ("DO-Data Partnerships", 2), ("DO-Strategic Policy", 2),
+            ("Data Ingestion", 8), ("Data Management", 8), ("Data Ethics", 8), ("Data Governance", 8),
+            ("Internal Partnerships", 8), ("International Partnerships", 8), ("MCs and TBsubs", 8),
+            ("New Public Health", 8),
         ];
 
     let roles: Vec<&str> = "Leader Communicator Thinker Organizer Doer Builder Writer".split(" ").collect();
@@ -262,7 +333,7 @@ pub fn pre_populate_db_schema() {
         let owner = people.pop().unwrap();
 
         let ownership = NewOrgOwnership::new(
-            people.pop().unwrap().id,
+            owner.id,
             ot.id,
         );
 
@@ -311,7 +382,7 @@ pub fn pre_populate_db_schema() {
 
         // Populate the rest of the team, assigning roles at random
 
-        for _i in 0..num_members {
+        for _i in 0..num_members.min(people.len()) {
             let person = people.pop().unwrap();
 
             let role = *roles.choose(&mut rng).unwrap();
@@ -371,7 +442,7 @@ pub fn create_admin_user() {
 
 /// Testing function to generate dummy data when resetting the database
 /// Started adding unique names to countries, so only works once when DB is reset.
-pub fn populate_db_with_demo_data(conn: &PgConnection) {
+pub fn populate_db_with_demo_data() {
 
     /*s
     // Set up RNG
