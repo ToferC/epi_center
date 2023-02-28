@@ -13,6 +13,7 @@ use crate::schema::*;
 use super::Organization;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[graphql(complex)]
 #[diesel(table_name = org_tiers)]
 pub struct OrgTier {
     pub id: Uuid,
@@ -32,6 +33,7 @@ pub struct OrgTier {
 
 #[ComplexObject]
 impl OrgTier {
+
     pub async fn organization(&self) -> Result<Organization> {
         Organization::get_by_id(&self.organization_id)
     }

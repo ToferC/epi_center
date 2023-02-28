@@ -61,6 +61,37 @@ impl TeamOwnership {
         };
         Ok(team_ownership)
     }
+
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
+        let mut conn = connection()?;
+
+        let res = team_ownerships::table
+            .filter(team_ownerships::id.eq(id))
+            .first(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_team_id(id: &Uuid) -> Result<Self> {
+        let mut conn = connection()?;
+
+        let res = team_ownerships::table
+            .filter(team_ownerships::team_id.eq(id))
+            .first(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_team_ids_by_owner_id(id: &Uuid) -> Result<Vec<Uuid>> {
+        let mut conn = connection()?;
+
+        let res = team_ownerships::table
+            .filter(team_ownerships::person_id.eq(id))
+            .select(team_ownerships::team_id)
+            .load::<Uuid>(&mut conn)?;
+
+        Ok(res)
+    }
     
     pub fn update(&self) -> Result<Self> {
 

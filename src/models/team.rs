@@ -14,7 +14,7 @@ use crate::config_variables::DATE_FORMAT;
 use crate::schema::*;
 use crate::database::connection;
 
-use super::Role;
+use super::{Role, Person, TeamOwnership};
 
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
@@ -81,6 +81,18 @@ impl Team {
 
         Ok(res)
     }
+
+    pub fn get_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Self>> {
+
+        let mut conn = connection()?;
+
+        let res = teams::table
+            .filter(teams::id.eq_any(ids))
+            .load::<Team>(&mut conn)?;
+
+        Ok(res)
+
+    }
     
     pub fn update(&self) -> Result<Self> {
         let mut conn = connection()?;
@@ -137,6 +149,13 @@ impl Team {
 
     pub async fn roles(&self) -> Result<Vec<Role>> {
         Role::get_by_team_id(self.id)
+    }
+
+    pub async fn owner(&self) -> Result<Person> {
+        let team_ownership = TeamOwnership::get_by_team_id(&self.id).unwrap();
+
+        Person::get_by_id(&team_ownership.person_id)
+
     }
     
 }

@@ -20,7 +20,7 @@ impl Query {
     // People 
     #[graphql(name = "allPeople")]
     /// Accepts argument of "count" and returns a vector of {count} persons ordered by
-    /// family name.
+    /// family name.D
     pub async fn all_people(
         &self, 
         context: &Context<'_>,
@@ -99,8 +99,8 @@ impl Query {
         Ok(res)
     }
 
-    #[graphql(name = "teamByEnglishName")]
-    pub async fn team_by_english_name(
+    #[graphql(name = "teamByName")]
+    pub async fn team_by_name(
         &self, 
         context: &Context<'_>,
         name: String,
@@ -109,23 +109,7 @@ impl Query {
         let mut conn = get_connection_from_context(context);
 
         let res = teams::table
-            .filter(teams::name_en.like(format!("%{}%", name)))
-            .load::<Team>(&mut conn)?;
-
-        Ok(res)
-    }
-
-    #[graphql(name = "teamByFrenchName")]
-    pub async fn team_by_french_name(
-        &self, 
-        context: &Context<'_>,
-        name: String,
-    ) -> Result<Vec<Team>> {
-
-        let mut conn = get_connection_from_context(context);
-
-        let res = teams::table
-            .filter(teams::name_fr.like(format!("%{}%", name)))
+            .filter(teams::name_en.like(format!("%{}%", name)).or(teams::name_fr.like(format!("%{}%", name))))
             .load::<Team>(&mut conn)?;
 
         Ok(res)
