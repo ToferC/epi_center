@@ -81,8 +81,6 @@ pub struct NewAffiliation {
     pub role: String,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
-    pub created_at: NaiveDate,
-    pub updated_at: NaiveDate,
 }
 
 impl NewAffiliation {
@@ -92,16 +90,12 @@ impl NewAffiliation {
         role: String,
         start_date: NaiveDate,
         end_date: NaiveDate,
-        created_at: NaiveDate,
-        updated_at: NaiveDate,
     ) -> Self {
         NewAffiliation {
             organization_id,
             role,
             start_date,
             end_date,
-            created_at,
-            updated_at,
         }
     }
 }

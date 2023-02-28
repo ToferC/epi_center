@@ -85,31 +85,23 @@ pub struct NewReportingRelationship {
     pub description: String,
     pub start_date: NaiveDate,
     pub end_date: Option<NaiveDate>,
-    pub created_at: NaiveDate,
-    pub updated_at: NaiveDate,
 }
 
 impl NewReportingRelationship {
 
     pub fn new(
-        id: Uuid,
         reporter: Uuid, // Person
         reporting_to: Uuid, // Person
         description: String,
         start_date: NaiveDate,
         end_date: Option<NaiveDate>,
-        created_at: NaiveDate,
-        updated_at: NaiveDate,
     ) -> Self {
         NewReportingRelationship {
-            id,
             reporter,
             reporting_to,
             description,
             start_date,
             end_date,
-            created_at,
-            updated_at,
         }
     }
 }
