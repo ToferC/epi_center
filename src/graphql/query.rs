@@ -1,4 +1,4 @@
-use diesel::{RunQueryDsl};
+use diesel::{RunQueryDsl, PgTextExpressionMethods};
 use diesel::{QueryDsl, ExpressionMethods, TextExpressionMethods, BoolExpressionMethods};
 use crate::schema::*;
 
@@ -62,7 +62,7 @@ impl Query {
         let mut conn = get_connection_from_context(context);
 
         let res = persons::table
-            .filter(persons::family_name.like(format!("%{}%", name)).or(persons::given_name.like(format!("%{}%", name))))
+            .filter(persons::family_name.ilike(format!("%{}%", name)).or(persons::given_name.ilike(format!("%{}%", name))))
             .load::<Person>(&mut conn)?;
 
         Ok(res)
@@ -109,7 +109,7 @@ impl Query {
         let mut conn = get_connection_from_context(context);
 
         let res = teams::table
-            .filter(teams::name_en.like(format!("%{}%", name)).or(teams::name_fr.like(format!("%{}%", name))))
+            .filter(teams::name_en.ilike(format!("%{}%", name)).or(teams::name_fr.ilike(format!("%{}%", name))))
             .load::<Team>(&mut conn)?;
 
         Ok(res)
@@ -179,7 +179,7 @@ impl Query {
         let mut conn = get_connection_from_context(context);
 
         let res = organizations::table
-            .filter(organizations::name_en.like(format!("%{}%", name)).or(organizations::name_fr.like(format!("%{}%", name))))
+            .filter(organizations::name_en.ilike(format!("%{}%", name)).or(organizations::name_fr.ilike(format!("%{}%", name))))
             .load::<Organization>(&mut conn)?;
 
         Ok(res)
@@ -220,7 +220,7 @@ impl Query {
         let mut conn = get_connection_from_context(context);
 
         let res = org_tiers::table
-            .filter(org_tiers::name_en.like(&name).or(org_tiers::name_fr.like(format!("%{}%", name))))
+            .filter(org_tiers::name_en.ilike(&name).or(org_tiers::name_fr.ilike(format!("%{}%", name))))
             .load::<OrgTier>(&mut conn)?;
 
         Ok(res)
