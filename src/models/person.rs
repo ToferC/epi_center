@@ -17,6 +17,8 @@ use crate::graphql::graphql_translate;
 use crate::database::connection;
 use crate::schema::*;
 
+use super::Role;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = persons)]
 /// Referenced by Team
@@ -91,25 +93,33 @@ impl Person {
 #[Object]
 impl Person {
 
+    /*
     #[graphql(
         guard = "RoleGuard::new(UserRole::Analyst)",
         visible = "is_analyst",
     )]
-    pub async fn family_name(&self) -> FieldResult<String> {
+     */
+    pub async fn family_name(&self) -> Result<String> {
         Ok(self.family_name.to_owned())
     }
     
+    /*
     #[graphql(
         guard = "RoleGuard::new(UserRole::Analyst)",
         visible = "is_analyst",
     )]
-    pub async fn given_name(&self) -> FieldResult<String> {
+     */
+    pub async fn given_name(&self) -> Result<String> {
         Ok(self.given_name.to_owned())
     }
 
-    pub async fn organization(&self) -> FieldResult<Organization> {
+    pub async fn organization(&self) -> Result<Organization> {
         
         Organization::get_by_id(&self.organization_id)
+    }
+
+    pub async fn roles(&self) -> Result<Vec<Role>> {
+        Role::get_by_person_id(self.id)
     }
 }
 

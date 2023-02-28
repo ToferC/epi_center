@@ -1,5 +1,5 @@
 use diesel::{RunQueryDsl};
-use diesel::{QueryDsl, ExpressionMethods};
+use diesel::{QueryDsl, ExpressionMethods, TextExpressionMethods, BoolExpressionMethods};
 use crate::schema::*;
 
 use async_graphql::*;
@@ -17,24 +17,10 @@ pub struct Query;
 #[Object]
 impl Query {
 
-    #[graphql(name = "allPersons")]
-    /// Returns a vector of all persons ordered by arrival time
-    pub async fn all_role(
-        &self, 
-        context: &Context<'_>,) -> Result<Vec<Person>> {
-
-        let mut conn = get_connection_from_context(context);
-
-        let res = persons::table
-            .order(persons::family_name)
-            .load::<Person>(&mut conn)?;
-
-        Ok(res)
-    }
-
+    // People 
     #[graphql(name = "allPeople")]
     /// Accepts argument of "count" and returns a vector of {count} persons ordered by
-    /// arrival time.
+    /// family name.
     pub async fn all_people(
         &self, 
         context: &Context<'_>,
@@ -66,7 +52,23 @@ impl Query {
         Ok(res)
     }
 
-    /// Travel Groups
+    #[graphql(name = "personByName")]
+    pub async fn person_by_name(
+        &self, 
+        context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<Person>> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = persons::table
+            .filter(persons::family_name.like(format!("%{}%", name)).or(persons::given_name.like(format!("%{}%", name))))
+            .load::<Person>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    // Teams
     #[graphql(name = "allTeams")]
     /// Returns a vector of all travel groups
     pub async fn all_teams(
@@ -81,7 +83,7 @@ impl Query {
     }
 
     
-    #[graphql(name = "travelGroupByID")]
+    #[graphql(name = "teamByID")]
     /// Returns a specific travel group by its UUID
     pub async fn team_by_id(
         &self, 
@@ -97,27 +99,68 @@ impl Query {
         Ok(res)
     }
 
-    #[graphql(name = "allRoles")]
-    /// Returns a vector of all role
-    pub async fn all_roles(&self, context: &Context<'_>) -> Result<Vec<Person>> {
+    #[graphql(name = "teamByEnglishName")]
+    pub async fn team_by_english_name(
+        &self, 
+        context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<Team>> {
+
         let mut conn = get_connection_from_context(context);
 
-        let res = persons::table.load::<Person>(&mut conn)?;
+        let res = teams::table
+            .filter(teams::name_en.like(format!("%{}%", name)))
+            .load::<Team>(&mut conn)?;
 
         Ok(res)
     }
+
+    #[graphql(name = "teamByFrenchName")]
+    pub async fn team_by_french_name(
+        &self, 
+        context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<Team>> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = teams::table
+            .filter(teams::name_fr.like(format!("%{}%", name)))
+            .load::<Team>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    // Roles
 
     #[graphql(name = "getRole")]
     /// Accepts an argument of "count" and returns a vector of {count} role
-    pub async fn get_role(&self, context: &Context<'_>, count: i64) -> Result<Vec<Person>> {
+    pub async fn get_role(&self, context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
         let mut conn = get_connection_from_context(context);
 
-        let res = persons::table
+        let res = roles::table
             .limit(count)
-            .load::<Person>(&mut conn)?;
+            .load::<Role>(&mut conn)?;
 
         Ok(res)
     }
+
+    #[graphql(name = "allRoles")]
+    /// Returns a vector of all persons ordered by family name
+    pub async fn all_roles(
+        &self, 
+        context: &Context<'_>,) -> Result<Vec<Role>> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = roles::table
+            .order(roles::start_datestamp)
+            .load::<Role>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    // Organizations
 
     #[graphql(name = "allOrganizations")]
     /// Returns a vector of all organization histories
@@ -142,6 +185,24 @@ impl Query {
         Ok(res)
     }
 
+    #[graphql(name = "organizationByName")]
+    pub async fn organization_by_name(
+        &self, 
+        context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<Organization>> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = organizations::table
+            .filter(organizations::name_en.like(format!("%{}%", name)).or(organizations::name_fr.like(format!("%{}%", name))))
+            .load::<Organization>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    // OrgTiers
+
     #[graphql(name = "allOrgTiers")]
     /// Returns a vector of all quarantine plans
     pub async fn all_org_tiers(&self, context: &Context<'_>) -> Result<Vec<OrgTier>> {
@@ -165,6 +226,23 @@ impl Query {
         Ok(res)
     }
 
+    #[graphql(name = "orgTierByName")]
+    pub async fn org_tier_by_name(
+        &self, 
+        context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<OrgTier>> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = org_tiers::table
+            .filter(org_tiers::name_en.like(&name).or(org_tiers::name_fr.like(format!("%{}%", name))))
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    // TeamOwnerships
     #[graphql(name = "allTeamOwnership")]
     /// Returns a vector of all covid test results
     pub async fn all_team_ownership_results(&self, context: &Context<'_>) -> Result<Vec<TeamOwnership>> {
@@ -186,6 +264,8 @@ impl Query {
 
         Ok(res)
     }
+
+    // Users / Admin
 
     #[graphql(
         name = "allUsers",

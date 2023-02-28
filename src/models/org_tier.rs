@@ -10,18 +10,39 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
+use super::Organization;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[diesel(table_name = org_tiers)]
 pub struct OrgTier {
     pub id: Uuid,
+
+    #[graphql(visible = false)]
     pub organization_id: Uuid, // Organization
     pub tier_level: i32,
     pub name_en: String,
     pub name_fr: String,
+
+    #[graphql(visible = false)]
     pub parent_tier: Option<Uuid>, // Recursive reference to OrgTier
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
+}
+
+#[ComplexObject]
+impl OrgTier {
+    pub async fn organization(&self) -> Result<Organization> {
+        Organization::get_by_id(&self.organization_id)
+    }
+
+    pub async fn parent_organization_tier(&self) -> Result<OrgTier> {
+        match self.parent_tier {
+            Some(id) => OrgTier::get_by_id(&id),
+            None => Err(Error::new("No Parent Tier. This is likely the top of the organizational hierarchy")
+                        .extend_with(|_, e| e.set("details", "No organizational tier id set for parent"))),
+        }
+    }
 }
 
 // Non Graphql
@@ -64,7 +85,7 @@ impl OrgTier {
         Ok(res)
     }
 
-    pub fn get_by_id(id: Uuid) -> Result<OrgTier> {
+    pub fn get_by_id(id: &Uuid) -> Result<OrgTier> {
         let mut conn = connection()?;
 
         let res = org_tiers::table

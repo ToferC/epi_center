@@ -9,9 +9,12 @@ use async_graphql::*;
 use crate::graphql::graphql_translate;
 use crate::models::{Organization, OrgTier};
 
+use crate::config_variables::DATE_FORMAT;
 
 use crate::schema::*;
 use crate::database::connection;
+
+use super::Role;
 
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
@@ -97,6 +100,9 @@ impl Team {
         Organization::get_by_id(&self.organization_id)
     }
 
+    pub async fn organization_level(&self) -> Result<OrgTier> {
+        OrgTier::get_by_id(&self.org_tier_id)
+    }
 
     pub async fn english_name(&self) -> Result<String> {
         Ok(self.name_en.to_owned())
@@ -113,6 +119,26 @@ impl Team {
     pub async fn french_description(&self) -> Result<String> {
         Ok(self.name_en.to_owned())
     }
+
+    pub async fn retired_at(&self) -> Result<String> {
+        match self.retired_at {
+            Some(d) => Ok(d.format(DATE_FORMAT).to_string()),
+            None => Ok("Still Active".to_string())
+        }
+    }
+
+    pub async fn created_at(&self) -> Result<String> {
+        Ok(self.created_at.format(DATE_FORMAT).to_string())
+    }
+
+    pub async fn updated_at(&self) -> Result<String> {
+        Ok(self.updated_at.format(DATE_FORMAT).to_string())
+    }
+
+    pub async fn roles(&self) -> Result<Vec<Role>> {
+        Role::get_by_team_id(self.id)
+    }
+    
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
