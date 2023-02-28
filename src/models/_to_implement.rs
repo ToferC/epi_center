@@ -17,6 +17,9 @@ pub struct ContactData {
     pub email: String,
     pub phone: String,
     pub work_address: String,
+    pub city: String,
+    pub territory: String,
+    pub country: String,
 }
 
 pub struct DataAccess {

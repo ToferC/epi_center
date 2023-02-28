@@ -99,6 +99,16 @@ impl Person {
         visible = "is_analyst",
     )]
      */
+    pub async fn peoplesoft_id(&self) -> Result<String> {
+        Ok(self.peoplesoft_id.to_owned())
+    }
+
+    /*
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Analyst)",
+        visible = "is_analyst",
+    )]
+     */
     pub async fn family_name(&self) -> Result<String> {
         Ok(self.family_name.to_owned())
     }
