@@ -12,6 +12,8 @@ use crate::graphql::graphql_translate;
 use crate::database::connection;
 use crate::schema::*;
 
+use super::OrgTier;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = org_tier_ownerships)]
 pub struct OrgOwnership {
@@ -69,6 +71,27 @@ impl OrgOwnership {
             .filter(org_tier_ownerships::id.eq(id))
             .first(&mut conn)?;
         Ok(org_tier_ownership)
+    }
+
+    pub fn get_by_org_tier_id(id: &Uuid) -> Result<Self> {
+        let mut conn = connection()?;
+
+        let res = org_tier_ownerships::table
+            .filter(org_tier_ownerships::org_tier_id.eq(id))
+            .first(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_org_tier_ids_by_owner_id(id: &Uuid) -> Result<Vec<Uuid>> {
+        let mut conn = connection()?;
+
+        let res = org_tier_ownerships::table
+            .filter(org_tier_ownerships::owner_id.eq(id))
+            .select(org_tier_ownerships::org_tier_id)
+            .load::<Uuid>(&mut conn)?;
+
+        Ok(res)
     }
     
     pub fn update(&self) -> FieldResult<Self> {

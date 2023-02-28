@@ -43,11 +43,11 @@ impl Role {
         Team::get_by_id(&self.team_id)
     }
 
-    pub async fn english_title(&self) -> Result<String> {
+    pub async fn title_english(&self) -> Result<String> {
         Ok(self.title_en.to_owned())
     }
 
-    pub async fn french_title(&self) -> Result<String> {
+    pub async fn title_french(&self) -> Result<String> {
         Ok(self.title_fr.to_owned())
     }
 

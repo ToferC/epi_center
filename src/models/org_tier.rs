@@ -10,7 +10,7 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use super::Organization;
+use super::{Organization, Person, OrgOwnership};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -38,12 +38,17 @@ impl OrgTier {
         Organization::get_by_id(&self.organization_id)
     }
 
-    pub async fn parent_organization_tier(&self) -> Result<OrgTier> {
+    pub async fn parent_organization_tier(&self) -> Result<Option<OrgTier>> {
         match self.parent_tier {
-            Some(id) => OrgTier::get_by_id(&id),
-            None => Err(Error::new("No Parent Tier. This is likely the top of the organizational hierarchy")
-                        .extend_with(|_, e| e.set("details", "No organizational tier id set for parent"))),
+            Some(id) => Ok(Some(OrgTier::get_by_id(&id)?)),
+            None => Ok(None),
         }
+    }
+
+    pub async fn owner(&self) -> Result<Person> {
+        let org_tier_ownership = OrgOwnership::get_by_org_tier_id(&self.id).unwrap();
+
+        Person::get_by_id(&org_tier_ownership.owner_id)
     }
 }
 
@@ -95,6 +100,15 @@ impl OrgTier {
             .first(&mut conn)?;
 
         Ok(res)
+    }
+
+    pub fn get_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+        let org_tier_ownership = org_tiers::table
+            .filter(org_tiers::id.eq_any(ids))
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(org_tier_ownership)
     }
     
     pub fn update(&self) -> Result<OrgTier> {

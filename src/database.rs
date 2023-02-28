@@ -298,6 +298,17 @@ pub fn pre_populate_db_schema() {
 
         let _res = Role::create(&nr).unwrap();
 
+        // Set team ownership
+
+        let new_team_ownership = NewTeamOwnership::new(
+            owner.id,
+            team.id,
+            chrono::Utc::now().naive_utc(),
+            None,
+        );
+
+        let _to = TeamOwnership::create(&new_team_ownership).expect("Unable to create ownership");
+
         // Populate the rest of the team, assigning roles at random
 
         for _i in 0..num_members {

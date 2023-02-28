@@ -17,7 +17,7 @@ use crate::graphql::graphql_translate;
 use crate::database::connection;
 use crate::schema::*;
 
-use super::{Role, TeamOwnership, Team};
+use super::{Role, TeamOwnership, Team, OrgTier, OrgOwnership};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = persons)]
@@ -122,10 +122,17 @@ impl Person {
         Role::get_by_person_id(self.id)
     }
 
-    pub async fn teams(&self) -> Result<Vec<Team>> {
+    pub async fn owned_teams(&self) -> Result<Vec<Team>> {
         let team_ids = TeamOwnership::get_team_ids_by_owner_id(&self.id).unwrap();
 
         Team::get_by_ids(&team_ids)
+
+    }
+
+    pub async fn owned_org_tiers(&self) -> Result<Vec<OrgTier>> {
+        let org_tier_ids = OrgOwnership::get_org_tier_ids_by_owner_id(&self.id).unwrap();
+
+        OrgTier::get_by_ids(&org_tier_ids)
 
     }
 }
