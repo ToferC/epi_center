@@ -182,7 +182,7 @@ impl NewCapability {
             person_id,
             skill_id,
             self_identified_level,
-            validated_level: None,
+            validated_level: Some(self_identified_level),
         }
     }
 }

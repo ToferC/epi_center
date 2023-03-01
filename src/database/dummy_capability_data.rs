@@ -16,8 +16,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in public_health_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::PublicHealth,
         );
 
@@ -30,8 +30,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in policy_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Policy,
         );
 
@@ -44,8 +44,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in data_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Data,
         );
 
@@ -58,8 +58,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in it_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::InformationTechnology,
         );
 
@@ -72,8 +72,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in hr_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::HumanResources,
         );
 
@@ -86,8 +86,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in finance_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Finance,
         );
 
@@ -100,8 +100,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in comms_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Communications,
         );
 
@@ -114,8 +114,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in administration_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Administration,
         );
 
@@ -128,8 +128,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in scientific_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Scientific,
         );
 
@@ -142,8 +142,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in medical_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Medical,
         );
 
@@ -156,8 +156,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in management_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Management,
         );
 
@@ -170,8 +170,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in leadership_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Leadership,
         );
 
@@ -184,8 +184,8 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
     for s in partnership_skills {
         let ns = NewSkill::new(
-            s.to_string(),
-            format!("{}_FR", s.to_string()),
+            s.trim().to_string(),
+            format!("{}_FR", s.trim().to_string()),
             SkillDomain::Partnerships,
         );
 
