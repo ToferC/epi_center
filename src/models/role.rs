@@ -116,9 +116,18 @@ impl Role {
         Ok(role)
     }
 
-    pub fn find_all() -> Result<Vec<Self>> {
+    pub fn get_all() -> Result<Vec<Self>> {
         let mut conn = connection()?;
         let roles = roles::table.load::<Role>(&mut conn)?;
+        Ok(roles)
+    }
+
+    pub fn get_count(count: i64) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+        let roles = roles::table
+            .limit(count)
+            .load::<Role>(&mut conn)?;
+        
         Ok(roles)
     }
 

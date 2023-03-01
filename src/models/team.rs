@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use chrono::{prelude::*};
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, Queryable, ExpressionMethods};
+use diesel::{self, Insertable, Queryable, BoolExpressionMethods, TextExpressionMethods, ExpressionMethods, PgTextExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
@@ -82,6 +82,23 @@ impl Team {
         Ok(res)
     }
 
+    pub fn get_all() -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = teams::table.load::<Team>(&mut conn)?;
+        Ok(res)
+    }
+
+    pub fn get_by_name(name: String) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = teams::table
+            .filter(teams::name_en.ilike(format!("%{}%", name)).or(teams::name_fr.ilike(format!("%{}%", name))))
+            .load::<Team>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Self>> {
 
         let mut conn = connection()?;
@@ -91,7 +108,6 @@ impl Team {
             .load::<Team>(&mut conn)?;
 
         Ok(res)
-
     }
     
     pub fn update(&self) -> Result<Self> {

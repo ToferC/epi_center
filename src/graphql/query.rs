@@ -73,13 +73,10 @@ impl Query {
     /// Returns a vector of all travel groups
     pub async fn all_teams(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
     ) -> Result<Vec<Team>> {
-        let mut conn = get_connection_from_context(context);
 
-        let res = teams::table.load::<Team>(&mut conn)?;
-
-        Ok(res)
+        Team::get_all()
     }
 
     
@@ -87,108 +84,71 @@ impl Query {
     /// Returns a specific travel group by its UUID
     pub async fn team_by_id(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         id: Uuid
     ) -> Result<Team> {
-        let mut conn = get_connection_from_context(context);
 
-        let res = teams::table
-        .filter(teams::id.eq(&id))
-        .first(&mut conn)?;
-        
-        Ok(res)
+        Team::get_by_id(&id)
     }
 
     #[graphql(name = "teamByName")]
     pub async fn team_by_name(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         name: String,
     ) -> Result<Vec<Team>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = teams::table
-            .filter(teams::name_en.ilike(format!("%{}%", name)).or(teams::name_fr.ilike(format!("%{}%", name))))
-            .load::<Team>(&mut conn)?;
-
-        Ok(res)
+        Team::get_by_name(name)
     }
 
     // Roles
 
-    #[graphql(name = "getRole")]
+    #[graphql(name = "getCountRole")]
     /// Accepts an argument of "count" and returns a vector of {count} role
-    pub async fn get_role(&self, context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
-        let mut conn = get_connection_from_context(context);
-
-        let res = roles::table
-            .limit(count)
-            .load::<Role>(&mut conn)?;
-
-        Ok(res)
+    pub async fn get_count_role(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
+        
+        Role::get_count(count)
     }
 
     #[graphql(name = "allRoles")]
     /// Returns a vector of all persons ordered by family name
     pub async fn all_roles(
         &self, 
-        context: &Context<'_>,) -> Result<Vec<Role>> {
+        _context: &Context<'_>,) -> Result<Vec<Role>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = roles::table
-            .order(roles::start_datestamp)
-            .load::<Role>(&mut conn)?;
-
-        Ok(res)
+        Role::get_all()
     }
 
     // Organizations
 
     #[graphql(name = "allOrganizations")]
-    /// Returns a vector of all organization histories
-    pub async fn all_organizations(&self, context: &Context<'_>) -> Result<Vec<Organization>> {
-        let mut conn = get_connection_from_context(context);
-
-        let res = organizations::table
-            .load::<Organization>(&mut conn)?;
-
-        Ok(res)
+    /// Returns a vector of all organizations
+    pub async fn all_organizations(&self, _context: &Context<'_>) -> Result<Vec<Organization>> {
+        
+        Organization::get_all()
     }
 
-    #[graphql(name = "getOrganizations")]
-    /// Accepts argument "count" and returns a vector of {count} organization histories
-    pub async fn get_organizations(&self, context: &Context<'_>, count: i64) -> Result<Vec<Organization>> {
-        let mut conn = get_connection_from_context(context);
-
-        let res = organizations::table
-            .limit(count)
-            .load::<Organization>(&mut conn)?;
-
-        Ok(res)
+    #[graphql(name = "getCountOrganizations")]
+    /// Accepts argument "count" and returns a vector of {count} organizations
+    pub async fn get_count_organizations(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Organization>> {
+        
+        Organization::get_count(count)
     }
 
     #[graphql(name = "organizationByName")]
     pub async fn organization_by_name(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         name: String,
     ) -> Result<Vec<Organization>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = organizations::table
-            .filter(organizations::name_en.ilike(format!("%{}%", name)).or(organizations::name_fr.ilike(format!("%{}%", name))))
-            .load::<Organization>(&mut conn)?;
-
-        Ok(res)
+        Organization::get_by_name(name)
     }
 
     // OrgTiers
 
     #[graphql(name = "allOrgTiers")]
-    /// Returns a vector of all quarantine plans
+    /// Returns a vector of all  org tiers
     pub async fn all_org_tiers(&self, context: &Context<'_>) -> Result<Vec<OrgTier>> {
         let mut conn = get_connection_from_context(context);
 
@@ -199,7 +159,7 @@ impl Query {
     }
 
     #[graphql(name = "getOrgTiers")]
-    /// Accepts argument "count" and returns a vector of {count} quarantine plans
+    /// Accepts argument "count" and returns a vector of {count} org tiers
     pub async fn get_org_tiers(&self, context: &Context<'_>, count: i64) -> Result<Vec<OrgTier>> {
         let mut conn = get_connection_from_context(context);
 
@@ -227,8 +187,9 @@ impl Query {
     }
 
     // TeamOwnerships
+
     #[graphql(name = "allTeamOwnership")]
-    /// Returns a vector of all covid test results
+    /// Returns a vector of all team ownerships
     pub async fn all_team_ownership_results(&self, context: &Context<'_>) -> Result<Vec<TeamOwnership>> {
         let mut conn = get_connection_from_context(context);
 
@@ -238,7 +199,7 @@ impl Query {
     }
 
     #[graphql(name = "getTeamOwnership")]
-    /// Accepts argument "count" and returns a vector of {count} covid test results
+    /// Accepts argument "count" and returns a vector of {count} team ownerships
     pub async fn get_team_ownership_results(&self, context: &Context<'_>, count: i64) -> Result<Vec<TeamOwnership>> {
         let mut conn = get_connection_from_context(context);
 

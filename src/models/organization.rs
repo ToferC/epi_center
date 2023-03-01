@@ -50,6 +50,35 @@ impl Organization {
         graphql_translate(res)
     }
 
+    pub fn get_all() -> Result<Vec<Organization>> {
+        let mut conn = connection()?;
+
+        let res = organizations::table
+            .load::<Organization>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_count(count: i64) -> Result<Vec<Organization>> {
+        let mut conn = connection()?;
+
+        let res = organizations::table
+            .limit(count)
+            .load::<Organization>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_name(name: String) -> Result<Vec<Organization>> {
+        let mut conn = connection()?;
+
+        let res = organizations::table
+            .filter(organizations::name_en.ilike(format!("%{}%", name)).or(organizations::name_fr.ilike(format!("%{}%", name))))
+            .load::<Organization>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn load_into_hash() -> HashMap<Uuid, Organization> {
         let mut conn = connection().expect("Unable to make connection");
 

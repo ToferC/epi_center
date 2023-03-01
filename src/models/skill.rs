@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 use async_graphql::*;
 
+use crate::database::connection;
 use crate::graphql::graphql_translate;
 use crate::schema::*;
 
@@ -33,7 +34,7 @@ impl NewSkill {
         NewSkill {
             name_en,
             name_fr,
-            acroynm_en,
+            description_en,
             description_fr,
         }
     }
@@ -52,22 +53,29 @@ pub struct Skill {
 }
 
 impl Skill {
-    pub fn create(conn: &PgConnection, skill: &NewSkill) -> FieldResult<Skill> {
+    pub fn create(skill: &NewSkill) -> FieldResult<Skill> {
+
+        let mut conn = connection()?;
+
         let res = diesel::insert_into(skills::table)
             .values(skill)
-            .get_result(conn);
+            .get_result(&mut conn);
 
         graphql_translate(res)
     }
 
-    pub fn get_by_id(conn: &PgConnection, id: &Uuid) -> FieldResult<Skill> {
+    pub fn get_by_id(id: &Uuid) -> FieldResult<Skill> {
+        let mut conn = connection()?;
+
         let res = skills::table.filter(skills::id.eq(id))
-            .first(conn);
+            .first(&mut conn);
 
         graphql_translate(res)
     }
 
-    pub fn load_into_hash(conn: &PgConnection) -> HashMap<Uuid, Skill> {
+    pub fn load_into_hash() -> HashMap<Uuid, Skill> {
+        let mut conn = connection()?;
+
         let res = skills::table
             .load::<Skill>(conn)
             .expect("Unable to load skills");
