@@ -14,11 +14,18 @@ use crate::database::connection;
 
 use crate::{schema::*, database};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
-#[table_name = "capabilities"]
+use super::{Person, Skill};
+
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[diesel(table_name = capabilities)]
+#[graphql(complex)]
 pub struct Capability {
     pub id: Uuid,
+
+    #[graphql(visible = false)]
     pub person_id: Uuid, // Person
+    
+    #[graphql(visible = false)]
     pub skill_id: Uuid, // Skill
     pub self_identified_level: CapabilityLevel,
     pub validated_level: Option<CapabilityLevel>,
@@ -28,7 +35,7 @@ pub struct Capability {
     pub retired_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
 #[ExistingTypePath = "crate::schema::sql_types::CapabilityLevel"]
 /// Enums for Capability -> shift to 0 - 4
 pub enum CapabilityLevel {
@@ -37,6 +44,18 @@ pub enum CapabilityLevel {
     Experienced,
     Expert,
     Specialist,
+}
+
+// Graphql
+#[ComplexObject]
+impl Capability {
+    pub async fn person(&self) -> Result<Person> {
+        Person::get_by_id(&self.person_id)
+    }
+
+    pub async fn skill(&self) -> Result<Skill> {
+        Skill::get_by_id(&self.skill_id)
+    }
 }
 
 // Non Graphql
@@ -72,16 +91,36 @@ impl Capability {
         Ok(capability)
     }
 
-    pub fn find_all() -> Result<Vec<Self>, CustomError> {
+    pub fn get_all() -> Result<Vec<Self>, CustomError> {
         let mut conn = database::connection()?;
         let capabilities = capabilities::table.load::<Capability>(&mut conn)?;
         Ok(capabilities)
     }
 
-    pub fn find(id: Uuid) -> Result<Self, CustomError> {
+    pub fn get_by_id(id: Uuid) -> Result<Self, CustomError> {
         let mut conn = database::connection()?;
         let capability = capabilities::table.filter(capabilities::id.eq(id)).first(&mut conn)?;
         Ok(capability)
+    }
+
+    pub fn get_by_skill_id(id: Uuid) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = capabilities::table
+            .filter(capabilities::skill_id.eq(id))
+            .load::<Capability>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_person_id(id: Uuid) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = capabilities::table
+            .filter(capabilities::person_id.eq(id))
+            .load::<Capability>(&mut conn)?;
+
+        Ok(res)
     }
     
     pub fn update(&self) -> FieldResult<Self> {

@@ -1,13 +1,5 @@
-use std::{io::stdin};
-use chrono::prelude::*;
-use chrono::Duration;
-use diesel::pg::PgConnection;
-use diesel::r2d2::ConnectionManager;
-use lazy_static::lazy_static;
-use r2d2::{self};
+
 use rand::Rng;
-use std::env;
-use uuid::Uuid;
 use rand::{thread_rng, seq::SliceRandom};
 
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
@@ -257,7 +249,10 @@ pub fn pre_populate_db_schema() {
             ("New Public Health", 8),
         ];
 
-    let roles: Vec<&str> = "Leader Communicator Thinker Organizer Doer Builder Writer".split(" ").collect();
+    let roles: Vec<&str> = "
+        Sr. Policy Analyst; Policy Analyst; Jr. Policy Analyst; Epidemiologist; Administrative Officer; Designer; 
+        Sr. Data Analyst; Data Analyst; Jr. Data Analyst; Project Officer; Scientist; Researcher; 
+        ".split("; ").collect();
 
     // Set up OrgTierOwnership
 

@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS capabilities;
 DROP TYPE IF EXISTS capability_level;
 
 DROP TABLE IF EXISTS skills;
+DROP TYPE IF EXISTS skill_domain;
+
 DROP TABLE IF EXISTS team_ownerships;
 DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS teams;

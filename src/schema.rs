@@ -4,6 +4,10 @@ pub mod sql_types {
     #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "capability_level"))]
     pub struct CapabilityLevel;
+
+    #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "skill_domain"))]
+    pub struct SkillDomain;
 }
 
 diesel::table! {
@@ -92,12 +96,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::SkillDomain;
+
     skills (id) {
         id -> Uuid,
         name_en -> Varchar,
         name_fr -> Varchar,
         description_en -> Text,
         description_fr -> Text,
+        domain -> SkillDomain,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,

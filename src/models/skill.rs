@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
+use diesel_derive_enum::DbEnum;
 use serde::{Serialize, Deserialize};
 use diesel::prelude::*;
 use diesel::{self, Insertable, Queryable};
@@ -13,30 +14,6 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
-#[table_name = "skills"]
-/// Represents an insertable Skill
-pub struct NewSkill {
-    name_en: String,
-    name_fr: String,
-    description_en: String,
-    description_fr: String,
-}
-
-impl NewSkill {
-    pub fn new(
-        name_en: String,
-        name_fr: String,
-    ) -> Self {
-        NewSkill {
-            name_en,
-            name_fr,
-            description_en: "Default EN".to_string(),
-            description_fr: "Default FR".to_string(),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, AsChangeset, SimpleObject)]
 #[table_name = "skills"]
 /// Should get this from an API or have standard data
@@ -47,10 +24,28 @@ pub struct Skill {
     pub name_fr: String,
     pub description_en: String,
     pub description_fr: String,
+    pub domain: SkillDomain,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
+#[ExistingTypePath = "crate::schema::sql_types::SkillDomain"]
+pub enum SkillDomain {
+    PublicHealth,
+    Policy,
+    Data,
+    IT,
+    HumanResources,
+    Finance,
+    Communications,
+    Administration,
+    Scientific,
+    Medical,
+    Management,
+    Leadership,
 }
 
 impl Skill {
@@ -126,5 +121,29 @@ impl Skill {
         };
 
         skills 
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
+#[table_name = "skills"]
+/// Represents an insertable Skill
+pub struct NewSkill {
+    name_en: String,
+    name_fr: String,
+    description_en: String,
+    description_fr: String,
+}
+
+impl NewSkill {
+    pub fn new(
+        name_en: String,
+        name_fr: String,
+    ) -> Self {
+        NewSkill {
+            name_en,
+            name_fr,
+            description_en: "Default EN".to_string(),
+            description_fr: "Default FR".to_string(),
+        }
     }
 }
