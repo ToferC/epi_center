@@ -6,6 +6,8 @@ use crate::models::{Person, Organization, NewPerson, NewOrganization,
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership};
 
+use super::create_fake_capabilities_for_person;
+
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
 pub fn pre_populate_db_schema() {
 
@@ -237,13 +239,15 @@ pub fn pre_populate_db_schema() {
 
         let person = Person::create(&p).expect("Unable to create person");
 
+        let _capabilities_for_person = create_fake_capabilities_for_person(person.id);
+
         people.push(person);
     } 
 
     // Set up Teams and roles data
 
     let teams = vec![("PMO", 5), ("VPO", 5), ("DGO DMIA", 5), ("DGO SPDI", 5), 
-            ("DO-Data Science", 2), ("DO-Data Policy", 2), ("DO-Data Partnerships", 2), ("DO-Strategic Policy", 2),
+            ("Director Data Science", 2), ("Director Data Policy", 2), ("Director Data Partnerships", 2), ("Director Strategic Policy", 2),
             ("Data Ingestion", 8), ("Data Management", 8), ("Data Ethics", 8), ("Data Governance", 8),
             ("Internal Partnerships", 8), ("International Partnerships", 8), ("MCs and TBsubs", 8),
             ("New Public Health", 8),

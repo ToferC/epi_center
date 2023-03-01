@@ -1,4 +1,5 @@
 
+use rand::seq::SliceRandom;
 use uuid::Uuid;
 use async_graphql::Error;
 
@@ -195,6 +196,49 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
 }
 
-pub fn create_fake_capabilities_for_person(id: Uuid) {
+pub fn create_fake_capabilities_for_person(id: Uuid) -> Result<(), Error>{
 
+    let mut rng = rand::thread_rng();
+
+    // Choose three random domains from SkillDomain
+
+    let mut sds: Vec<SkillDomain> = Vec::new();
+
+    for _ in 0..3 {
+        let sd: SkillDomain = rand::random();
+        if !sds.contains(&sd) {
+            sds.push(sd);
+        }
+    }
+
+    // Identify highest CapabilityLevel
+
+    for sd in sds {
+        let domain = sd;
+
+        // Choose 3-5 random skills from each domain
+
+        let skills_in_domain = Skill::get_by_skill_domain(domain)?;
+
+        // Choose 3-5 random skills from domain
+
+        let mut selected_skills: Vec<Skill> = Vec::new();
+
+        for _ in 0..3 {
+            let skill = skills_in_domain.choose(&mut rng).unwrap();
+            if !selected_skills.contains(&skill) {
+                selected_skills.push(skill.clone());
+            }
+        }
+
+        let capability_level: CapabilityLevel = rand::random();
+
+        for skill in selected_skills {
+            let nc = NewCapability::new(id, skill.id, capability_level);
+            let _res = Capability::create(&nc)?;
+            capability_level.step_down();
+        }
+    }
+
+    Ok(())
 }

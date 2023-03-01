@@ -17,7 +17,7 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, AsChangeset, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, AsChangeset, SimpleObject, PartialEq)]
 #[table_name = "skills"]
 /// Should get this from an API or have standard data
 /// Now pre-loaded as prt of context
@@ -106,6 +106,16 @@ impl Skill {
 
         let res = skills::table
             .filter(skills::name_en.ilike(format!("%{}%", name)).or(skills::name_fr.ilike(format!("%{}%", name))))
+            .load::<Skill>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_skill_domain(domain: SkillDomain) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = skills::table
+            .filter(skills::domain.eq(domain))
             .load::<Skill>(&mut conn)?;
 
         Ok(res)

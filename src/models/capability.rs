@@ -1,8 +1,9 @@
 use std::fmt::Debug;
 
 use chrono::{prelude::*};
+use rand::{distributions::{Distribution,Standard}, Rng};
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, PgConnection, Queryable, ExpressionMethods, BoolExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
 use diesel_derive_enum::{DbEnum};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
@@ -24,7 +25,7 @@ pub struct Capability {
 
     #[graphql(visible = false)]
     pub person_id: Uuid, // Person
-    
+
     #[graphql(visible = false)]
     pub skill_id: Uuid, // Skill
     pub self_identified_level: CapabilityLevel,
@@ -35,7 +36,7 @@ pub struct Capability {
     pub retired_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum, PartialOrd, Ord)]
 #[ExistingTypePath = "crate::schema::sql_types::CapabilityLevel"]
 /// Enums for Capability -> shift to 0 - 4
 pub enum CapabilityLevel {
@@ -44,6 +45,31 @@ pub enum CapabilityLevel {
     Experienced,
     Expert,
     Specialist,
+}
+
+impl Distribution<CapabilityLevel> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> CapabilityLevel {
+        match rng.gen_range(0..11) {
+            0 => CapabilityLevel::Desired,
+            1 => CapabilityLevel::Novice,
+            2..=7 => CapabilityLevel::Experienced,
+            8..=9 => CapabilityLevel::Expert,
+            10 => CapabilityLevel::Specialist,
+            _ => CapabilityLevel::Desired,
+        }
+    }
+}
+
+impl CapabilityLevel {
+    pub fn step_down(&self) -> CapabilityLevel {
+        match self {
+            CapabilityLevel::Desired => CapabilityLevel::Desired,
+            CapabilityLevel::Novice => CapabilityLevel::Desired,
+            CapabilityLevel::Experienced => CapabilityLevel::Novice,
+            CapabilityLevel::Expert => CapabilityLevel::Experienced,
+            CapabilityLevel::Specialist => CapabilityLevel::Expert,
+        }
+    }
 }
 
 // Graphql

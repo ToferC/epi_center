@@ -12,6 +12,7 @@ use rand::{thread_rng, seq::SliceRandom};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 use crate::database::pre_populate_db_schema;
+use crate::database::pre_populate_skills;
 use crate::errors::error_handler::CustomError;
 
 pub type PostgresPool = r2d2::Pool<ConnectionManager<PgConnection>>;
@@ -69,6 +70,8 @@ pub fn init() {
                 .expect("Unable to create admin");
         
             println!("Admin created: {:?}", &admin);
+
+            pre_populate_skills();
 
             pre_populate_db_schema();
 
