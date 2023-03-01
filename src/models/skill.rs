@@ -46,6 +46,7 @@ pub enum SkillDomain {
     Medical,
     Management,
     Leadership,
+    Partnerships,
 }
 
 impl Skill {
