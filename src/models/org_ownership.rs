@@ -7,8 +7,6 @@ use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
 
-use crate::graphql::graphql_translate;
-
 use crate::database::connection;
 use crate::schema::*;
 
@@ -28,17 +26,17 @@ pub struct OrgOwnership {
 
 // Non Graphql
 impl OrgOwnership {
-    pub fn create(org_tier_ownership: &NewOrgOwnership) -> FieldResult<OrgOwnership> {
+    pub fn create(org_tier_ownership: &NewOrgOwnership) -> Result<OrgOwnership> {
         let mut conn = connection()?;
 
         let res = diesel::insert_into(org_tier_ownerships::table)
             .values(org_tier_ownership)
-            .get_result(&mut conn);
+            .get_result(&mut conn)?;
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(org_tier_ownership: &NewOrgOwnership) -> FieldResult<OrgOwnership> {
+    pub fn get_or_create(org_tier_ownership: &NewOrgOwnership) -> Result<OrgOwnership> {
         let mut conn = connection()?;
 
         let res = org_tier_ownerships::table
@@ -94,7 +92,7 @@ impl OrgOwnership {
         Ok(res)
     }
     
-    pub fn update(&self) -> FieldResult<Self> {
+    pub fn update(&self) -> Result<Self> {
         let mut conn = connection()?;
 
         let res = diesel::update(org_tier_ownerships::table)

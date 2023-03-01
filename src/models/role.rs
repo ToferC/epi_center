@@ -7,7 +7,6 @@ use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
 
-use crate::graphql::graphql_translate;
 use crate::config_variables::DATE_FORMAT;
 
 use crate::schema::*;
@@ -91,9 +90,9 @@ impl Role {
 
         let res = diesel::insert_into(roles::table)
         .values(role)
-        .get_result(&mut conn);
+        .get_result(&mut conn)?;
         
-        graphql_translate(res)
+        Ok(res)
     }
     
     pub fn get_or_create(role: &NewRole) -> Result<Role> {

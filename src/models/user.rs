@@ -57,7 +57,7 @@ pub struct User {
 
 impl User {
 
-    pub fn get_by_id(id: &Uuid) -> FieldResult<Self> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
         let user = users::table
             .filter(users::id.eq(id))
@@ -66,7 +66,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn get_by_email(email: &String) -> FieldResult<Self> {
+    pub fn get_by_email(email: &String) -> Result<Self> {
         let mut conn = connection()?;
         let user = users::table
             .filter(users::email.eq(email))
@@ -75,7 +75,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn create(user: InsertableUser) -> FieldResult<Self> {
+    pub fn create(user: InsertableUser) -> Result<Self> {
         let mut conn = connection()?;
         let user = diesel::insert_into(users::table)
             .values(&user)
@@ -84,7 +84,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn update(&self) -> FieldResult<Self> {
+    pub fn update(&self) -> Result<Self> {
         let mut conn = connection()?;
         let user = diesel::update(users::table)
             .filter(users::id.eq(&self.id))

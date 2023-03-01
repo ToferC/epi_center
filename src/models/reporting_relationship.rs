@@ -8,8 +8,6 @@ use uuid::Uuid;
 use async_graphql::*;
 use rand::{Rng, thread_rng};
 
-use crate::graphql::graphql_translate;
-
 use crate::schema::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
@@ -29,15 +27,15 @@ pub struct ReportingRelationship {
 
 // Non Graphql
 impl ReportingRelationship {
-    pub fn create(conn: &PgConnection, reporting_relationship: &NewReportingRelationship) -> FieldResult<ReportingRelationship> {
+    pub fn create(conn: &PgConnection, reporting_relationship: &NewReportingRelationship) -> Result<ReportingRelationship> {
         let res = diesel::insert_into(reporting_relationships::table)
         .values(reporting_relationship)
         .get_result(conn);
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(conn: &PgConnection, reporting_relationship: &NewReportingRelationship) -> FieldResult<ReportingRelationship> {
+    pub fn get_or_create(conn: &PgConnection, reporting_relationship: &NewReportingRelationship) -> Result<ReportingRelationship> {
         let res = reporting_relationships::table
         .filter(reporting_relationships::family_name.eq(&reporting_relationship.family_name))
         .distinct()
@@ -67,7 +65,7 @@ impl ReportingRelationship {
         Ok(person)
     }
     
-    pub fn update(&self, conn: &PgConnection) -> FieldResult<Self> {
+    pub fn update(&self, conn: &PgConnection) -> Result<Self> {
         let res = diesel::update(reporting_relationships::table)
         .filter(reporting_relationships::id.eq(&self.id))
         .set(self)

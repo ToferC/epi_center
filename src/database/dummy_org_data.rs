@@ -278,8 +278,8 @@ pub fn pre_populate_db_schema() {
         let (team_name, num_members) = teams[ind];
 
         let new_team = NewTeam::new(
-            team_name.to_string(), 
-            format!("{}_FR", team_name),
+            team_name.trim().to_string(), 
+            format!("{}_FR", team_name.trim()),
             org.id, 
             ot.id, 
             "Description_EN".to_string(), 

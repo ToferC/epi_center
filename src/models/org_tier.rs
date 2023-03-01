@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use chrono::{prelude::*};
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, Queryable, ExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods, TextExpressionMethods, PgTextExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
@@ -92,12 +92,31 @@ impl OrgTier {
         Ok(res)
     }
 
+    pub fn get_count(count: i64) -> Result<Vec<OrgTier>> {
+        let mut conn = connection()?;
+        let res = org_tiers::table
+            .limit(count)
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_id(id: &Uuid) -> Result<OrgTier> {
         let mut conn = connection()?;
 
         let res = org_tiers::table
             .filter(org_tiers::id.eq(id))
             .first(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_name(name: &str) -> Result<Vec<OrgTier>> {
+        let mut conn = connection()?;
+
+        let res = org_tiers::table
+            .filter(org_tiers::name_en.ilike(&name).or(org_tiers::name_fr.ilike(format!("%{}%", name))))
+            .load::<OrgTier>(&mut conn)?;
 
         Ok(res)
     }

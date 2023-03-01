@@ -6,7 +6,6 @@ use diesel::{self, Insertable, Queryable, BoolExpressionMethods, TextExpressionM
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use crate::graphql::graphql_translate;
 use crate::models::{Organization, OrgTier};
 
 use crate::config_variables::DATE_FORMAT;
@@ -45,9 +44,9 @@ impl Team {
 
         let res = diesel::insert_into(teams::table)
         .values(team)
-        .get_result(&mut conn);
+        .get_result(&mut conn)?;
         
-        graphql_translate(res)
+        Ok(res)
     }
     
     pub fn get_or_create(team: &NewTeam) -> Result<Team> {

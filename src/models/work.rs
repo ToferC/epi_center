@@ -8,8 +8,6 @@ use uuid::Uuid;
 use async_graphql::*;
 use rand::{Rng, thread_rng};
 
-use crate::graphql::graphql_translate;
-
 use crate::schema::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
@@ -37,15 +35,15 @@ pub enum WorkStatus {
 
 // Non Graphql
 impl Work {
-    pub fn create(conn: &PgConnection, work: &NewWork) -> FieldResult<Work> {
+    pub fn create(conn: &PgConnection, work: &NewWork) -> Result<Work> {
         let res = diesel::insert_into(works::table)
         .values(work)
         .get_result(conn);
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(conn: &PgConnection, work: &NewWork) -> FieldResult<Work> {
+    pub fn get_or_create(conn: &PgConnection, work: &NewWork) -> Result<Work> {
         let res = works::table
         .filter(works::family_name.eq(&work.family_name))
         .distinct()
@@ -75,7 +73,7 @@ impl Work {
         Ok(work)
     }
     
-    pub fn update(&self, conn: &PgConnection) -> FieldResult<Self> {
+    pub fn update(&self, conn: &PgConnection) -> Result<Self> {
         let res = diesel::update(works::table)
         .filter(works::id.eq(&self.id))
         .set(self)

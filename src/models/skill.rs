@@ -94,6 +94,16 @@ impl Skill {
         Ok(res)
     }
 
+    pub fn get_name_by_id(id: &Uuid) -> Result<String> {
+        let mut conn = connection()?;
+
+        let res = skills::table.filter(skills::id.eq(id))
+            .select((skills::name_en))
+            .first(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_all() -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
@@ -118,6 +128,17 @@ impl Skill {
             .filter(skills::name_en.ilike(format!("%{}%", name)).or(skills::name_fr.ilike(format!("%{}%", name))))
             .select(skills::id)
             .first::<Uuid>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_skill_ids_by_name(name: String) -> Result<Vec<Uuid>> {
+        let mut conn = connection()?;
+
+        let res = skills::table
+            .filter(skills::name_en.ilike(format!("%{}%", name)).or(skills::name_fr.ilike(format!("%{}%", name))))
+            .select(skills::id)
+            .load::<Uuid>(&mut conn)?;
 
         Ok(res)
     }

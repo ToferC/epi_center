@@ -165,7 +165,7 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
     }
 
     let leadership_skills: Vec<&str> = "
-        Vision Setting; Innovation; Fo_resight; Political Influence; Mobilizing People
+        Vision Setting; Innovation; Foresight; Political Influence; Mobilizing People
     ".split("; ").collect();
 
     for s in leadership_skills {
@@ -231,12 +231,12 @@ pub fn create_fake_capabilities_for_person(id: Uuid) -> Result<(), Error>{
             }
         }
 
-        let capability_level: CapabilityLevel = rand::random();
+        let mut capability_level: CapabilityLevel = rand::random();
 
         for skill in selected_skills {
             let nc = NewCapability::new(id, skill.id, capability_level);
             let _res = Capability::create(&nc)?;
-            capability_level.step_down();
+            capability_level = capability_level.step_down();
         }
     }
 

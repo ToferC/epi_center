@@ -8,8 +8,6 @@ use uuid::Uuid;
 use async_graphql::*;
 use rand::{Rng, thread_rng};
 
-use crate::graphql::graphql_translate;
-
 use crate::schema::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
@@ -28,15 +26,15 @@ pub struct Credential {
 
 // Non Graphql
 impl Credential {
-    pub fn create(conn: &PgConnection, credential: &NewCredential) -> FieldResult<Credential> {
+    pub fn create(conn: &PgConnection, credential: &NewCredential) -> Result<Credential> {
         let res = diesel::insert_into(credentials::table)
         .values(credential)
         .get_result(conn);
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(conn: &PgConnection, credential: &NewCredential) -> FieldResult<Credential> {
+    pub fn get_or_create(conn: &PgConnection, credential: &NewCredential) -> Result<Credential> {
         let res = credentials::table
         .filter(credentials::family_name.eq(&credential.family_name))
         .distinct()
@@ -66,7 +64,7 @@ impl Credential {
         Ok(credential)
     }
     
-    pub fn update(&self, conn: &PgConnection) -> FieldResult<Self> {
+    pub fn update(&self, conn: &PgConnection) -> Result<Self> {
         let res = diesel::update(credentials::table)
         .filter(credentials::id.eq(&self.id))
         .set(self)

@@ -8,8 +8,6 @@ use uuid::Uuid;
 use async_graphql::*;
 use rand::{Rng, thread_rng};
 
-use crate::graphql::graphql_translate;
-
 use crate::schema::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
@@ -26,15 +24,15 @@ pub struct Affiliation {
 
 // Non Graphql
 impl Affiliation {
-    pub fn create(conn: &PgConnection, affiliation: &NewAffiliation) -> FieldResult<Affiliation> {
+    pub fn create(conn: &PgConnection, affiliation: &NewAffiliation) -> Result<Affiliation> {
         let res = diesel::insert_into(affiliations::table)
         .values(affiliation)
         .get_result(conn);
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(conn: &PgConnection, affiliation: &NewAffiliation) -> FieldResult<Affiliation> {
+    pub fn get_or_create(conn: &PgConnection, affiliation: &NewAffiliation) -> Result<Affiliation> {
         let res = affiliations::table
         .filter(affiliations::family_name.eq(&affiliation.family_name))
         .distinct()
@@ -64,7 +62,7 @@ impl Affiliation {
         Ok(affiliation)
     }
     
-    pub fn update(&self, conn: &PgConnection) -> FieldResult<Self> {
+    pub fn update(&self, conn: &PgConnection) -> Result<Self> {
         let res = diesel::update(affiliations::table)
         .filter(affiliations::id.eq(&self.id))
         .set(self)

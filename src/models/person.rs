@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use chrono::{prelude::*};
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, PgConnection, Queryable, ExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods, PgTextExpressionMethods, BoolExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
@@ -11,8 +11,6 @@ use crate::models::{Organization};
 
 use crate::common_utils::{
     is_analyst, RoleGuard, UserRole};
-
-use crate::graphql::graphql_translate;
 
 use crate::database::connection;
 use crate::schema::*;
@@ -40,16 +38,16 @@ pub struct Person {
 
 // Non Graphql
 impl Person {
-    pub fn create(person: &NewPerson) -> FieldResult<Person> {
+    pub fn create(person: &NewPerson) -> Result<Person> {
         let mut conn = connection()?;
         let res = diesel::insert_into(persons::table)
         .values(person)
-        .get_result(&mut conn);
+        .get_result(&mut conn)?;
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(person: &NewPerson) -> FieldResult<Person> {
+    pub fn get_or_create(person: &NewPerson) -> Result<Person> {
         let mut conn = connection()?;
         let res = persons::table
         .filter(persons::family_name.eq(&person.family_name))
@@ -68,17 +66,46 @@ impl Person {
         Ok(person)
     }
 
-    pub fn get_by_id(id: &Uuid) -> FieldResult<Person> {
+    pub fn get_by_id(id: &Uuid) -> Result<Person> {
         let mut conn = connection()?;
 
         let res = persons::table
             .filter(persons::id.eq(id))
-            .first(&mut conn);
+            .first(&mut conn)?;
 
-        graphql_translate(res)
+        Ok(res)
+    }
+
+    pub fn get_all() -> Result<Vec<Person>> {
+        let mut conn = connection()?;
+
+        let res = persons::table
+            .load::<Person>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_count(count: i64) -> Result<Vec<Person>> {
+        let mut conn = connection()?;
+
+        let res = persons::table
+            .limit(count)
+            .load::<Person>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_name(name: &String) -> Result<Vec<Person>> {
+        let mut conn = connection()?;
+
+        let res = persons::table
+            .filter(persons::family_name.ilike(format!("%{}%", name)).or(persons::given_name.ilike(format!("%{}%", name))))
+            .load::<Person>(&mut conn)?;
+
+        Ok(res)
     }
     
-    pub fn update(&self) -> FieldResult<Self> {
+    pub fn update(&self) -> Result<Self> {
         let mut conn = connection()?;
 
         let res = diesel::update(persons::table)

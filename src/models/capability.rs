@@ -9,8 +9,6 @@ use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
 
-use crate::graphql::graphql_translate;
-use crate::errors::error_handler::CustomError;
 use crate::database::connection;
 
 use crate::{schema::*, database};
@@ -79,6 +77,10 @@ impl Capability {
         Person::get_by_id(&self.person_id)
     }
 
+    pub async fn skill_name(&self) -> Result<String> {
+        Skill::get_name_by_id(&self.skill_id)
+    }
+
     pub async fn skill(&self) -> Result<Skill> {
         Skill::get_by_id(&self.skill_id)
     }
@@ -86,17 +88,17 @@ impl Capability {
 
 // Non Graphql
 impl Capability {
-    pub fn create(capability: &NewCapability) -> FieldResult<Capability> {
+    pub fn create(capability: &NewCapability) -> Result<Capability> {
         let mut conn = connection()?;
 
         let res = diesel::insert_into(capabilities::table)
             .values(capability)
-            .get_result(&mut conn);
+            .get_result(&mut conn)?;
         
-        graphql_translate(res)
+        Ok(res)
     }
     
-    pub fn get_or_create(capability: &NewCapability) -> FieldResult<Capability> {
+    pub fn get_or_create(capability: &NewCapability) -> Result<Capability> {
         let mut conn = connection()?;
 
         let res = capabilities::table
@@ -117,23 +119,40 @@ impl Capability {
         Ok(capability)
     }
 
-    pub fn get_all() -> Result<Vec<Self>, CustomError> {
+    pub fn get_all() -> Result<Vec<Self>> {
         let mut conn = database::connection()?;
-        let capabilities = capabilities::table.load::<Capability>(&mut conn)?;
-        Ok(capabilities)
+        let res = capabilities::table.load::<Capability>(&mut conn)?;
+        Ok(res)
     }
 
-    pub fn get_by_id(id: Uuid) -> Result<Self, CustomError> {
+    pub fn get_count(count: i64) -> Result<Vec<Self>> {
         let mut conn = database::connection()?;
-        let capability = capabilities::table.filter(capabilities::id.eq(id)).first(&mut conn)?;
-        Ok(capability)
+        let res = capabilities::table.limit(count).load::<Capability>(&mut conn)?;
+        Ok(res)
     }
 
-    pub fn get_by_skill_id(id: Uuid) -> Result<Vec<Self>> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self>{
+        let mut conn = database::connection()?;
+        let res = capabilities::table.filter(capabilities::id.eq(id))
+            .first(&mut conn)?;
+        Ok(res)
+    }
+
+    pub fn get_single_by_skill_id(id: Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = capabilities::table
             .filter(capabilities::skill_id.eq(id))
+            .load::<Capability>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_skill_ids(ids: Vec<Uuid>) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = capabilities::table
+            .filter(capabilities::skill_id.eq_any(ids))
             .load::<Capability>(&mut conn)?;
 
         Ok(res)
@@ -149,7 +168,7 @@ impl Capability {
         Ok(res)
     }
     
-    pub fn update(&self) -> FieldResult<Self> {
+    pub fn update(&self) -> Result<Self> {
 
         let mut conn = database::connection()?;
 

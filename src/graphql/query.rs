@@ -24,89 +24,99 @@ impl Query {
     pub async fn all_people(
         &self, 
         context: &Context<'_>,
+    ) -> Result<Vec<Person>> {
+
+        Person::get_all()
+    }
+
+    #[graphql(name = "getPeople")]
+    /// Accepts argument of "count" and returns a vector of {count} persons ordered by
+    /// family name.D
+    pub async fn get_people(
+        &self, 
+        context: &Context<'_>,
         count: i64,
     ) -> Result<Vec<Person>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = persons::table
-            .order(persons::family_name)
-            .limit(count)
-            .load::<Person>(&mut conn)?;
-
-        Ok(res)
+        Person::get_count(count)
     }
 
     #[graphql(name = "personById")]
     pub async fn person_by_id(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         id: Uuid
     ) -> Result<Person> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = persons::table.filter(persons::id.eq(id))
-            .first(&mut conn)?;
-
-        Ok(res)
+        Person::get_by_id(&id)
     }
 
     #[graphql(name = "personByName")]
     pub async fn person_by_name(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         name: String,
     ) -> Result<Vec<Person>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = persons::table
-            .filter(persons::family_name.ilike(format!("%{}%", name)).or(persons::given_name.ilike(format!("%{}%", name))))
-            .load::<Person>(&mut conn)?;
-
-        Ok(res)
+        Person::get_by_name(&name)
     }
 
     // Capabilities
 
     pub async fn get_capabilities(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
     ) -> Result<Vec<Capability>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = capabilities::table
-            .order(capabilities::validated_level)
-            .load::<Capability>(&mut conn)?;
-
-        Ok(res)
+        Capability::get_all()
     }
 
     pub async fn capability_by_id(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         id: Uuid
     ) -> Result<Capability> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = capabilities::table.filter(capabilities::id.eq(id))
-            .first(&mut conn)?;
-
-        Ok(res)
+        Capability::get_by_id(&id)
     }
 
-    pub async fn get_capability_by_skill_name(
+    pub async fn get_capabilities_by_skill_name(
         &self, 
         _context: &Context<'_>,
         name: String,
     ) -> Result<Vec<Capability>> {
 
-        let skill_id = Skill::get_top_skill_id_by_name(name)?;
+        let skill_ids = Skill::get_skill_ids_by_name(name)?;
 
-        Capability::get_by_skill_id(skill_id)
+        Capability::get_by_skill_ids(skill_ids)
+    }
+
+    // Skills
+
+    pub async fn get_skills(
+        &self, 
+        _context: &Context<'_>,
+    ) -> Result<Vec<Skill>> {
+
+        Skill::get_all()
+    }
+
+    pub async fn get_skill_by_id(
+        &self, 
+        _context: &Context<'_>,
+        id: Uuid
+    ) -> Result<Skill> {
+
+        Skill::get_by_id(&id)
+    }
+
+    pub async fn get_skill_by_name(
+        &self, 
+        _context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<Skill>> {
+
+        Skill::get_by_name(name)
     }
 
     // Teams
@@ -190,41 +200,25 @@ impl Query {
 
     #[graphql(name = "allOrgTiers")]
     /// Returns a vector of all  org tiers
-    pub async fn all_org_tiers(&self, context: &Context<'_>) -> Result<Vec<OrgTier>> {
-        let mut conn = get_connection_from_context(context);
+    pub async fn all_org_tiers(&self, _context: &Context<'_>) -> Result<Vec<OrgTier>> {
 
-        let res = org_tiers::table
-            .load::<OrgTier>(&mut conn)?;
-
-        Ok(res)
+        OrgTier::get_all()
     }
 
     #[graphql(name = "getOrgTiers")]
     /// Accepts argument "count" and returns a vector of {count} org tiers
-    pub async fn get_org_tiers(&self, context: &Context<'_>, count: i64) -> Result<Vec<OrgTier>> {
-        let mut conn = get_connection_from_context(context);
-
-        let res = org_tiers::table
-            .limit(count)
-            .load::<OrgTier>(&mut conn)?;
-
-        Ok(res)
+    pub async fn get_org_tiers(&self, _context: &Context<'_>, count: i64) -> Result<Vec<OrgTier>> {
+        OrgTier::get_count(count)
     }
 
     #[graphql(name = "orgTierByName")]
     pub async fn org_tier_by_name(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         name: String,
     ) -> Result<Vec<OrgTier>> {
 
-        let mut conn = get_connection_from_context(context);
-
-        let res = org_tiers::table
-            .filter(org_tiers::name_en.ilike(&name).or(org_tiers::name_fr.ilike(format!("%{}%", name))))
-            .load::<OrgTier>(&mut conn)?;
-
-        Ok(res)
+        OrgTier::get_by_name(&name)
     }
 
     // TeamOwnerships

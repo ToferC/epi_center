@@ -11,7 +11,6 @@ use crate::common_utils::{UserRole,
     is_admin, RoleGuard};
 // use rdkafka::producer::FutureProducer;
 // use crate::kafka::send_message;
-use crate::graphql::get_connection_from_context;
 
 pub struct Mutation;
 

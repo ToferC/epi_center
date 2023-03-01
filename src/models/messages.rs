@@ -9,7 +9,7 @@ use rand::Rng;
 use async_graphql::*;
 // use rdkafka::{producer::FutureProducer};
 
-use crate::graphql::{graphql_translate, get_connection_from_context};
+use crate::graphql::{get_connection_from_context};
 use crate::schema::*;
 // use crate::kafka::send_message;
 // use crate::get_or_create_country_by_name;
@@ -41,7 +41,7 @@ impl PILResponse {
             .values(travel_response)
             .get_result(conn);
 
-        graphql_translate(res)
+        Ok(res)
     }
 }
 

@@ -11,7 +11,6 @@ use uuid::Uuid;
 use async_graphql::*;
 
 use crate::database::connection;
-use crate::graphql::graphql_translate;
 use crate::schema::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, SimpleObject)]
@@ -36,18 +35,18 @@ impl Organization {
 
         let res = diesel::insert_into(organizations::table)
             .values(organization)
-            .get_result(&mut conn);
+            .get_result(&mut conn)?;
 
-        graphql_translate(res)
+        Ok(res)
     }
 
     pub fn get_by_id(id: &Uuid) -> Result<Organization> {
         let mut conn = connection()?;
 
         let res = organizations::table.filter(organizations::id.eq(id))
-            .first(&mut conn);
+            .first(&mut conn)?;
 
-        graphql_translate(res)
+        Ok(res)
     }
 
     pub fn get_all() -> Result<Vec<Organization>> {
