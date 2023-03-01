@@ -6,8 +6,11 @@ use serde::{Serialize, Deserialize};
 use diesel::prelude::*;
 use diesel::{self, Insertable, Queryable};
 use diesel::{RunQueryDsl, QueryDsl};
-//use juniper::{Result};
 use uuid::Uuid;
+use rand::{
+    distributions::{Standard, Distribution}, 
+    Rng
+};
 
 use async_graphql::*;
 
@@ -37,7 +40,7 @@ pub enum SkillDomain {
     PublicHealth,
     Policy,
     Data,
-    IT,
+    InformationTechnology,
     HumanResources,
     Finance,
     Communications,
@@ -47,6 +50,27 @@ pub enum SkillDomain {
     Management,
     Leadership,
     Partnerships,
+}
+
+impl Distribution<SkillDomain> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SkillDomain {
+        match rng.gen_range(0..20) {
+            0..=3 => SkillDomain::PublicHealth,
+            4..=5 => SkillDomain::Policy,
+            6 => SkillDomain::Data,
+            7 => SkillDomain::InformationTechnology,
+            8 => SkillDomain::HumanResources,
+            9 => SkillDomain::Finance,
+            10 => SkillDomain::Communications,
+            11 => SkillDomain::Administration,
+            12..=14 => SkillDomain::Scientific,
+            15..=16 => SkillDomain::Medical,
+            17 => SkillDomain::Management,
+            18 => SkillDomain::Leadership,
+            19 => SkillDomain::Partnerships,
+            _ => SkillDomain::Policy,
+        }
+    }
 }
 
 impl Skill {
@@ -133,18 +157,21 @@ pub struct NewSkill {
     name_fr: String,
     description_en: String,
     description_fr: String,
+    domain: SkillDomain,
 }
 
 impl NewSkill {
     pub fn new(
         name_en: String,
         name_fr: String,
+        domain: SkillDomain,
     ) -> Self {
         NewSkill {
             name_en,
             name_fr,
             description_en: "Default EN".to_string(),
             description_fr: "Default FR".to_string(),
+            domain,
         }
     }
 }

@@ -1,67 +1,200 @@
-use rand::Rng;
-use rand::{thread_rng, seq::SliceRandom};
+
+use uuid::Uuid;
+use async_graphql::Error;
 
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel};
+    TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain};
 
-pub fn pre_populate_skills() -> Result<Vec<Skill>> {
+pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
-    let public_health_skills: Vec<String> = "
-        Epidemiology; One Health; Community Health; Mental Health; Health Inequalities; Multi-sectoral Partnerships; Drug Use; Vaccines
-    ".split("; ").iter().collect();
+    let public_health_skills: Vec<&str> = "
+        Epidemiology; One Health; Community Health; Mental Health; Health Inequalities; Multi-sectoral Partnerships; Drug Use; Vaccines; 
+        Risk Assessment; Surveillance
+    ".split("; ").collect();
+
+    for s in public_health_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::PublicHealth,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
     
-    let policy_skills: Vec<String> = "
+    let policy_skills: Vec<&str> = "
         Policy Development; Policy Measurement; Policy Implementation; Strategic Policy; Evaluation; MC & TBsub Writing; Governance
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let data_skills: Vec<String> = "
+    for s in policy_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Policy,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let data_skills: Vec<&str> = "
         Data Access; Data Collection; Data Analysis; Data Management; Public Health Infomatics; Bioinfomatics; Data Visualization
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let it_skills: Vec<String> = "
+    for s in data_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Data,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let it_skills: Vec<&str> = "
         Cloud Administration; Cloud Architecture; Programming - Python; Database Administration; Networking; Back-end Development; Front-end Development
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let hr_skills: Vec<String> = "
+    for s in it_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::InformationTechnology,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let hr_skills: Vec<&str> = "
         Staffing; Classification; Recruiting; Pay and Compensation
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let finance_skills: Vec<String> = "
+    for s in hr_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::HumanResources,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let finance_skills: Vec<&str> = "
         Accounting; Forecasting; Audit; Government Budgeting
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let comms_skills: Vec<String> = "
+    for s in finance_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Finance,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let comms_skills: Vec<&str> = "
         Writing; Public Speaking; Media; Storytelling
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let administration_skills: Vec<String> = "
+    for s in comms_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Communications,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let administration_skills: Vec<&str> = "
         ATIP; Budgeting; Operations; HR Processing; Travel
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let scientific_skills: Vec<String> = "
+    for s in administration_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Administration,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let scientific_skills: Vec<&str> = "
         Anti-Microbial Resistance; Whole Genome Sequencing; Genomics; Modelling; Climate Change
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let medical_skills: Vec<String> = "
+    for s in scientific_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Scientific,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let medical_skills: Vec<&str> = "
         Pediatrics; Maternal Health; Respiratory Health; Cardiovascular Health; Dental Health; Nutration; Chronic Disease
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let management_skills: Vec<String> = "
+    for s in medical_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Medical,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let management_skills: Vec<&str> = "
         People Management; Action Management; Financial Management; Performance Management
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
-    let leadership_skills: Vec<String> = "
-        Vision Setting; Innovation; Foresight; Political Influence; Mobilizing People
-    ".split("; ").iter().collect();
+    for s in management_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Management,
+        );
 
-    let partnership_skills: Vec<String> = "
+        let _res = Skill::create(&ns)?;
+    }
+
+    let leadership_skills: Vec<&str> = "
+        Vision Setting; Innovation; Fo_resight; Political Influence; Mobilizing People
+    ".split("; ").collect();
+
+    for s in leadership_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Leadership,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    let partnership_skills: Vec<&str> = "
         Cross-sectoral Partnerships; International Partnerships; Inter-governmental Partnerships; Community Partnerships
-    ".split("; ").iter().collect();
+    ".split("; ").collect();
 
+    for s in partnership_skills {
+        let ns = NewSkill::new(
+            s.to_string(),
+            format!("{}_FR", s.to_string()),
+            SkillDomain::Partnerships,
+        );
+
+        let _res = Skill::create(&ns)?;
+    }
+
+    Skill::get_all()
 
 }
 
-pub fn create_fake_capabilities_for_person(id: Uuid) -> Result<Capability> {
+pub fn create_fake_capabilities_for_person(id: Uuid) {
 
 }
