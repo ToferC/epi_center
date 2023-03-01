@@ -5,7 +5,7 @@ use crate::schema::*;
 use async_graphql::*;
 
 use crate::models::{Person, User, TeamOwnership, OrgOwnership,
-    Team, Organization, Role, OrgTier};
+    Team, Organization, Role, OrgTier, Capability, Skill};
 use uuid::Uuid;
 
 use crate::graphql::{get_connection_from_context};
@@ -66,6 +66,47 @@ impl Query {
             .load::<Person>(&mut conn)?;
 
         Ok(res)
+    }
+
+    // Capabilities
+
+    pub async fn get_capabilities(
+        &self, 
+        context: &Context<'_>,
+    ) -> Result<Vec<Capability>> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = capabilities::table
+            .order(capabilities::validated_level)
+            .load::<Capability>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub async fn capability_by_id(
+        &self, 
+        context: &Context<'_>,
+        id: Uuid
+    ) -> Result<Capability> {
+
+        let mut conn = get_connection_from_context(context);
+
+        let res = capabilities::table.filter(capabilities::id.eq(id))
+            .first(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub async fn get_capability_by_skill_name(
+        &self, 
+        _context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<Capability>> {
+
+        let skill_id = Skill::get_top_skill_id_by_name(name)?;
+
+        Capability::get_by_skill_id(skill_id)
     }
 
     // Teams

@@ -111,6 +111,17 @@ impl Skill {
         Ok(res)
     }
 
+    pub fn get_top_skill_id_by_name(name: String) -> Result<Uuid> {
+        let mut conn = connection()?;
+
+        let res = skills::table
+            .filter(skills::name_en.ilike(format!("%{}%", name)).or(skills::name_fr.ilike(format!("%{}%", name))))
+            .select(skills::id)
+            .first::<Uuid>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_skill_domain(domain: SkillDomain) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 

@@ -71,7 +71,7 @@ pub fn init() {
         
             println!("Admin created: {:?}", &admin);
 
-            pre_populate_skills();
+            let _res = pre_populate_skills().expect("error in populating skills");
 
             pre_populate_db_schema();
 
