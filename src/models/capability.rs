@@ -2,15 +2,17 @@ use std::fmt::Debug;
 
 use chrono::{prelude::*};
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, PgConnection, Queryable, ExpressionMethods};
+use diesel::{self, Insertable, PgConnection, Queryable, ExpressionMethods, BoolExpressionMethods};
+use diesel_derive_enum::{DbEnum};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use rand::{Rng, thread_rng};
 
 use crate::graphql::graphql_translate;
+use crate::errors::error_handler::CustomError;
+use crate::database::connection;
 
-use crate::schema::*;
+use crate::{schema::*, database};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[table_name = "capabilities"]
@@ -18,12 +20,17 @@ pub struct Capability {
     pub id: Uuid,
     pub person_id: Uuid, // Person
     pub skill_id: Uuid, // Skill
-    pub self_identified_level: u32,
-    pub created_at: NaiveDate,
-    pub updated_at: NaiveDate,
+    pub self_identified_level: CapabilityLevel,
+    pub validated_level: Option<CapabilityLevel>,
+
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+    pub retired_at: Option<NaiveDateTime>,
 }
 
-// Enums for Capability -> shift to 0 - 4
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[ExistingTypePath = "crate::schema::sql_types::CapabilityLevel"]
+/// Enums for Capability -> shift to 0 - 4
 pub enum CapabilityLevel {
     Desired,
     Novice,
@@ -34,26 +41,31 @@ pub enum CapabilityLevel {
 
 // Non Graphql
 impl Capability {
-    pub fn create(conn: &PgConnection, capability: &NewCapability) -> FieldResult<Capability> {
+    pub fn create(capability: &NewCapability) -> FieldResult<Capability> {
+        let mut conn = connection()?;
+
         let res = diesel::insert_into(capabilities::table)
-        .values(capability)
-        .get_result(conn);
+            .values(capability)
+            .get_result(&mut conn);
         
         graphql_translate(res)
     }
     
-    pub fn get_or_create(conn: &PgConnection, capability: &NewCapability) -> FieldResult<Capability> {
+    pub fn get_or_create(capability: &NewCapability) -> FieldResult<Capability> {
+        let mut conn = connection()?;
+
         let res = capabilities::table
-        .filter(capabilities::family_name.eq(&capability.family_name))
-        .distinct()
-        .first(conn);
+            .filter(capabilities::person_id.eq(&capability.person_id)
+            .and(capabilities::skill_id.eq(&capability.skill_id)))
+            .distinct()
+            .first(&mut conn);
         
         let capability = match res {
             Ok(p) => p,
             Err(e) => {
                 // Capability not found
                 println!("{:?}", e);
-                let p = Capability::create(conn, capability).expect("Unable to create capability");
+                let p = Capability::create(capability).expect("Unable to create capability");
                 p
             }
         };
@@ -61,35 +73,37 @@ impl Capability {
     }
 
     pub fn find_all() -> Result<Vec<Self>, CustomError> {
-        let conn = database::connection()?;
-        let capabilities = capabilities::table.load::<Capability>(&conn)?;
+        let mut conn = database::connection()?;
+        let capabilities = capabilities::table.load::<Capability>(&mut conn)?;
         Ok(capabilities)
     }
 
     pub fn find(id: Uuid) -> Result<Self, CustomError> {
-        let conn = database::connection()?;
-        let capability = capabilities::table.filter(capabilities::id.eq(id)).first(&conn)?;
+        let mut conn = database::connection()?;
+        let capability = capabilities::table.filter(capabilities::id.eq(id)).first(&mut conn)?;
         Ok(capability)
     }
     
-    pub fn update(&self, conn: &PgConnection) -> FieldResult<Self> {
+    pub fn update(&self) -> FieldResult<Self> {
+
+        let mut conn = database::connection()?;
+
         let res = diesel::update(capabilities::table)
         .filter(capabilities::id.eq(&self.id))
         .set(self)
-        .get_result(conn)?;
+        .get_result(&mut conn)?;
         
         Ok(res)
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
 #[table_name = "capabilities"]
 pub struct NewCapability {
     pub person_id: Uuid, // Person
     pub skill_id: Uuid, // Skill
-    pub self_identified_level: u32,
-    pub created_at: NaiveDate,
-    pub updated_at: NaiveDate,
+    pub self_identified_level: CapabilityLevel,
+    pub validated_level: Option<CapabilityLevel>,
 }
 
 impl NewCapability {
@@ -97,16 +111,13 @@ impl NewCapability {
     pub fn new(
         person_id: Uuid, // Person
         skill_id: Uuid, // Skill
-        self_identified_level: u32,
-        created_at: NaiveDate,
-        updated_at: NaiveDate,
+        self_identified_level: CapabilityLevel,
     ) -> Self {
         NewCapability {
             person_id,
             skill_id,
             self_identified_level,
-            created_at,
-            updated_at,
+            validated_level: None,
         }
     }
 }

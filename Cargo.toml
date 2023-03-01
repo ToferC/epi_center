@@ -25,7 +25,7 @@ strum_macros = "0.23.1"
 chrono = { version = "0.4.20", features = ["serde"] }
 diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono", "uuid", "serde_json"]}
 r2d2 = "0.8.8"
-diesel-derive-enum = { version = "1", features = ["postgres"]}
+diesel-derive-enum = { version = "2.0.1", features = ["postgres"]}
 diesel_migrations = "2.0.0"
 lazy_static = "1.4"
 proc-macro2 = "1"

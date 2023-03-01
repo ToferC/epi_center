@@ -158,4 +158,38 @@ CREATE TABLE IF NOT EXISTS team_ownerships (
     end_date TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-)
+);
+
+CREATE TABLE IF NOT EXISTS skills (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name_en VARCHAR(256) UNIQUE NOT NULL,
+    name_fr VARCHAR(256) UNIQUE NOT NULL,
+    description_en TEXT NOT NULL,
+    description_fr TEXT NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    retired_at TIMESTAMP DEFAULT NULL
+);
+
+CREATE TYPE capability_level AS ENUM ('desired', 'novice', 'experienced', 'expert', 'specialist');
+
+CREATE TABLE IF NOT EXISTS capabilities (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    person_id UUID NOT NULL,
+    FOREIGN KEY(person_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    skill_id UUID NOT NULL,
+    FOREIGN KEY(skill_id)
+        REFERENCES skills(id) ON DELETE RESTRICT,
+
+    self_identified_level capability_level NOT NULL,
+    validated_level capability_level,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    retired_at TIMESTAMP DEFAULT NULL
+);
+

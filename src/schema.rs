@@ -1,5 +1,27 @@
 // @generated automatically by Diesel CLI.
 
+pub mod sql_types {
+    #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "capability_level"))]
+    pub struct CapabilityLevel;
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::CapabilityLevel;
+
+    capabilities (id) {
+        id -> Uuid,
+        person_id -> Uuid,
+        skill_id -> Uuid,
+        self_identified_level -> CapabilityLevel,
+        validated_level -> Nullable<CapabilityLevel>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        retired_at -> Nullable<Timestamp>,
+    }
+}
+
 diesel::table! {
     org_tier_ownerships (id) {
         id -> Uuid,
@@ -70,6 +92,19 @@ diesel::table! {
 }
 
 diesel::table! {
+    skills (id) {
+        id -> Uuid,
+        name_en -> Varchar,
+        name_fr -> Varchar,
+        description_en -> Text,
+        description_fr -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        retired_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
     team_ownerships (id) {
         id -> Uuid,
         person_id -> Uuid,
@@ -116,6 +151,8 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(capabilities -> persons (person_id));
+diesel::joinable!(capabilities -> skills (skill_id));
 diesel::joinable!(org_tier_ownerships -> org_tiers (org_tier_id));
 diesel::joinable!(org_tier_ownerships -> persons (owner_id));
 diesel::joinable!(org_tiers -> organizations (organization_id));
@@ -129,11 +166,13 @@ diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    capabilities,
     org_tier_ownerships,
     org_tiers,
     organizations,
     persons,
     roles,
+    skills,
     team_ownerships,
     teams,
     users,
