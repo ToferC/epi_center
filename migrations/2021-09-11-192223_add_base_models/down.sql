@@ -12,7 +12,10 @@ DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS teams;
 DROP TABLE IF EXISTS org_tier_ownerships;
 DROP TABLE IF EXISTS org_tiers;
+
 DROP TABLE IF EXISTS persons;
+DROP TYPE IF EXISTS hr_group;
+
 DROP TABLE IF EXISTS organizations;
 
 DROP TABLE IF EXISTS users;

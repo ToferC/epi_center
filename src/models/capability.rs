@@ -4,6 +4,7 @@ use chrono::{prelude::*};
 use rand::{distributions::{Distribution,Standard}, Rng};
 use serde::{Deserialize, Serialize};
 use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
+use diesel::dsl::count;
 use diesel_derive_enum::{DbEnum};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
@@ -34,7 +35,7 @@ pub struct Capability {
     pub retired_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum, PartialOrd, Ord, Display)]
 #[ExistingTypePath = "crate::schema::sql_types::CapabilityLevel"]
 /// Enums for Capability -> shift to 0 - 4
 pub enum CapabilityLevel {
@@ -166,6 +167,22 @@ impl Capability {
             .load::<Capability>(&mut conn)?;
 
         Ok(res)
+    }
+
+    pub fn get_level_counts_by_name(name: String) -> Result<Vec<(String, i64)>> {
+        let mut conn = connection()?;
+
+        let skill_id = Skill::get_top_skill_id_by_name(name)?;
+
+        let res: Vec<(String, i64)> = capabilities::table
+            .filter(capabilities::skill_id.eq(skill_id))
+            .group_by(capabilities::self_identified_level)
+            .select((capabilities::self_identified_level, count(capabilities::id)))
+            .load::<(String, i64)>(&mut conn)?;
+
+        Ok(res)
+           
+           
     }
     
     pub fn update(&self) -> Result<Self> {

@@ -1,10 +1,11 @@
 
 use rand::Rng;
+use rand::distributions::Standard;
 use rand::{thread_rng, seq::SliceRandom};
 
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership};
+    TeamOwnership, NewTeamOwnership, HrGroup};
 
 use super::create_fake_capabilities_for_person;
 
@@ -228,13 +229,22 @@ pub fn pre_populate_db_schema() {
 
         let gn: String = String::from(&record[0]);
         let famn: String = String::from(&record[1]);
+
+        let grp: HrGroup = rand::random();
         
         let p = NewPerson::new(
             uuid::Uuid::new_v4(),
-            famn,
-            gn,
+            famn.to_owned(),
+            gn.to_owned(),
+            format!("{}.{}@phac-aspc.gc.ca", &gn, &famn).to_lowercase(),
+            gen_rand_number(),
+            "130 Colonnade Rd".to_string(),
+            "Ottawa".to_string(),
+            "Ontario".to_string(),
+            "K2E 7K3".to_string(),
             org.id,
-            rng.gen_range(100000000..999999999).to_string(),
+            gen_rand_number(),
+            gen_rand_number(),
         );
 
         let person = Person::create(&p).expect("Unable to create person");
@@ -264,7 +274,20 @@ pub fn pre_populate_db_schema() {
         // allocate people to org tiers - starting at the top
 
         // set org_tier_owner
-        let owner = people.pop().unwrap();
+        let mut owner = people.pop().unwrap();
+        
+        // set exec grp and level
+
+        let (grp, lvl) = match ot.tier_level {
+            1 => (HrGroup::DM, 1),
+            2 => (HrGroup::EX, 4),
+            3 => (HrGroup::EX, 3),
+            4 => (HrGroup::EX, 1),
+            5 => (HrGroup::EC, 7),
+            _ => (HrGroup::EC, 4),
+        };
+
+        let owner = owner.update().expect("Unable to update person");
 
         let ownership = NewOrgOwnership::new(
             owner.id,
@@ -296,7 +319,9 @@ pub fn pre_populate_db_schema() {
             ot.name_en.clone(), 
             ot.name_fr.clone(), 
             0.80, 
-            true, 
+            true,
+            grp,
+            lvl,
             chrono::Utc::now().naive_utc(), 
             None
         );
@@ -321,13 +346,17 @@ pub fn pre_populate_db_schema() {
 
             let role = *roles.choose(&mut rng).unwrap();
 
+            let grp: HrGroup = rand::random();
+
             let nr = NewRole::new(
                 person.id, 
                 team.id, 
-                role.to_string(), 
-                format!("{}_FR", role), 
+                role.trim().to_string(), 
+                format!("{}_FR", role.trim()), 
                 0.80, 
-                true, 
+                true,
+                grp,
+                rng.gen_range(2..8),
                 chrono::Utc::now().naive_utc(), 
                 None
             );
@@ -336,4 +365,16 @@ pub fn pre_populate_db_schema() {
 
         }
     }
+}
+
+pub fn gen_rand_number() -> String {
+    let mut rng = rand::thread_rng();
+
+    let rand_num: String = (0..11)
+        .map(|_| {
+            let i = rng.gen_range(0..10);
+            i.to_string()
+        }).collect();
+
+    rand_num
 }

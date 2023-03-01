@@ -52,12 +52,20 @@ CREATE TABLE IF NOT EXISTS persons (
     user_id UUID UNIQUE NOT NULL,
     family_name VARCHAR NOT NULL,
     given_name VARCHAR NOT NULL,
-    
+
+    email VARCHAR(128) UNIQUE NOT NULL,
+    phone VARCHAR(32) UNIQUE NOT NULL,
+    work_address VARCHAR(256) NOT NULL,
+    city VARCHAR(128) NOT NULL,
+    province VARCHAR(128) NOT NULL,
+    postal_code VARCHAR(16) NOT NULL,
+
     organization_id UUID NOT NULL,
     FOREIGN KEY(organization_id)
         REFERENCES organizations(id) ON DELETE RESTRICT,
 
     peoplesoft_id VARCHAR NOT NULL,
+    orcid_id VARCHAR NOT NULL,
     
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -122,6 +130,19 @@ CREATE TABLE IF NOT EXISTS teams (
 
 );
 
+CREATE TYPE hr_group AS ENUM (
+    'ec',
+    'as',
+    'pm',
+    'cr',
+    'pe',
+    'is',
+    'fi',
+    'res',
+    'ex',
+    'dm'
+);
+
 CREATE TABLE IF NOT EXISTS roles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
@@ -137,6 +158,10 @@ CREATE TABLE IF NOT EXISTS roles (
     title_fr VARCHAR(256) NOT NULL,
     effort FLOAT NOT NULL,
     active bool NOT NULL,
+
+    hr_group hr_group NOT NULL,
+    hr_level INT NOT NULL,
+
     start_datestamp TIMESTAMP NOT NULL,
     end_date TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),

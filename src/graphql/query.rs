@@ -5,7 +5,7 @@ use crate::schema::*;
 use async_graphql::*;
 
 use crate::models::{Person, User, TeamOwnership, OrgOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill};
+    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityLevel};
 use uuid::Uuid;
 
 use crate::graphql::{get_connection_from_context};
@@ -89,6 +89,16 @@ impl Query {
         let skill_ids = Skill::get_skill_ids_by_name(name)?;
 
         Capability::get_by_skill_ids(skill_ids)
+    }
+
+    /// Return a count of the number of people who have a capability at each level of the capability
+    pub async fn get_capability_counts(
+        &self, 
+        _context: &Context<'_>,
+        name: String,
+    ) -> Result<Vec<(String, i64)>> {
+
+        Capability::get_level_counts_by_name(name)
     }
 
     // Skills

@@ -1,8 +1,10 @@
 use std::fmt::Debug;
 
 use chrono::{prelude::*};
+use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
 use diesel::{self, Insertable, Queryable, ExpressionMethods};
+use rand::{distributions::{Distribution, Standard}, Rng};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
@@ -26,6 +28,10 @@ pub struct Role {
     pub title_fr: String,
     pub effort: f64,
     pub active: bool,
+    // HR info - this will be another module - just here for expediency
+    pub hr_group: HrGroup,
+    pub hr_level: i32,
+
     pub start_datestamp: NaiveDateTime,
     pub end_date: Option<NaiveDateTime>,
     pub created_at: NaiveDateTime,
@@ -60,6 +66,14 @@ impl Role {
         } else {
             Ok("INACTIVE".to_string())
         }
+    }
+
+    pub async fn hr_group(&self) -> Result<String> {
+        Ok(self.hr_group.to_string())
+    }
+
+    pub async fn hr_level(&self) -> Result<i32> {
+        Ok(self.hr_level)
     }
 
     pub async fn start_date(&self) -> Result<String> {
@@ -177,6 +191,9 @@ pub struct NewRole {
     pub title_fr: String,
     pub effort: f64,
     pub active: bool,
+    // HR info - this will be another module - just here for expediency
+    pub hr_group: HrGroup,
+    pub hr_level: i32,
     pub start_datestamp: NaiveDateTime,
     pub end_date: Option<NaiveDateTime>,
 }
@@ -190,6 +207,8 @@ impl NewRole {
         title_fr: String,
         effort: f64,
         active: bool,
+        hr_group: HrGroup,
+        hr_level: i32,
         start_datestamp: NaiveDateTime,
         end_date: Option<NaiveDateTime>,
     ) -> Self {
@@ -200,8 +219,44 @@ impl NewRole {
             title_fr,
             effort,
             active,
+            hr_group,
+            hr_level,
             start_datestamp,
             end_date,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Enum, DbEnum, Copy, Display)]
+#[ExistingTypePath = "crate::schema::sql_types::HrGroup"]
+/// Represents a Government of Canada pay group
+pub enum HrGroup {
+    EC,
+    AS,
+    PM,
+    CR,
+    PE,
+    IS,
+    FI,
+    RES,
+    EX,
+    DM,
+    LotsMore,
+}
+
+impl Distribution<HrGroup> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> HrGroup {
+        match rng.gen_range(0..13) {
+            0..=4 => HrGroup::EC,
+            5 => HrGroup::AS,
+            6 => HrGroup::PM,
+            7 => HrGroup::CR,
+            8 => HrGroup::PE,
+            9 => HrGroup::IS,
+            10 => HrGroup::FI,
+            11 => HrGroup::RES,
+            12 => HrGroup::EX,
+            _ => HrGroup::DM,
         }
     }
 }

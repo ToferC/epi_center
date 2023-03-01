@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use chrono::{prelude::*};
+use rand::distributions::{Distribution};
 use serde::{Deserialize, Serialize};
 use diesel::{self, Insertable, Queryable, ExpressionMethods, PgTextExpressionMethods, BoolExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
@@ -17,18 +18,31 @@ use crate::schema::*;
 
 use super::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[graphql(complex)]
 #[diesel(table_name = persons)]
 /// Referenced by Team
 /// Referenced by ReportingRelationship
 pub struct Person {
     pub id: Uuid,
     pub user_id: Uuid,
+    #[graphql(visible = false)]
     pub family_name: String,
+    #[graphql(visible = false)]
     pub given_name: String,
 
+    // contact info - this will be another module - just here for expediency
+    pub email: String,
+    pub phone: String,
+    pub work_address: String,
+    pub city: String,
+    pub province: String,
+    pub postal_code: String,
+
     pub organization_id: Uuid, // Organization 
+    #[graphql(visible = false)]
     pub peoplesoft_id: String,
+    pub orcid_id: String,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -117,16 +131,14 @@ impl Person {
     }
 }
 
-#[Object]
+#[ComplexObject]
 impl Person {
 
-    /*
     #[graphql(
         guard = "RoleGuard::new(UserRole::Analyst)",
         visible = "is_analyst",
     )]
-     */
-    pub async fn peoplesoft_id(&self) -> Result<String> {
+    pub async fn internal_peoplesoft_id(&self) -> Result<String> {
         Ok(self.peoplesoft_id.to_owned())
     }
 
@@ -136,7 +148,7 @@ impl Person {
         visible = "is_analyst",
     )]
      */
-    pub async fn family_name(&self) -> Result<String> {
+    pub async fn last_name(&self) -> Result<String> {
         Ok(self.family_name.to_owned())
     }
     
@@ -146,7 +158,7 @@ impl Person {
         visible = "is_analyst",
     )]
      */
-    pub async fn given_name(&self) -> Result<String> {
+    pub async fn first_name(&self) -> Result<String> {
         Ok(self.given_name.to_owned())
     }
 
@@ -185,8 +197,16 @@ pub struct NewPerson {
     pub user_id: Uuid,
     pub family_name: String,
     pub given_name: String,
+    // contact info - this will be another module - just here for expediency
+    pub email: String,
+    pub phone: String,
+    pub work_address: String,
+    pub city: String,
+    pub province: String,
+    pub postal_code: String,
     pub organization_id: Uuid, // Organization
     pub peoplesoft_id: String,
+    pub orcid_id: String,
 }
 
 impl NewPerson {
@@ -195,15 +215,29 @@ impl NewPerson {
         user_id: Uuid,
         family_name: String,
         given_name: String,
+        email: String,
+        phone: String,
+        work_address: String,
+        city: String,
+        province: String,
+        postal_code: String,
         organization_id: Uuid, // Organization
         peoplesoft_id: String,
+        orcid_id: String,
     ) -> Self {
         NewPerson {
             user_id,
             family_name,
             given_name,
+            email,
+            phone,
+            work_address,
+            city,
+            province,
+            postal_code,
             organization_id,
             peoplesoft_id,
+            orcid_id,
         }
     }
 }

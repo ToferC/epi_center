@@ -6,6 +6,10 @@ pub mod sql_types {
     pub struct CapabilityLevel;
 
     #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "hr_group"))]
+    pub struct HrGroup;
+
+    #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "skill_domain"))]
     pub struct SkillDomain;
 }
@@ -71,8 +75,15 @@ diesel::table! {
         user_id -> Uuid,
         family_name -> Varchar,
         given_name -> Varchar,
+        email -> Varchar,
+        phone -> Varchar,
+        work_address -> Varchar,
+        city -> Varchar,
+        province -> Varchar,
+        postal_code -> Varchar,
         organization_id -> Uuid,
         peoplesoft_id -> Varchar,
+        orcid_id -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,
@@ -80,6 +91,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::HrGroup;
+
     roles (id) {
         id -> Uuid,
         person_id -> Uuid,
@@ -88,6 +102,8 @@ diesel::table! {
         title_fr -> Varchar,
         effort -> Float8,
         active -> Bool,
+        hr_group -> HrGroup,
+        hr_level -> Int4,
         start_datestamp -> Timestamp,
         end_date -> Nullable<Timestamp>,
         created_at -> Timestamp,
