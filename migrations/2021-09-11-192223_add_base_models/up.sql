@@ -249,3 +249,37 @@ CREATE TABLE IF NOT EXISTS affiliations (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TYPE work_status AS ENUM (
+    'planning',
+    'in_progress',
+    'completed',
+    'blocked',
+    'cancelled'
+);
+
+CREATE TABLE IF NOT EXISTS works (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    person_id UUID,
+    FOREIGN KEY(person_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    team_id UUID,
+    FOREIGN KEY(team_id)
+        REFERENCES teams(id) ON DELETE RESTRICT,
+
+    title_en VARCHAR(144) NOT NULL,
+    outcome_en VARCHAR(256) NOT NULL,
+    outcome_fr VARCHAR(256) NOT NULL,
+
+    start_datestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    target_completion_date TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    work_status work_status NOT NULL DEFAULT 'planning',
+    effort FLOAT NOT NULL,
+
+    completed_date TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+

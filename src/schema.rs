@@ -12,6 +12,10 @@ pub mod sql_types {
     #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "skill_domain"))]
     pub struct SkillDomain;
+
+    #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "work_status"))]
+    pub struct WorkStatus;
 }
 
 diesel::table! {
@@ -191,6 +195,27 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::WorkStatus;
+
+    works (id) {
+        id -> Uuid,
+        person_id -> Nullable<Uuid>,
+        team_id -> Nullable<Uuid>,
+        title_en -> Varchar,
+        outcome_en -> Varchar,
+        outcome_fr -> Varchar,
+        start_datestamp -> Timestamp,
+        target_completion_date -> Timestamp,
+        work_status -> WorkStatus,
+        effort -> Float8,
+        completed_date -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
 diesel::joinable!(affiliations -> organizations (organization_id));
 diesel::joinable!(affiliations -> persons (person_id));
 diesel::joinable!(capabilities -> organizations (organization_id));
@@ -207,6 +232,8 @@ diesel::joinable!(team_ownerships -> teams (team_id));
 diesel::joinable!(teams -> org_tiers (org_tier_id));
 diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
+diesel::joinable!(works -> persons (person_id));
+diesel::joinable!(works -> teams (team_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     affiliations,
@@ -221,4 +248,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     teams,
     users,
     valid_roles,
+    works,
 );

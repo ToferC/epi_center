@@ -8,6 +8,7 @@ mod role;
 mod skill;
 mod capability;
 mod affiliation;
+mod work;
 
 mod access_log;
 mod user;
@@ -24,6 +25,7 @@ pub use role::*;
 pub use skill::*;
 pub use capability::*;
 pub use affiliation::*;
+pub use work::*;
 
 pub use self::access_log::*;
 pub use self::user::*;

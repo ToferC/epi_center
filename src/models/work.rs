@@ -1,128 +1,168 @@
 use std::fmt::Debug;
 
 use chrono::{prelude::*};
+use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, PgConnection, Queryable, ExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
 use rand::{Rng, thread_rng};
 
 use crate::schema::*;
+use crate::database::connection;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[table_name = "works"]
 pub struct Work {
     pub id: Uuid,
     pub person_id: Option<Uuid>, // Person
-    pub work_id: Option<Uuid>, // Work
+    pub team_id: Option<Uuid>, // Team
+    pub title_en: String,
     pub outcome_en: String,
     pub outcome_fr: String,
-    pub start_date: NaiveDate,
-    pub target_completion_data: NaiveDate,
-    pub work_status: usize,
-    pub completed_date: Option<NaiveDate>,
-    pub created_at: NaiveDate,
-    pub updated_at: NaiveDate,
+    pub start_datestamp: NaiveDateTime,
+    pub target_completion_date: NaiveDateTime,
+    pub work_status: WorkStatus,
+    pub effort: f64,
+    pub completed_date: Option<NaiveDateTime>,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
+#[ExistingTypePath = "crate::schema::sql_types::WorkStatus"]
 pub enum WorkStatus {
     Planning, // 0
     InProgress, // 1
-    Complete, // 2
+    Completed, // 2
     Blocked, // 3
+    Cancelled,
 }
 
 // Non Graphql
 impl Work {
-    pub fn create(conn: &PgConnection, work: &NewWork) -> Result<Work> {
+    pub fn create(work: &NewWork) -> Result<Work> {
+        let mut conn = connection()?;
+
         let res = diesel::insert_into(works::table)
         .values(work)
-        .get_result(conn);
+        .get_result(&mut conn)?;
         
         Ok(res)
     }
     
-    pub fn get_or_create(conn: &PgConnection, work: &NewWork) -> Result<Work> {
+    pub fn get_or_create(work: &NewWork) -> Result<Work> {
+        let mut conn = connection()?;
+
         let res = works::table
-        .filter(works::family_name.eq(&work.family_name))
-        .distinct()
-        .first(conn);
+            .filter(works::person_id.eq(&work.person_id))
+            .distinct()
+            .first(&mut conn);
         
         let work = match res {
             Ok(p) => p,
             Err(e) => {
                 // Work not found
                 println!("{:?}", e);
-                let p = Work::create(conn, work).expect("Unable to create work");
+                let p = Work::create(work).expect("Unable to create work");
                 p
             }
         };
         Ok(work)
     }
 
-    pub fn find_all() -> Result<Vec<Self>, CustomError> {
-        let conn = database::connection()?;
-        let works = works::table.load::<Work>(&conn)?;
-        Ok(works)
+    pub fn get_all() -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+        let res = works::table.load::<Work>(&mut conn)?;
+        Ok(res)
     }
 
-    pub fn find(id: Uuid) -> Result<Self, CustomError> {
-        let conn = database::connection()?;
-        let work = works::table.filter(works::id.eq(id)).first(&conn)?;
-        Ok(work)
+    pub fn get_count(count: i64) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+        let res = works::table
+            .limit(count)
+            .load::<Work>(&mut conn)?;
+        
+        Ok(res)
+    }
+
+    pub fn get_by_id(id: Uuid) -> Result<Self> {
+        let mut conn = connection()?;
+        let res = works::table.filter(works::id.eq(id)).first(&mut conn)?;
+        Ok(res)
+    }
+
+    pub fn get_by_team_id(id: Uuid) -> Result<Vec<Work>> {
+        let mut conn = connection()?;
+
+        let res = works::table
+            .filter(works::team_id.eq(id))
+            .load::<Work>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_person_id(id: Uuid) -> Result<Vec<Work>> {
+        let mut conn = connection()?;
+
+        let res = works::table
+            .filter(works::person_id.eq(id))
+            .load::<Work>(&mut conn)?;
+
+        Ok(res)
     }
     
-    pub fn update(&self, conn: &PgConnection) -> Result<Self> {
+    pub fn update(&self) -> Result<Self> {
+        let mut conn = connection()?;
+
         let res = diesel::update(works::table)
         .filter(works::id.eq(&self.id))
         .set(self)
-        .get_result(conn)?;
+        .get_result(&mut conn)?;
         
         Ok(res)
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
 #[table_name = "works"]
 pub struct NewWork {
     pub person_id: Option<Uuid>, // Person
-    pub work_id: Option<Uuid>, // Work
+    pub team_id: Option<Uuid>, // Work
+    pub title_en: String,
     pub outcome_en: String,
     pub outcome_fr: String,
-    pub start_date: NaiveDate,
-    pub target_completion_data: NaiveDate,
-    pub work_status: usize,
-    pub completed_date: Option<NaiveDate>,
-    pub created_at: NaiveDate,
-    pub updated_at: NaiveDate,
+    pub start_datestamp: NaiveDateTime,
+    pub target_completion_date: NaiveDateTime,
+    pub work_status: WorkStatus,
+    pub effort: f64,
 }
 
 impl NewWork {
 
     pub fn new(
         person_id: Option<Uuid>, // Person
-        work_id: Option<Uuid>, // Work
+        team_id: Option<Uuid>, // Work
+        title_en: String,
         outcome_en: String,
         outcome_fr: String,
-        start_date: NaiveDate,
-        target_completion_data: NaiveDate,
-        work_status: usize,
-        completed_date: Option<NaiveDate>,
-        created_at: NaiveDate,
-        updated_at: NaiveDate,
+        start_datestamp: NaiveDateTime,
+        target_completion_date: NaiveDateTime,
+        work_status: WorkStatus,
+        effort: f64,
+
     ) -> Self {
         NewWork {
             person_id,
-            work_id,
+            team_id,
+            title_en,
             outcome_en,
             outcome_fr,
-            start_date,
-            target_completion_data,
+            start_datestamp,
+            target_completion_date,
             work_status,
-            completed_date,
-            created_at,
-            updated_at,
+            effort,
         }
     }
 }
