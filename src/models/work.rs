@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use chrono::{prelude::*};
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, Queryable, ExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
@@ -12,12 +12,13 @@ use rand::{Rng, thread_rng};
 use crate::schema::*;
 use crate::database::connection;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[table_name = "works"]
 pub struct Work {
     pub id: Uuid,
-    pub person_id: Option<Uuid>, // Person
-    pub team_id: Option<Uuid>, // Team
+    pub assigned_by_person_id: Uuid, // Person
+    pub assigned_to_person_id: Option<Uuid>, // Person
+    pub team_id: Uuid, // Team
     pub title_en: String,
     pub outcome_en: String,
     pub outcome_fr: String,
@@ -33,10 +34,10 @@ pub struct Work {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
 #[ExistingTypePath = "crate::schema::sql_types::WorkStatus"]
 pub enum WorkStatus {
-    Planning, // 0
-    InProgress, // 1
-    Completed, // 2
-    Blocked, // 3
+    Planning,
+    InProgress,
+    Completed,
+    Blocked,
     Cancelled,
 }
 
@@ -56,7 +57,11 @@ impl Work {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::person_id.eq(&work.person_id))
+            .filter(works::assigned_by_person_id.eq(&work.assigned_by_person_id)
+                .and(works::title_en.eq(&work.title_en))
+                .and(works::assigned_to_person_id.eq(&work.assigned_to_person_id))
+                .and(works::target_completion_date.eq(&work.target_completion_date))
+            )
             .distinct()
             .first(&mut conn);
         
@@ -103,11 +108,21 @@ impl Work {
         Ok(res)
     }
 
-    pub fn get_by_person_id(id: Uuid) -> Result<Vec<Work>> {
+    pub fn get_by_assigning_person_id(id: Uuid) -> Result<Vec<Work>> {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::person_id.eq(id))
+            .filter(works::assigned_by_person_id.eq(id))
+            .load::<Work>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_assigned_person_id(id: Uuid) -> Result<Vec<Work>> {
+        let mut conn = connection()?;
+
+        let res = works::table
+            .filter(works::assigned_to_person_id.eq(id))
             .load::<Work>(&mut conn)?;
 
         Ok(res)
@@ -128,8 +143,9 @@ impl Work {
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
 #[table_name = "works"]
 pub struct NewWork {
-    pub person_id: Option<Uuid>, // Person
-    pub team_id: Option<Uuid>, // Work
+    pub assigned_by_person_id: Uuid, // Person
+    pub assigned_to_person_id: Option<Uuid>, // Person
+    pub team_id: Uuid, // Team
     pub title_en: String,
     pub outcome_en: String,
     pub outcome_fr: String,
@@ -142,8 +158,9 @@ pub struct NewWork {
 impl NewWork {
 
     pub fn new(
-        person_id: Option<Uuid>, // Person
-        team_id: Option<Uuid>, // Work
+        assigned_by_person_id: Uuid, // Person
+        assigned_to_person_id: Option<Uuid>, // Person
+        team_id: Uuid, // Work
         title_en: String,
         outcome_en: String,
         outcome_fr: String,
@@ -154,7 +171,8 @@ impl NewWork {
 
     ) -> Self {
         NewWork {
-            person_id,
+            assigned_by_person_id,
+            assigned_to_person_id,
             team_id,
             title_en,
             outcome_en,

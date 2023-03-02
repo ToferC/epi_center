@@ -201,8 +201,9 @@ diesel::table! {
 
     works (id) {
         id -> Uuid,
-        person_id -> Nullable<Uuid>,
-        team_id -> Nullable<Uuid>,
+        assigned_by_person_id -> Uuid,
+        assigned_to_person_id -> Nullable<Uuid>,
+        team_id -> Uuid,
         title_en -> Varchar,
         outcome_en -> Varchar,
         outcome_fr -> Varchar,
@@ -232,7 +233,6 @@ diesel::joinable!(team_ownerships -> teams (team_id));
 diesel::joinable!(teams -> org_tiers (org_tier_id));
 diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
-diesel::joinable!(works -> persons (person_id));
 diesel::joinable!(works -> teams (team_id));
 
 diesel::allow_tables_to_appear_in_same_query!(

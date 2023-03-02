@@ -260,11 +260,15 @@ CREATE TYPE work_status AS ENUM (
 CREATE TABLE IF NOT EXISTS works (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    person_id UUID,
-    FOREIGN KEY(person_id)
+    assigned_by_person_id UUID NOT NULL,
+    FOREIGN KEY(assigned_by_person_id)
         REFERENCES persons(id) ON DELETE RESTRICT,
 
-    team_id UUID,
+    assigned_to_person_id UUID,
+    FOREIGN KEY(assigned_to_person_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    team_id UUID NOT NULL,
     FOREIGN KEY(team_id)
         REFERENCES teams(id) ON DELETE RESTRICT,
 
