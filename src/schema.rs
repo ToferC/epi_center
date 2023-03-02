@@ -201,7 +201,7 @@ diesel::table! {
 
     works (id) {
         id -> Uuid,
-        assigned_by_person_id -> Uuid,
+        created_by_person_id -> Uuid,
         assigned_to_person_id -> Nullable<Uuid>,
         team_id -> Uuid,
         title_en -> Varchar,

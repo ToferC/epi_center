@@ -250,6 +250,7 @@ CREATE TABLE IF NOT EXISTS affiliations (
 );
 
 CREATE TYPE work_status AS ENUM (
+    'backlog',
     'planning',
     'in_progress',
     'completed',
@@ -260,8 +261,8 @@ CREATE TYPE work_status AS ENUM (
 CREATE TABLE IF NOT EXISTS works (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    assigned_by_person_id UUID NOT NULL,
-    FOREIGN KEY(assigned_by_person_id)
+    created_by_person_id UUID NOT NULL,
+    FOREIGN KEY(created_by_person_id)
         REFERENCES persons(id) ON DELETE RESTRICT,
 
     assigned_to_person_id UUID,

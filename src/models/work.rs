@@ -16,7 +16,7 @@ use crate::database::connection;
 #[table_name = "works"]
 pub struct Work {
     pub id: Uuid,
-    pub assigned_by_person_id: Uuid, // Person
+    pub created_by_person_id: Uuid, // Person
     pub assigned_to_person_id: Option<Uuid>, // Person
     pub team_id: Uuid, // Team
     pub title_en: String,
@@ -57,7 +57,7 @@ impl Work {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::assigned_by_person_id.eq(&work.assigned_by_person_id)
+            .filter(works::created_by_person_id.eq(&work.created_by_person_id)
                 .and(works::title_en.eq(&work.title_en))
                 .and(works::assigned_to_person_id.eq(&work.assigned_to_person_id))
                 .and(works::target_completion_date.eq(&work.target_completion_date))
@@ -112,7 +112,7 @@ impl Work {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::assigned_by_person_id.eq(id))
+            .filter(works::created_by_person_id.eq(id))
             .load::<Work>(&mut conn)?;
 
         Ok(res)
@@ -143,7 +143,7 @@ impl Work {
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
 #[table_name = "works"]
 pub struct NewWork {
-    pub assigned_by_person_id: Uuid, // Person
+    pub created_by_person_id: Uuid, // Person
     pub assigned_to_person_id: Option<Uuid>, // Person
     pub team_id: Uuid, // Team
     pub title_en: String,
@@ -158,7 +158,7 @@ pub struct NewWork {
 impl NewWork {
 
     pub fn new(
-        assigned_by_person_id: Uuid, // Person
+        created_by_person_id: Uuid, // Person
         assigned_to_person_id: Option<Uuid>, // Person
         team_id: Uuid, // Work
         title_en: String,
@@ -171,7 +171,7 @@ impl NewWork {
 
     ) -> Self {
         NewWork {
-            assigned_by_person_id,
+            created_by_person_id,
             assigned_to_person_id,
             team_id,
             title_en,
