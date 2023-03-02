@@ -6,7 +6,7 @@ use diesel::{PgConnection};
 use diesel::r2d2::ConnectionManager;
 use r2d2::PooledConnection;
 
-use crate::graphql::{Query, Mutation}; // Removed Subscription
+use crate::graphql::{Mutation, query::Query}; // Removed Subscription
 
 // use crate::kafka::{create_producer};
 
@@ -34,7 +34,7 @@ pub fn create_schema_with_context(pg_pool: PostgresPool) -> async_graphql::Schem
 
     let kafka_consumer_counter = Mutex::new(0);
     
-    Schema::build(Query, Mutation, EmptySubscription)
+    Schema::build(Query::default(), Mutation, EmptySubscription)
         // Database connection
         .data(arc_pool)
         // Live cached data -> may want to remove once dataloaders in place

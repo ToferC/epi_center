@@ -143,7 +143,7 @@ impl OrgTier {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 #[diesel(table_name = org_tiers)]
 pub struct NewOrgTier {
     pub organization_id: Uuid, // Organization

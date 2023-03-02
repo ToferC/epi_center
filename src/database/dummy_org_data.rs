@@ -24,17 +24,28 @@ pub fn pre_populate_db_schema() {
 
     let org = Organization::create(&o).expect("Unable to create new organization");
 
-    // Set up Science Org for Affiliations
+    // Set up Science Orgs for Affiliations
 
-    let new_science_org = NewOrganization::new(
-        "University of British Columbia".to_string(),
-        "Universitaire de Columbie Brittanique".to_string(),
-        "UBC".to_string(),
-        "UCB".to_string(),
-        "Academic".to_string(),
-    );
+    let places = vec![("British Columbia", "UBC"), ("Manitoba", "UM"), ("Toronto", "UofT"), ("Quebec", "UQAM"),
+        ("Alberta", "UofA"), ("Saskatchewan", "USask"), ("New Brunswick", "UNB"), ("Nova Scotia", "NSCAD")];
 
-    let science_org = Organization::create(&new_science_org).expect("Unable to create new organization");
+    let mut science_org_ids: Vec<uuid::Uuid> = Vec::new();
+
+    for place in places {
+        
+        let new_science_org = NewOrganization::new(
+            format!("University of {}", place.0),
+            format!("Universitaire de {}", place.0),
+            place.1.to_owned(),
+            place.1.to_owned(),
+            "Academic".to_string(),
+        );
+
+        let science_org = Organization::create(&new_science_org)
+            .expect("Unable to create new organization");
+
+        science_org_ids.push(science_org.id);
+    }
 
     // Set up Org Tiers
 
@@ -258,8 +269,6 @@ pub fn pre_populate_db_schema() {
         "M5V 3L7".to_string(),
     ]);
 
-
-
     // Set up Persons
     let mut rng = rand::thread_rng();
 
@@ -282,7 +291,7 @@ pub fn pre_populate_db_schema() {
             uuid::Uuid::new_v4(),
             famn.to_owned(),
             gn.to_owned(),
-            format!("{}.{}@phac-aspc.gc.ca", &gn, &famn).to_lowercase(),
+            format!("{}.{}_{}@phac-aspc.gc.ca", &gn, &famn, rng.gen_range(0..999)).to_lowercase(),
             gen_rand_number(),
             addr[0].to_owned(),
             addr[1].to_owned(),
@@ -295,10 +304,12 @@ pub fn pre_populate_db_schema() {
 
         let person = Person::create(&p).expect("Unable to create person");
 
+        let science_org_id = science_org_ids.choose(&mut rng).unwrap();
+
         let _capabilities_for_person = create_fake_capabilities_for_person(
             person.id, 
             org.id,
-            science_org.id,
+            *science_org_id,
         )
             .expect("Unable to create capabilities for person");
 

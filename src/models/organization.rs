@@ -126,7 +126,7 @@ impl Organization {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 #[table_name = "organizations"]
 /// Represents an insertable Organization
 pub struct NewOrganization {

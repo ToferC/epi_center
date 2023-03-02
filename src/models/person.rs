@@ -195,7 +195,7 @@ impl Person {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 /// Referenced by Roles, TeamOwnership, OrgOwnership
 #[diesel(table_name = persons)]
 pub struct NewPerson {
@@ -245,4 +245,29 @@ impl NewPerson {
             orcid_id,
         }
     }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, InputObject)]
+#[graphql(complex)]
+#[diesel(table_name = persons)]
+/// InputObject for Person with Option fields - only include the ones you want to update
+pub struct PersonData {
+    pub id: Uuid,
+    pub user_id: Option<Uuid>,
+    pub family_name: Option<String>,
+    pub given_name: Option<String>,
+
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub work_address: Option<String>,
+    pub city: Option<String>,
+    pub province: Option<String>,
+    pub postal_code: Option<String>,
+
+    pub organization_id: Option<Uuid>, // Organization 
+    pub peoplesoft_id: Option<String>,
+    pub orcid_id: Option<String>,
+
+    pub updated_at: Option<NaiveDateTime>,
+    pub retired_at: Option<NaiveDateTime>,
 }

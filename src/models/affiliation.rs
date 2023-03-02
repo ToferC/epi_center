@@ -108,7 +108,7 @@ impl Affiliation {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
 #[table_name = "affiliations"]
 pub struct NewAffiliation {
     pub person_id: Uuid,
@@ -129,7 +129,7 @@ impl NewAffiliation {
             person_id,
             organization_id,
             affiliation_role,
-            end_date: None,
+            end_date,
         }
     }
 }

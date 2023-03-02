@@ -105,7 +105,7 @@ impl OrgOwnership {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
 #[diesel(table_name = org_tier_ownerships)]
 pub struct NewOrgOwnership {
     pub owner_id: Uuid,

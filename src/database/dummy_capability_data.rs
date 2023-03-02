@@ -1,5 +1,5 @@
 
-use rand::seq::SliceRandom;
+use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 use async_graphql::Error;
 
@@ -211,13 +211,13 @@ pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, scienc
         }
     }
 
-    // If person has Science domain, add an affiliation
+    // If person has Science domain, 20% chance to add an affiliation
 
-    if sds.contains(&SkillDomain::Scientific) {
+    if sds.contains(&SkillDomain::Scientific) && rng.gen_bool(0.2) {
         let na = NewAffiliation::new(
             person_id,
             science_org_id,
-            "Science".to_string(),
+            "Research Affiliate".to_string(),
             None,
         );
 

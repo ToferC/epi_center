@@ -185,7 +185,7 @@ impl Capability {
             .filter(capabilities::skill_id.eq(skill_id))
             .group_by((capabilities::self_identified_level, capabilities::name_en))
             .select((capabilities::name_en, capabilities::self_identified_level, count(capabilities::id)))
-            .order_by(capabilities::name_en)
+            .order_by((capabilities::name_en, capabilities::self_identified_level))
             .load::<(String, CapabilityLevel, i64)>(&mut conn)?;
 
         // Convert res into CapabilityCountStruct
@@ -212,7 +212,7 @@ impl Capability {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 #[table_name = "capabilities"]
 pub struct NewCapability {
     pub name_en: String,

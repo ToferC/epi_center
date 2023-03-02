@@ -177,7 +177,7 @@ impl Team {
     
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 /// Linked from HealthProfile
 /// Linked to Trip
 #[diesel(table_name = teams)]

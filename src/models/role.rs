@@ -184,7 +184,7 @@ impl Role {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 #[diesel(table_name = roles)]
 pub struct NewRole {
     pub person_id: Uuid,
