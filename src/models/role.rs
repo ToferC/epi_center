@@ -18,6 +18,8 @@ use super::{Person, Team};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = roles)]
+#[diesel(belongs_to(Person))]
+#[diesel(belongs_to(Team))]
 /// Intermediary data structure between Person and team
 /// Referenced by Person
 pub struct Role {

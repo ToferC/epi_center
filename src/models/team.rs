@@ -16,8 +16,10 @@ use crate::database::connection;
 use super::{Role, Person, TeamOwnership};
 
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
+#[derive(Debug, Clone, Deserialize, Serialize, Identifiable, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = teams)]
+#[diesel(belongs_to(Organization))]
+#[diesel(belongs_to(OrgTier))]
 /// Referenced by Role
 pub struct Team {
     pub id: Uuid,

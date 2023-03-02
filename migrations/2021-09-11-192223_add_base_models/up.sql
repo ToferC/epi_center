@@ -207,6 +207,9 @@ CREATE TYPE capability_level AS ENUM ('desired', 'novice', 'experienced', 'exper
 CREATE TABLE IF NOT EXISTS capabilities (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
+    name_en VARCHAR(256) NOT NULL,
+    name_fr VARCHAR(256) NOT NULL,
+
     person_id UUID NOT NULL,
     FOREIGN KEY(person_id)
         REFERENCES persons(id) ON DELETE RESTRICT,
@@ -214,6 +217,10 @@ CREATE TABLE IF NOT EXISTS capabilities (
     skill_id UUID NOT NULL,
     FOREIGN KEY(skill_id)
         REFERENCES skills(id) ON DELETE RESTRICT,
+
+    organization_id UUID NOT NULL,
+    FOREIGN KEY(organization_id)
+        REFERENCES organizations(id) ON DELETE RESTRICT,
 
     self_identified_level capability_level NOT NULL,
     validated_level capability_level,

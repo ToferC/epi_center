@@ -14,6 +14,7 @@ use super::OrgTier;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = org_tier_ownerships)]
+#[diesel(belongs_to(Person))]
 pub struct OrgOwnership {
     pub id: Uuid,
     pub owner_id: Uuid,

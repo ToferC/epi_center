@@ -196,7 +196,7 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
 }
 
-pub fn create_fake_capabilities_for_person(id: Uuid) -> Result<(), Error>{
+pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid) -> Result<(), Error>{
 
     let mut rng = rand::thread_rng();
 
@@ -234,9 +234,10 @@ pub fn create_fake_capabilities_for_person(id: Uuid) -> Result<(), Error>{
         let mut capability_level: CapabilityLevel = rand::random();
 
         for skill in selected_skills {
-            let nc = NewCapability::new(id, skill.id, capability_level);
-            let _res = Capability::create(&nc)?;
+            let nc = NewCapability::new(person_id, skill.id, org_id, capability_level);
+            let res = Capability::create(&nc)?;
             capability_level = capability_level.step_down();
+            println!("Created {}: {}", res.name_en, res.self_identified_level)
         }
     }
 

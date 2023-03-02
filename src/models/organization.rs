@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
+use diesel::dsl::count;
 use serde::{Serialize, Deserialize};
 use diesel::prelude::*;
 use diesel::{self, Insertable, Queryable};
@@ -13,8 +14,11 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
+use crate::models::{CapabilityCount, CapabilityLevel, Skill};
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, SimpleObject)]
 #[table_name = "organizations"]
+#[graphql(complex)]
 /// Should get this from an API or have standard data
 /// Now pre-loaded as prt of context
 pub struct Organization {
@@ -27,6 +31,30 @@ pub struct Organization {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
+}
+
+#[ComplexObject]
+impl Organization {
+    async fn get_capability_counts(&self) -> Result<Vec<CapabilityCount>> {
+        let mut conn = connection().unwrap();
+
+        let res: Vec<(String, CapabilityLevel, i64)> = capabilities::table
+            .filter(capabilities::organization_id.eq(self.id))
+            .group_by((capabilities::name_en, capabilities::self_identified_level))
+            .select((capabilities::name_en, capabilities::self_identified_level, count(capabilities::id)))
+            .order_by((capabilities::name_en, capabilities::self_identified_level))
+            .load::<(String, CapabilityLevel, i64)>(&mut conn)?;
+
+    // Convert res into CapabilityCountStruct
+    let mut counts: Vec<CapabilityCount> = Vec::new();
+
+    for r in res {
+        let count = CapabilityCount::from(r);
+        counts.push(count);
+    }
+
+    Ok(counts)
+    }
 }
 
 impl Organization {

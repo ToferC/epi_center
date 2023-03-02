@@ -15,6 +15,7 @@ use super::{Organization, Person, OrgOwnership};
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
 #[diesel(table_name = org_tiers)]
+#[diesel(belongs_to(Organization))]
 pub struct OrgTier {
     pub id: Uuid,
 

@@ -20,8 +20,11 @@ diesel::table! {
 
     capabilities (id) {
         id -> Uuid,
+        name_en -> Varchar,
+        name_fr -> Varchar,
         person_id -> Uuid,
         skill_id -> Uuid,
+        organization_id -> Uuid,
         self_identified_level -> CapabilityLevel,
         validated_level -> Nullable<CapabilityLevel>,
         created_at -> Timestamp,
@@ -175,6 +178,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(capabilities -> organizations (organization_id));
 diesel::joinable!(capabilities -> persons (person_id));
 diesel::joinable!(capabilities -> skills (skill_id));
 diesel::joinable!(org_tier_ownerships -> org_tiers (org_tier_id));

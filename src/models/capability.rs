@@ -10,20 +10,27 @@ use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
 
-use crate::database::connection;
+use crate::{database::connection};
 
 use crate::{schema::*, database};
 
-use super::{Person, Skill};
+use crate::models::{Person, Skill, Organization};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject, Associations)]
+#[diesel(belongs_to(Person))]
+#[diesel(belongs_to(Skill))]
+#[diesel(belongs_to(Organization))]
 #[diesel(table_name = capabilities)]
 #[graphql(complex)]
 pub struct Capability {
     pub id: Uuid,
 
+    pub name_en: String,
+    pub name_fr: String,
+
     #[graphql(visible = false)]
     pub person_id: Uuid, // Person
+    pub organization_id: Uuid, // Organization
 
     #[graphql(visible = false)]
     pub skill_id: Uuid, // Skill
@@ -169,20 +176,27 @@ impl Capability {
         Ok(res)
     }
 
-    pub fn get_level_counts_by_name(name: String) -> Result<Vec<(String, i64)>> {
+    pub fn get_level_counts_by_name(name: String) -> Result<Vec<CapabilityCount>> {
         let mut conn = connection()?;
 
         let skill_id = Skill::get_top_skill_id_by_name(name)?;
 
-        let res: Vec<(String, i64)> = capabilities::table
+        let res: Vec<(String, CapabilityLevel, i64)> = capabilities::table
             .filter(capabilities::skill_id.eq(skill_id))
-            .group_by(capabilities::self_identified_level)
-            .select((capabilities::self_identified_level, count(capabilities::id)))
-            .load::<(String, i64)>(&mut conn)?;
+            .group_by((capabilities::self_identified_level, capabilities::name_en))
+            .select((capabilities::name_en, capabilities::self_identified_level, count(capabilities::id)))
+            .order_by(capabilities::name_en)
+            .load::<(String, CapabilityLevel, i64)>(&mut conn)?;
 
-        Ok(res)
-           
-           
+        // Convert res into CapabilityCountStruct
+        let mut counts: Vec<CapabilityCount> = Vec::new();
+
+        for r in res {
+            let count = CapabilityCount::from(r);
+            counts.push(count);
+        }
+
+        Ok(counts)
     }
     
     pub fn update(&self) -> Result<Self> {
@@ -201,8 +215,11 @@ impl Capability {
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
 #[table_name = "capabilities"]
 pub struct NewCapability {
+    pub name_en: String,
+    pub name_fr: String,
     pub person_id: Uuid, // Person
     pub skill_id: Uuid, // Skill
+    pub organization_id: Uuid,
     pub self_identified_level: CapabilityLevel,
     pub validated_level: Option<CapabilityLevel>,
 }
@@ -212,13 +229,47 @@ impl NewCapability {
     pub fn new(
         person_id: Uuid, // Person
         skill_id: Uuid, // Skill
+        organization_id: Uuid,
         self_identified_level: CapabilityLevel,
     ) -> Self {
+
+        let skill = Skill::get_by_id(&skill_id).expect("Unable to get skill");
+
         NewCapability {
+            name_en: skill.name_en,
+            name_fr: skill.name_fr,
             person_id,
             skill_id,
+            organization_id,
             self_identified_level,
             validated_level: Some(self_identified_level),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
+pub struct CapabilityCount {
+    name: String,
+    pub level: String,
+    pub counts: i64,
+}
+
+impl From<(String, CapabilityLevel, i64)> for CapabilityCount {
+    fn from((name, level, counts): (String, CapabilityLevel, i64)) -> Self {
+        CapabilityCount {
+            name,
+            level: level.to_string(),
+            counts,
+        }
+    }
+}
+
+impl CapabilityCount {
+    pub fn new(name: String, level: String, counts: i64) -> Self {
+        CapabilityCount {
+            name,
+            level,
+            counts,
         }
     }
 }

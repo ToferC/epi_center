@@ -18,17 +18,18 @@ use crate::schema::*;
 
 use super::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
 #[diesel(table_name = persons)]
+#[diesel(belongs_to(Organization))]
 /// Referenced by Team
 /// Referenced by ReportingRelationship
 pub struct Person {
     pub id: Uuid,
     pub user_id: Uuid,
-    #[graphql(visible = false)]
+    #[graphql(skip)]
     pub family_name: String,
-    #[graphql(visible = false)]
+    #[graphql(skip)]
     pub given_name: String,
 
     // contact info - this will be another module - just here for expediency
@@ -148,7 +149,7 @@ impl Person {
         visible = "is_analyst",
     )]
      */
-    pub async fn last_name(&self) -> Result<String> {
+    pub async fn family_name(&self) -> Result<String> {
         Ok(self.family_name.to_owned())
     }
     
@@ -158,7 +159,7 @@ impl Person {
         visible = "is_analyst",
     )]
      */
-    pub async fn first_name(&self) -> Result<String> {
+    pub async fn given_name(&self) -> Result<String> {
         Ok(self.given_name.to_owned())
     }
 

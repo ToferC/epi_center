@@ -5,7 +5,7 @@ use crate::schema::*;
 use async_graphql::*;
 
 use crate::models::{Person, User, TeamOwnership, OrgOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityLevel};
+    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityLevel, CapabilityCount};
 use uuid::Uuid;
 
 use crate::graphql::{get_connection_from_context};
@@ -23,7 +23,7 @@ impl Query {
     /// family name.D
     pub async fn all_people(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
     ) -> Result<Vec<Person>> {
 
         Person::get_all()
@@ -34,7 +34,7 @@ impl Query {
     /// family name.D
     pub async fn get_people(
         &self, 
-        context: &Context<'_>,
+        _context: &Context<'_>,
         count: i64,
     ) -> Result<Vec<Person>> {
 
@@ -80,7 +80,7 @@ impl Query {
         Capability::get_by_id(&id)
     }
 
-    pub async fn get_capabilities_by_skill_name(
+    pub async fn get_capabilities_by_name(
         &self, 
         _context: &Context<'_>,
         name: String,
@@ -96,7 +96,7 @@ impl Query {
         &self, 
         _context: &Context<'_>,
         name: String,
-    ) -> Result<Vec<(String, i64)>> {
+    ) -> Result<Vec<CapabilityCount>> {
 
         Capability::get_level_counts_by_name(name)
     }

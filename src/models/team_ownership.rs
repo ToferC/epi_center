@@ -12,7 +12,9 @@ use crate::database::connection;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[diesel(table_name = team_ownerships)]
-/// Referenced by Role
+#[diesel(belongs_to(Person))]
+#[diesel(belongs_to(Team))]
+// Represents ownership of a team by a person
 pub struct TeamOwnership {
     pub id: Uuid,
     pub person_id: Uuid,

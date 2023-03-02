@@ -249,7 +249,8 @@ pub fn pre_populate_db_schema() {
 
         let person = Person::create(&p).expect("Unable to create person");
 
-        let _capabilities_for_person = create_fake_capabilities_for_person(person.id);
+        let _capabilities_for_person = create_fake_capabilities_for_person(person.id, org.id)
+            .expect("Unable to create capabilities for person");
 
         people.push(person);
     } 
