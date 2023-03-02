@@ -230,3 +230,22 @@ CREATE TABLE IF NOT EXISTS capabilities (
     retired_at TIMESTAMP DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS affiliations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    person_id UUID NOT NULL,
+    FOREIGN KEY(person_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    organization_id UUID NOT NULL,
+    FOREIGN KEY(organization_id)
+        REFERENCES organizations(id) ON DELETE RESTRICT,
+
+    affiliation_role VARCHAR(256) UNIQUE NOT NULL,
+
+    start_datestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    end_date TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+

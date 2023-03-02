@@ -1,11 +1,10 @@
-use diesel::{RunQueryDsl, PgTextExpressionMethods};
-use diesel::{QueryDsl, ExpressionMethods, TextExpressionMethods, BoolExpressionMethods};
+use diesel::{RunQueryDsl};
 use crate::schema::*;
 
 use async_graphql::*;
 
-use crate::models::{Person, User, TeamOwnership, OrgOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityLevel, CapabilityCount};
+use crate::models::{Person, User, TeamOwnership,
+    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityCount};
 use uuid::Uuid;
 
 use crate::graphql::{get_connection_from_context};
@@ -31,7 +30,7 @@ impl Query {
 
     #[graphql(name = "getPeople")]
     /// Accepts argument of "count" and returns a vector of {count} persons ordered by
-    /// family name.D
+    /// family name
     pub async fn get_people(
         &self, 
         _context: &Context<'_>,
@@ -235,24 +234,16 @@ impl Query {
 
     #[graphql(name = "allTeamOwnership")]
     /// Returns a vector of all team ownerships
-    pub async fn all_team_ownership_results(&self, context: &Context<'_>) -> Result<Vec<TeamOwnership>> {
-        let mut conn = get_connection_from_context(context);
-
-        let res = team_ownerships::table.load::<TeamOwnership>(&mut conn)?;
-
-        Ok(res)
+    pub async fn all_team_ownership(&self, _context: &Context<'_>) -> Result<Vec<TeamOwnership>> {
+        
+        TeamOwnership::get_all()
     }
 
     #[graphql(name = "getTeamOwnership")]
     /// Accepts argument "count" and returns a vector of {count} team ownerships
-    pub async fn get_team_ownership_results(&self, context: &Context<'_>, count: i64) -> Result<Vec<TeamOwnership>> {
-        let mut conn = get_connection_from_context(context);
-
-        let res = team_ownerships::table
-            .limit(count)
-            .load::<TeamOwnership>(&mut conn)?;
-
-        Ok(res)
+    pub async fn get_team_ownership(&self, _context: &Context<'_>, count: i64) -> Result<Vec<TeamOwnership>> {
+        
+        TeamOwnership::get_count(count)
     }
 
     // Users / Admin
@@ -277,7 +268,7 @@ impl Query {
         visible = "is_admin",
     )]
     /// Returns a vector of all users
-    pub async fn get_user_by_email(&self, context: &Context<'_>, email: String) -> Result<User> {
+    pub async fn get_user_by_email(&self, _context: &Context<'_>, email: String) -> Result<User> {
 
         let res = User::get_by_email(&email)?;
 
@@ -290,7 +281,7 @@ impl Query {
         visible = "is_admin",
     )]
     /// Returns a vector of all users
-    pub async fn get_user_by_id(&self, context: &Context<'_>, id: Uuid) -> Result<User> {
+    pub async fn get_user_by_id(&self, _context: &Context<'_>, id: Uuid) -> Result<User> {
 
         let res = User::get_by_id(&id)?;
 

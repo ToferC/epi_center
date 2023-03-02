@@ -15,6 +15,19 @@ pub mod sql_types {
 }
 
 diesel::table! {
+    affiliations (id) {
+        id -> Uuid,
+        person_id -> Uuid,
+        organization_id -> Uuid,
+        affiliation_role -> Varchar,
+        start_datestamp -> Timestamp,
+        end_date -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::CapabilityLevel;
 
@@ -178,6 +191,8 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(affiliations -> organizations (organization_id));
+diesel::joinable!(affiliations -> persons (person_id));
 diesel::joinable!(capabilities -> organizations (organization_id));
 diesel::joinable!(capabilities -> persons (person_id));
 diesel::joinable!(capabilities -> skills (skill_id));
@@ -194,6 +209,7 @@ diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    affiliations,
     capabilities,
     org_tier_ownerships,
     org_tiers,

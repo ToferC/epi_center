@@ -74,6 +74,25 @@ impl TeamOwnership {
         Ok(res)
     }
 
+    pub fn get_all() -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = team_ownerships::table
+            .load::<Self>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_count(count: i64) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = team_ownerships::table
+            .limit(count)
+            .load::<Self>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_team_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
 

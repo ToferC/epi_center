@@ -7,6 +7,7 @@ mod team_ownership;
 mod role;
 mod skill;
 mod capability;
+mod affiliation;
 
 mod access_log;
 mod user;
@@ -22,6 +23,7 @@ pub use team_ownership::*;
 pub use role::*;
 pub use skill::*;
 pub use capability::*;
+pub use affiliation::*;
 
 pub use self::access_log::*;
 pub use self::user::*;

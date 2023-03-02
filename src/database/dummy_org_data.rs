@@ -24,6 +24,18 @@ pub fn pre_populate_db_schema() {
 
     let org = Organization::create(&o).expect("Unable to create new organization");
 
+    // Set up Science Org for Affiliations
+
+    let new_science_org = NewOrganization::new(
+        "University of British Columbia".to_string(),
+        "Universitaire de Columbie Brittanique".to_string(),
+        "UBC".to_string(),
+        "UCB".to_string(),
+        "Academic".to_string(),
+    );
+
+    let science_org = Organization::create(&new_science_org).expect("Unable to create new organization");
+
     // Set up Org Tiers
 
     let mut org_tiers: Vec<OrgTier> = Vec::new();
@@ -214,6 +226,40 @@ pub fn pre_populate_db_schema() {
     org_tiers.push(man7);
     org_tiers.push(man8);
 
+    // Create Org Addresses
+
+    let mut addresses = Vec::new();
+
+    addresses.push(vec![
+        "200 René Lévesque Blvd. West".to_string(),
+        "Montreal".to_string(),
+        "Quebec".to_string(),
+        "H2Z 1X4".to_string(),
+    ]);
+
+    addresses.push(vec![
+        "100 Colonnade Rd".to_string(),
+        "Ottawa".to_string(),
+        "Ontario".to_string(),
+        "K2E 7J5".to_string(),
+    ]);
+
+    addresses.push(vec![
+        "391 York Avenue".to_string(),
+        "Winnipeg".to_string(),
+        "Manitoba".to_string(),
+        "R3C 4W1".to_string(),
+    ]);
+
+    addresses.push(vec![
+        "180 Queen Street West".to_string(),
+        "Toronto".to_string(),
+        "Ontario".to_string(),
+        "M5V 3L7".to_string(),
+    ]);
+
+
+
     // Set up Persons
     let mut rng = rand::thread_rng();
 
@@ -230,7 +276,7 @@ pub fn pre_populate_db_schema() {
         let gn: String = String::from(&record[0]);
         let famn: String = String::from(&record[1]);
 
-        let grp: HrGroup = rand::random();
+        let addr = addresses.choose(&mut rng).unwrap();
         
         let p = NewPerson::new(
             uuid::Uuid::new_v4(),
@@ -238,10 +284,10 @@ pub fn pre_populate_db_schema() {
             gn.to_owned(),
             format!("{}.{}@phac-aspc.gc.ca", &gn, &famn).to_lowercase(),
             gen_rand_number(),
-            "130 Colonnade Rd".to_string(),
-            "Ottawa".to_string(),
-            "Ontario".to_string(),
-            "K2E 7K3".to_string(),
+            addr[0].to_owned(),
+            addr[1].to_owned(),
+            addr[2].to_owned(),
+            addr[3].to_owned(),
             org.id,
             gen_rand_number(),
             gen_rand_number(),
@@ -249,7 +295,11 @@ pub fn pre_populate_db_schema() {
 
         let person = Person::create(&p).expect("Unable to create person");
 
-        let _capabilities_for_person = create_fake_capabilities_for_person(person.id, org.id)
+        let _capabilities_for_person = create_fake_capabilities_for_person(
+            person.id, 
+            org.id,
+            science_org.id,
+        )
             .expect("Unable to create capabilities for person");
 
         people.push(person);

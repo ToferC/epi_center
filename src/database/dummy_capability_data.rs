@@ -3,7 +3,7 @@ use rand::seq::SliceRandom;
 use uuid::Uuid;
 use async_graphql::Error;
 
-use crate::models::{Person, Organization, NewPerson, NewOrganization, 
+use crate::models::{Affiliation, NewAffiliation, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain};
 
@@ -196,7 +196,7 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
 }
 
-pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid) -> Result<(), Error>{
+pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, science_org_id: Uuid) -> Result<(), Error>{
 
     let mut rng = rand::thread_rng();
 
@@ -209,6 +209,19 @@ pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid) -> Res
         if !sds.contains(&sd) {
             sds.push(sd);
         }
+    }
+
+    // If person has Science domain, add an affiliation
+
+    if sds.contains(&SkillDomain::Scientific) {
+        let na = NewAffiliation::new(
+            person_id,
+            science_org_id,
+            "Science".to_string(),
+            None,
+        );
+
+        let _res = Affiliation::create(&na)?;
     }
 
     // Identify highest CapabilityLevel

@@ -1,6 +1,6 @@
 -- This file should undo anything in `up.sql`
 
-
+DROP TABLE IF EXISTS affiliations;
 DROP TABLE IF EXISTS capabilities;
 DROP TYPE IF EXISTS capability_level;
 
