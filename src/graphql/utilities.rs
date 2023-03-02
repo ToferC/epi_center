@@ -21,7 +21,7 @@ pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
 
 pub fn create_schema_with_context(pg_pool: PostgresPool) -> async_graphql::Schema<Query, Mutation, EmptySubscription> {
     
-    let cloned_conn = pg_pool.clone().get().expect("Unable to connect to db");
+    //let cloned_conn = pg_pool.clone().get().expect("Unable to connect to db");
     
     let arc_pool = Arc::new(pg_pool);
 
@@ -34,7 +34,7 @@ pub fn create_schema_with_context(pg_pool: PostgresPool) -> async_graphql::Schem
 
     let kafka_consumer_counter = Mutex::new(0);
     
-    Schema::build(Query::default(), Mutation, EmptySubscription)
+    Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         // Database connection
         .data(arc_pool)
         // Live cached data -> may want to remove once dataloaders in place
