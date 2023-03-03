@@ -18,6 +18,10 @@ pub mod sql_types {
     pub struct LanguageName;
 
     #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "publication_status"))]
+    pub struct PublicationStatus;
+
+    #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "skill_domain"))]
     pub struct SkillDomain;
 
@@ -139,6 +143,37 @@ diesel::table! {
 }
 
 diesel::table! {
+    publication_contributors (id) {
+        id -> Uuid,
+        publication_id -> Uuid,
+        contributor_id -> Uuid,
+        contributor_role -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::PublicationStatus;
+
+    publications (id) {
+        id -> Uuid,
+        publishing_organization_id -> Uuid,
+        lead_author_id -> Uuid,
+        title -> Varchar,
+        subject_text -> Varchar,
+        publication_status -> PublicationStatus,
+        url_string -> Nullable<Varchar>,
+        publishing_id -> Nullable<Varchar>,
+        submitted_date -> Nullable<Timestamp>,
+        published_datestamp -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::HrGroup;
 
@@ -255,6 +290,10 @@ diesel::joinable!(org_tier_ownerships -> org_tiers (org_tier_id));
 diesel::joinable!(org_tier_ownerships -> persons (owner_id));
 diesel::joinable!(org_tiers -> organizations (organization_id));
 diesel::joinable!(persons -> organizations (organization_id));
+diesel::joinable!(publication_contributors -> persons (contributor_id));
+diesel::joinable!(publication_contributors -> publications (publication_id));
+diesel::joinable!(publications -> organizations (publishing_organization_id));
+diesel::joinable!(publications -> persons (lead_author_id));
 diesel::joinable!(roles -> persons (person_id));
 diesel::joinable!(roles -> teams (team_id));
 diesel::joinable!(team_ownerships -> persons (person_id));
@@ -272,6 +311,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     org_tiers,
     organizations,
     persons,
+    publication_contributors,
+    publications,
     roles,
     skills,
     team_ownerships,

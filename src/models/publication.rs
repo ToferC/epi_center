@@ -7,23 +7,25 @@ use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMetho
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use rand::{Rng, thread_rng};
 
 use crate::schema::*;
 use crate::database::connection;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
-#[table_name = "publications"]
+use crate::models::{Person, PublicationContributor, Organization};
+
+#[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, Identifiable, AsChangeset, SimpleObject)]
+#[graphql(complex)]
+#[diesel(table_name = publications)]
 pub struct Publication {
     pub id: Uuid,
-    pub publishing_organization: Uuid,
+    pub publishing_organization_id: Uuid,
     pub lead_author_id: Uuid, // Person
     pub title: String,
-    pub subject: String,
+    pub subject_text: String,
     pub publication_status: PublicationStatus,
-    pub url: Option<String>,
+    pub url_string: Option<String>,
     pub publishing_id: Option<String>,
-    pub submitted_date: NaiveDateTime,
+    pub submitted_date: Option<NaiveDateTime>,
     pub published_datestamp: Option<NaiveDateTime>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -34,9 +36,29 @@ pub struct Publication {
 pub enum PublicationStatus {
     Planning,
     InProgress,
+    Draft,
     Submitted,
     Published,
+    Rejected,
     Cancelled,
+}
+
+#[ComplexObject]
+impl Publication {
+    pub async fn lead_author(&self) -> Result<Person> {
+        Person::get_by_id(&self.lead_author_id)
+    }
+
+    pub async fn publishing_organization(&self) -> Result<Organization> {
+        Organization::get_by_id(&self.publishing_organization_id)
+    }
+
+    pub async fn contributors(&self) -> Result<Vec<Person>> {
+        
+        let ids = PublicationContributor::get_contributor_ids(&self.id)?;
+        
+        Person::get_by_ids(&ids)
+    }
 }
 
 // Non Graphql
@@ -55,10 +77,10 @@ impl Publication {
         let mut conn = connection()?;
 
         let res = publications::table
-            .filter(publications::created_by_person_id.eq(&publication.created_by_person_id)
-                .and(publications::title_en.eq(&publication.title_en))
-                .and(publications::assigned_to_person_id.eq(&publication.assigned_to_person_id))
-                .and(publications::target_completion_date.eq(&publication.target_completion_date))
+            .filter(publications::publishing_organization_id.eq(&publication.publishing_organization_id)
+                .and(publications::title.eq(&publication.title))
+                .and(publications::lead_author_id.eq(&publication.lead_author_id))
+                .and(publications::publishing_id.eq(&publication.publishing_id))
             )
             .distinct()
             .first(&mut conn);
@@ -96,31 +118,11 @@ impl Publication {
         Ok(res)
     }
 
-    pub fn get_by_team_id(id: Uuid) -> Result<Vec<Publication>> {
+    pub fn get_by_lead_author_id(id: Uuid) -> Result<Vec<Publication>> {
         let mut conn = connection()?;
 
         let res = publications::table
-            .filter(publications::team_id.eq(id))
-            .load::<Publication>(&mut conn)?;
-
-        Ok(res)
-    }
-
-    pub fn get_by_assigning_person_id(id: Uuid) -> Result<Vec<Publication>> {
-        let mut conn = connection()?;
-
-        let res = publications::table
-            .filter(publications::created_by_person_id.eq(id))
-            .load::<Publication>(&mut conn)?;
-
-        Ok(res)
-    }
-
-    pub fn get_by_assigned_person_id(id: Uuid) -> Result<Vec<Publication>> {
-        let mut conn = connection()?;
-
-        let res = publications::table
-            .filter(publications::assigned_to_person_id.eq(id))
+            .filter(publications::lead_author_id.eq(id))
             .load::<Publication>(&mut conn)?;
 
         Ok(res)
@@ -141,44 +143,41 @@ impl Publication {
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
 #[table_name = "publications"]
 pub struct NewPublication {
-    pub created_by_person_id: Uuid, // Person
-    pub assigned_to_person_id: Option<Uuid>, // Person
-    pub team_id: Uuid, // Team
-    pub title_en: String,
-    pub outcome_en: String,
-    pub outcome_fr: String,
-    pub start_datestamp: NaiveDateTime,
-    pub target_completion_date: NaiveDateTime,
+    pub publishing_organization_id: Uuid,
+    pub lead_author_id: Uuid, // Person
+    pub title: String,
+    pub subject_text: String,
     pub publication_status: PublicationStatus,
-    pub effort: f64,
+    pub url_string: Option<String>,
+    pub publishing_id: Option<String>,
+    pub submitted_date: Option<NaiveDateTime>,
+    pub published_datestamp: Option<NaiveDateTime>,
 }
 
 impl NewPublication {
 
     pub fn new(
-        created_by_person_id: Uuid, // Person
-        assigned_to_person_id: Option<Uuid>, // Person
-        team_id: Uuid, // Publication
-        title_en: String,
-        outcome_en: String,
-        outcome_fr: String,
-        start_datestamp: NaiveDateTime,
-        target_completion_date: NaiveDateTime,
+        publishing_organization_id: Uuid,
+        lead_author_id: Uuid, // Person
+        title: String,
+        subject_text: String,
         publication_status: PublicationStatus,
-        effort: f64,
+        url_string: Option<String>,
+        publishing_id: Option<String>,
+        submitted_date: Option<NaiveDateTime>,
+        published_datestamp: Option<NaiveDateTime>,
 
     ) -> Self {
         NewPublication {
-            created_by_person_id,
-            assigned_to_person_id,
-            team_id,
-            title_en,
-            outcome_en,
-            outcome_fr,
-            start_datestamp,
-            target_completion_date,
+            publishing_organization_id,
+            lead_author_id,
+            title,
+            subject_text,
             publication_status,
-            effort,
+            url_string,
+            publishing_id,
+            submitted_date,
+            published_datestamp,
         }
     }
 }

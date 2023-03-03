@@ -10,6 +10,8 @@ mod capability;
 mod affiliation;
 mod work;
 mod language;
+mod publication;
+mod publication_contributor;
 
 mod access_log;
 mod user;
@@ -28,6 +30,8 @@ pub use capability::*;
 pub use affiliation::*;
 pub use work::*;
 pub use language::*;
+pub use publication::*;
+pub use publication_contributor::*;
 
 pub use self::access_log::*;
 pub use self::user::*;

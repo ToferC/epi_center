@@ -92,6 +92,16 @@ impl Person {
         Ok(res)
     }
 
+    pub fn get_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Person>> {
+        let mut conn = connection()?;
+
+        let res = persons::table
+            .filter(persons::id.eq_any(ids))
+            .load::<Person>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_all() -> Result<Vec<Person>> {
         let mut conn = connection()?;
 
