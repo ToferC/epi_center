@@ -7,12 +7,13 @@ use crate::models::{Person, Organization, NewPerson, NewOrganization,
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, HrGroup};
 
-use super::create_fake_capabilities_for_person;
+use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors};
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
 pub fn pre_populate_db_schema() {
 
     // Set up Organization
+    let mut science_org_ids: Vec<uuid::Uuid> = Vec::new();
 
     let o = NewOrganization::new(
         "Public Health Agency of Canada".to_string(),
@@ -24,12 +25,13 @@ pub fn pre_populate_db_schema() {
 
     let org = Organization::create(&o).expect("Unable to create new organization");
 
+    science_org_ids.push(org.id);
+
     // Set up Science Orgs for Affiliations
 
     let places = vec![("British Columbia", "UBC"), ("Manitoba", "UM"), ("Toronto", "UofT"), ("Quebec", "UQAM"),
         ("Alberta", "UofA"), ("Saskatchewan", "USask"), ("New Brunswick", "UNB"), ("Nova Scotia", "NSCAD")];
 
-    let mut science_org_ids: Vec<uuid::Uuid> = Vec::new();
 
     for place in places {
         
@@ -291,7 +293,7 @@ pub fn pre_populate_db_schema() {
             uuid::Uuid::new_v4(),
             famn.to_owned(),
             gn.to_owned(),
-            format!("{}.{}_{}@phac-aspc.gc.ca", &gn, &famn, rng.gen_range(0..999)).to_lowercase(),
+            format!("{}.{}_{}@phac-aspc.gc.ca", &gn, &famn, rng.gen_range(0..9999)).to_lowercase(),
             gen_rand_number(),
             addr[0].to_owned(),
             addr[1].to_owned(),
@@ -305,12 +307,12 @@ pub fn pre_populate_db_schema() {
 
         let person = Person::create(&p).expect("Unable to create person");
 
-        let science_org_id = science_org_ids.choose(&mut rng).unwrap();
+        let science_org_id = &science_org_ids.choose(&mut rng).unwrap();
 
         let _capabilities_for_person = create_fake_capabilities_for_person(
             person.id, 
             org.id,
-            *science_org_id,
+            **science_org_id,
         )
             .expect("Unable to create capabilities for person");
 
@@ -425,10 +427,14 @@ pub fn pre_populate_db_schema() {
             );
 
             let _res = Role::create(&nr).unwrap();
-
-        }
+        }    
     }
+
+    // Create Publications and Assign Contributors
+    let _res = generate_dummy_publications_and_contributors(&science_org_ids)
+        .expect("Unable to create publications and contributors");
 }
+
 
 pub fn gen_rand_number() -> String {
     let mut rng = rand::thread_rng();

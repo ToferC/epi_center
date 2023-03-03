@@ -16,7 +16,8 @@ use crate::common_utils::{
 use crate::database::connection;
 use crate::schema::*;
 
-use super::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability, Affiliation, LanguageData};
+use crate::models::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability, Affiliation, LanguageData, 
+    Publication, PublicationContributor};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -191,18 +192,20 @@ impl Person {
         let team_ids = TeamOwnership::get_team_ids_by_owner_id(&self.id).unwrap();
 
         Team::get_by_ids(&team_ids)
-
     }
 
     pub async fn owned_org_tiers(&self) -> Result<Vec<OrgTier>> {
         let org_tier_ids = OrgOwnership::get_org_tier_ids_by_owner_id(&self.id).unwrap();
 
         OrgTier::get_by_ids(&org_tier_ids)
-
     }
 
     pub async fn capabilities(&self) -> Result<Vec<Capability>> {
         Capability::get_by_person_id(self.id)
+    }
+
+    pub async fn publications(&self) -> Result<Vec<Publication>> {
+        Publication::get_by_contributor_id(&self.id)
     }
 
     pub async fn language_data(&self) -> Result<Vec<LanguageData>> {

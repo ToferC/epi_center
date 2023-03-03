@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use chrono::{prelude::*};
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods, PgTextExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
@@ -18,7 +18,9 @@ use crate::models::{Person, PublicationContributor, Organization};
 #[diesel(table_name = publications)]
 pub struct Publication {
     pub id: Uuid,
+    #[graphql(skip)]
     pub publishing_organization_id: Uuid,
+    #[graphql(skip)]
     pub lead_author_id: Uuid, // Person
     pub title: String,
     pub subject_text: String,
@@ -112,17 +114,57 @@ impl Publication {
         Ok(res)
     }
 
-    pub fn get_by_id(id: Uuid) -> Result<Self> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
         let res = publications::table.filter(publications::id.eq(id)).first(&mut conn)?;
         Ok(res)
     }
 
-    pub fn get_by_lead_author_id(id: Uuid) -> Result<Vec<Publication>> {
+    pub fn get_by_ids(ids: &[Uuid]) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+        let res = publications::table.filter(publications::id.eq_any(ids))
+            .load::<Publication>(&mut conn)?;
+        Ok(res)
+    }
+
+    pub fn get_by_contributor_id(person_id: &Uuid) -> Result<Vec<Publication>> {
+        let mut conn = connection()?;
+        let res: Vec<Uuid> = publication_contributors::table
+            .filter(publication_contributors::contributor_id.eq(person_id))
+            .select((publication_contributors::publication_id))
+            .load::<Uuid>(&mut conn)?;
+
+        let publications = Publication::get_by_ids(&res)?;
+
+        Ok(publications)
+    }
+
+    pub fn get_by_lead_author_id(id: &Uuid) -> Result<Vec<Publication>> {
         let mut conn = connection()?;
 
         let res = publications::table
             .filter(publications::lead_author_id.eq(id))
+            .load::<Publication>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_publishing_organization_id(id: &Uuid) -> Result<Vec<Publication>> {
+        let mut conn = connection()?;
+
+        let res = publications::table
+            .filter(publications::publishing_organization_id.eq(id))
+            .load::<Publication>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_title_or_subject(title: &str) -> Result<Vec<Publication>> {
+        let mut conn = connection()?;
+
+        let res = publications::table
+            .filter(publications::title.ilike(format!("%{}%", title)))
+            .or_filter(publications::subject_text.ilike(format!("%{}%", title)))
             .load::<Publication>(&mut conn)?;
 
         Ok(res)

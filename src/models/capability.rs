@@ -179,6 +179,17 @@ impl Capability {
         Ok(res)
     }
 
+    pub fn get_by_domain_and_level(domain: &SkillDomain, level: CapabilityLevel) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = capabilities::table
+            .filter(capabilities::domain.eq(domain))
+            .filter(capabilities::self_identified_level.eq(level))
+            .load::<Capability>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_person_id(id: Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 

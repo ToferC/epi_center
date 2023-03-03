@@ -11,6 +11,8 @@ use rand::{Rng, thread_rng};
 use crate::schema::*;
 use crate::database::connection;
 
+use super::{Publication, Person};
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[table_name = "publication_contributors"]
 /// Data structure connecting persons in heirarchical relationship
@@ -21,6 +23,21 @@ pub struct PublicationContributor {
     pub contributor_role: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+#[Object]
+impl PublicationContributor {
+    pub async fn publication(&self) -> Result<Publication> {
+        Publication::get_by_id(&self.publication_id)
+    }
+
+    pub async fn contributor(&self) -> Result<Person> {
+        Person::get_by_id(&self.contributor_id)
+    }
+
+    pub async fn contributor_role(&self) -> Result<String> {
+        Ok(self.contributor_role.clone())
+    }
 }
 
 
@@ -74,12 +91,22 @@ impl PublicationContributor {
         Ok(res)
     }
 
-    pub fn get_by_id(id: Uuid) -> Result<Self> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
         let person = publication_contributors::table
             .filter(publication_contributors::id.eq(id))
             .first(&mut conn)?;
         Ok(person)
+    }
+
+    pub fn get_by_contributor_id(contributor_id: &Uuid) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = publication_contributors::table
+            .filter(publication_contributors::contributor_id.eq(contributor_id))
+            .load::<PublicationContributor>(&mut conn)?;
+
+        Ok(res)
     }
     
     pub fn update(&self) -> Result<Self> {

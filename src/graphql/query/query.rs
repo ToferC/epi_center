@@ -2,6 +2,8 @@ use async_graphql::*;
 
 use crate::graphql::query::{CapabilityQuery, PersonQuery, TeamQuery, OrganizationQuery, UserQuery, RoleQuery};
 
+use super::PublicationQuery;
+
 #[derive(Default, MergedObject)]
 pub struct Query(
     CapabilityQuery,
@@ -10,4 +12,5 @@ pub struct Query(
     OrganizationQuery,
     UserQuery,
     RoleQuery,
+    PublicationQuery,
 );

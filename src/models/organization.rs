@@ -14,7 +14,7 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use crate::models::{CapabilityCount, CapabilityLevel, Affiliation, SkillDomain};
+use crate::models::{CapabilityCount, CapabilityLevel, Affiliation, SkillDomain, Publication};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, SimpleObject)]
 #[table_name = "organizations"]
@@ -35,8 +35,13 @@ pub struct Organization {
 
 #[ComplexObject]
 impl Organization {
+
     async fn get_affiliations(&self) -> Result<Vec<Affiliation>> {
         Affiliation::get_by_organization_id(self.id)
+    }
+
+    pub async fn publications(&self) -> Result<Vec<Publication>> {
+        Publication::get_by_publishing_organization_id(&self.id)
     }
     
     async fn get_capability_counts(&self) -> Result<Vec<CapabilityCount>> {
