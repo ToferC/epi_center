@@ -28,7 +28,7 @@ impl PersonQuery {
         Person::get_all()
     }
 
-    #[graphql(name = "getPeople")]
+    #[graphql(name = "People")]
     /// Accepts argument of "count" and returns a vector of {count} persons ordered by
     /// family name
     pub async fn get_people(

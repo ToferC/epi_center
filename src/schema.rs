@@ -10,6 +10,14 @@ pub mod sql_types {
     pub struct HrGroup;
 
     #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "language_level"))]
+    pub struct LanguageLevel;
+
+    #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "language_name"))]
+    pub struct LanguageName;
+
+    #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "skill_domain"))]
     pub struct SkillDomain;
 
@@ -49,6 +57,23 @@ diesel::table! {
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::LanguageName;
+    use super::sql_types::LanguageLevel;
+
+    language_datas (id) {
+        id -> Uuid,
+        person_id -> Uuid,
+        language_name -> LanguageName,
+        reading -> Nullable<LanguageLevel>,
+        writing -> Nullable<LanguageLevel>,
+        speaking -> Nullable<LanguageLevel>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -103,6 +128,7 @@ diesel::table! {
         city -> Varchar,
         province -> Varchar,
         postal_code -> Varchar,
+        country -> Varchar,
         organization_id -> Uuid,
         peoplesoft_id -> Varchar,
         orcid_id -> Varchar,
@@ -224,6 +250,7 @@ diesel::joinable!(affiliations -> persons (person_id));
 diesel::joinable!(capabilities -> organizations (organization_id));
 diesel::joinable!(capabilities -> persons (person_id));
 diesel::joinable!(capabilities -> skills (skill_id));
+diesel::joinable!(language_datas -> persons (person_id));
 diesel::joinable!(org_tier_ownerships -> org_tiers (org_tier_id));
 diesel::joinable!(org_tier_ownerships -> persons (owner_id));
 diesel::joinable!(org_tiers -> organizations (organization_id));
@@ -240,6 +267,7 @@ diesel::joinable!(works -> teams (team_id));
 diesel::allow_tables_to_appear_in_same_query!(
     affiliations,
     capabilities,
+    language_datas,
     org_tier_ownerships,
     org_tiers,
     organizations,

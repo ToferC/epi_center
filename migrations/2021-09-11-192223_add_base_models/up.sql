@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS persons (
     city VARCHAR(128) NOT NULL,
     province VARCHAR(128) NOT NULL,
     postal_code VARCHAR(16) NOT NULL,
+    country VARCHAR(128) NOT NULL,
 
     organization_id UUID NOT NULL,
     FOREIGN KEY(organization_id)
@@ -286,6 +287,43 @@ CREATE TABLE IF NOT EXISTS works (
     effort FLOAT NOT NULL,
 
     completed_date TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TYPE language_name AS ENUM (
+    'english',
+    'french',
+    'arabic',
+    'chinese',
+    'spanish',
+    'german',
+    'japanese',
+    'korean',
+    'italian',
+    'other'
+);
+
+CREATE TYPE language_level AS ENUM (
+    'a',
+    'b',
+    'c',
+    'e',
+    'x'
+);
+
+CREATE TABLE IF NOT EXISTS language_datas (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    person_id UUID NOT NULL,
+    FOREIGN KEY(person_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    language_name language_name NOT NULL,
+    reading language_level,
+    writing language_level,
+    speaking language_level,
+
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

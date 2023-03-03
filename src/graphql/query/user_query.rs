@@ -33,12 +33,12 @@ impl UserQuery {
     }
 
     #[graphql(
-        name = "getUserByEmail",
+        name = "userByEmail",
         guard = "RoleGuard::new(UserRole::Admin)",
         visible = "is_admin",
     )]
     /// Returns a vector of all users
-    pub async fn get_user_by_email(&self, _context: &Context<'_>, email: String) -> Result<User> {
+    pub async fn user_by_email(&self, _context: &Context<'_>, email: String) -> Result<User> {
 
         let res = User::get_by_email(&email)?;
 
@@ -46,12 +46,12 @@ impl UserQuery {
     }
 
     #[graphql(
-        name = "getUserById",
+        name = "userById",
         guard = "RoleGuard::new(UserRole::Admin)",
         visible = "is_admin",
     )]
     /// Returns a vector of all users
-    pub async fn get_user_by_id(&self, _context: &Context<'_>, id: Uuid) -> Result<User> {
+    pub async fn user_by_id(&self, _context: &Context<'_>, id: Uuid) -> Result<User> {
 
         let res = User::get_by_id(&id)?;
 

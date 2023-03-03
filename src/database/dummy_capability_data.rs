@@ -5,7 +5,7 @@ use async_graphql::Error;
 
 use crate::models::{Affiliation, NewAffiliation, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain};
+    TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData};
 
 pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 
@@ -199,6 +199,53 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
 pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, science_org_id: Uuid) -> Result<(), Error>{
 
     let mut rng = rand::thread_rng();
+
+    // Create LanguageDatas
+
+    let primary_language = vec![LanguageName::English, LanguageName::French]
+        .choose(&mut rng).unwrap().clone();
+
+    let secondary_language = match primary_language {
+        LanguageName::English => LanguageName::French,
+        LanguageName::French => LanguageName::English,
+        _ => LanguageName::English,
+    };
+
+    let primary = NewLanguageData::new(
+        person_id, 
+        primary_language, 
+        Some(LanguageLevel::E),
+        Some(LanguageLevel::E),
+        Some(LanguageLevel::E)
+    );
+
+    let _res = LanguageData::create(&primary)?;
+
+    if rng.gen_bool(0.5) {
+
+        let beginner = vec![LanguageLevel::B, LanguageLevel::A, LanguageLevel::A];
+        let intermediate = vec![LanguageLevel::C, LanguageLevel::B, LanguageLevel::B];
+        let professional = vec![LanguageLevel::C, LanguageLevel::B, LanguageLevel::C];
+        let fluent = vec![LanguageLevel::E, LanguageLevel::E, LanguageLevel::E];
+
+        let chosen = match rng.gen_range(0..=10) {
+            0..=3 => beginner,
+            4..=6 => intermediate,
+            7..=9 => professional,
+            10 => fluent,
+            _ => beginner,
+        };
+
+        let secondary = NewLanguageData::new(
+            person_id, 
+            secondary_language, 
+            Some(chosen[0]),
+            Some(chosen[1]),
+            Some(chosen[2])
+        );
+
+        let _res = LanguageData::create(&secondary)?;
+    }
 
     // Choose three random domains from SkillDomain
 

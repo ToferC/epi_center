@@ -18,7 +18,7 @@ impl RoleQuery {
 
     // Roles
 
-    #[graphql(name = "getCountRole")]
+    #[graphql(name = "roleCount")]
     /// Accepts an argument of "count" and returns a vector of {count} role
     pub async fn get_count_role(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
         
@@ -32,5 +32,15 @@ impl RoleQuery {
         _context: &Context<'_>,) -> Result<Vec<Role>> {
 
         Role::get_all()
+    }
+
+    #[graphql(name = "roleById")]
+    pub async fn role_by_id(
+        &self, 
+        _context: &Context<'_>,
+        id: Uuid,
+    ) -> Result<Role> {
+
+        Role::get_by_id(id)
     }
 }

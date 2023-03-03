@@ -84,7 +84,7 @@ impl CapabilityQuery {
         Skill::get_all()
     }
 
-    pub async fn get_skill_by_id(
+    pub async fn skill_by_id(
         &self, 
         _context: &Context<'_>,
         id: Uuid

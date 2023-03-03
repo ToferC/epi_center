@@ -18,10 +18,8 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use crate::models::{CapabilityCount, CapabilityLevel};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, AsChangeset, SimpleObject, PartialEq)]
-#[graphql(complex)]
 #[table_name = "skills"]
 /// Should get this from an API or have standard data
 /// Now pre-loaded as prt of context
@@ -36,32 +34,6 @@ pub struct Skill {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
-}
-
-#[ComplexObject]
-impl Skill {
-    /*
-    async fn get_org_capability_counts(&self, organization_id: Uuid) -> Result<Vec<CapabilityCount>> {
-        let mut conn = connection().unwrap();
-
-        let res: Vec<(String, CapabilityLevel, i64)> = capabilities::table
-            .filter(capabilities::skill_id.eq(self.id).and(capabilities::organization_id.eq(organization_id)))
-            .group_by(capabilities::self_identified_level)
-            .select((capabilities::name_en, capabilities::self_identified_level, count(capabilities::id)))
-            .order_by(capabilities::self_identified_level)
-            .load::<(String, CapabilityLevel, i64)>(&mut conn)?;
-
-    // Convert res into CapabilityCountStruct
-    let mut counts: Vec<CapabilityCount> = Vec::new();
-
-    for r in res {
-        let count = CapabilityCount::from(r);
-        counts.push(count);
-    }
-
-    Ok(counts)
-    }
-     */
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]

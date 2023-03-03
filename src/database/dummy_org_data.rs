@@ -297,6 +297,7 @@ pub fn pre_populate_db_schema() {
             addr[1].to_owned(),
             addr[2].to_owned(),
             addr[3].to_owned(),
+            "Canada".to_string(),
             org.id,
             gen_rand_number(),
             gen_rand_number(),

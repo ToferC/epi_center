@@ -25,6 +25,9 @@ COPY ./Cargo.toml ./Cargo.toml
 COPY ./migrations ./migrations
 COPY ./templates ./templates
 
+# Copy dummy data
+COPY ./names.csv ./names.csv
+
 # This build to cache dependencies
 RUN cargo build --release
 RUN rm src/*.rs 
@@ -41,6 +44,7 @@ FROM rust:latest
 
 # Copy final build artifact
 COPY --from=build /people_data_api/target/release/people_data_api .
+COPY --from=build /people_data_api/names.csv .
 
 EXPOSE 8080
 

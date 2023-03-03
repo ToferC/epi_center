@@ -1,5 +1,9 @@
 -- This file should undo anything in `up.sql`
 
+DROP TABLE IF EXISTS language_datas;
+DROP TYPE IF EXISTS language_level;
+DROP TYPE IF EXISTS language_name;
+
 DROP TABLE IF EXISTS works;
 DROP TYPE IF EXISTS work_status;
 

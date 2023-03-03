@@ -9,6 +9,7 @@ mod skill;
 mod capability;
 mod affiliation;
 mod work;
+mod language;
 
 mod access_log;
 mod user;
@@ -26,6 +27,7 @@ pub use skill::*;
 pub use capability::*;
 pub use affiliation::*;
 pub use work::*;
+pub use language::*;
 
 pub use self::access_log::*;
 pub use self::user::*;
