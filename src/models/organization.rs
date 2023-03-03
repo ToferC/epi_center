@@ -14,7 +14,7 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use crate::models::{CapabilityCount, CapabilityLevel, Affiliation};
+use crate::models::{CapabilityCount, CapabilityLevel, Affiliation, SkillDomain};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, SimpleObject)]
 #[table_name = "organizations"]
@@ -42,12 +42,12 @@ impl Organization {
     async fn get_capability_counts(&self) -> Result<Vec<CapabilityCount>> {
         let mut conn = connection().unwrap();
 
-        let res: Vec<(String, CapabilityLevel, i64)> = capabilities::table
+        let res: Vec<(String, SkillDomain, CapabilityLevel, i64)> = capabilities::table
             .filter(capabilities::organization_id.eq(self.id))
-            .group_by((capabilities::name_en, capabilities::self_identified_level))
-            .select((capabilities::name_en, capabilities::self_identified_level, count(capabilities::id)))
+            .group_by((capabilities::domain, capabilities::self_identified_level, capabilities::name_en))
+            .select((capabilities::name_en, capabilities::domain, capabilities::self_identified_level, count(capabilities::id)))
             .order_by((capabilities::name_en, capabilities::self_identified_level))
-            .load::<(String, CapabilityLevel, i64)>(&mut conn)?;
+            .load::<(String, SkillDomain, CapabilityLevel, i64)>(&mut conn)?;
 
     // Convert res into CapabilityCountStruct
     let mut counts: Vec<CapabilityCount> = Vec::new();

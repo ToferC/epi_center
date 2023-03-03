@@ -162,7 +162,7 @@ impl Skill {
         Ok(res)
     }
 
-    pub fn get_skill_ids_by_name(name: String) -> Result<Vec<Uuid>> {
+    pub fn get_ids_by_name(name: String) -> Result<Vec<Uuid>> {
         let mut conn = connection()?;
 
         let res = skills::table
@@ -173,7 +173,18 @@ impl Skill {
         Ok(res)
     }
 
-    pub fn get_by_skill_domain(domain: SkillDomain) -> Result<Vec<Self>> {
+    pub fn get_ids_by_domain(domain: SkillDomain) -> Result<Vec<Uuid>> {
+        let mut conn = connection()?;
+
+        let res = skills::table
+            .filter(skills::domain.eq(domain))
+            .select(skills::id)
+            .load::<Uuid>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_domain(domain: SkillDomain) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = skills::table

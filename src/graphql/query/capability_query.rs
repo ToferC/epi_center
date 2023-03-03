@@ -4,7 +4,7 @@ use crate::schema::*;
 use async_graphql::*;
 
 use crate::models::{Person, User, TeamOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityCount};
+    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityCount, SkillDomain, CapabilityLevel};
 use uuid::Uuid;
 
 use crate::graphql::{get_connection_from_context};
@@ -18,7 +18,7 @@ impl CapabilityQuery {
 
     // Capabilities
 
-    pub async fn get_capabilities(
+    pub async fn capabilities(
         &self, 
         _context: &Context<'_>,
     ) -> Result<Vec<Capability>> {
@@ -35,19 +35,28 @@ impl CapabilityQuery {
         Capability::get_by_id(&id)
     }
 
-    pub async fn get_capabilities_by_name(
+    pub async fn capabilities_by_name(
         &self, 
         _context: &Context<'_>,
         name: String,
     ) -> Result<Vec<Capability>> {
 
-        let skill_ids = Skill::get_skill_ids_by_name(name)?;
-
-        Capability::get_by_skill_ids(skill_ids)
+        Capability::get_by_name(&name)
     }
 
+    pub async fn capabilities_by_name_and_level(
+        &self, 
+        _context: &Context<'_>,
+        name: String,
+        level: CapabilityLevel,
+    ) -> Result<Vec<Capability>> {
+
+        Capability::get_by_name_and_level(&name, level)
+    }
+       
+
     /// Return a count of the number of people who have a capability at each level of the capability
-    pub async fn get_capability_counts(
+    pub async fn capability_counts_by_name(
         &self, 
         _context: &Context<'_>,
         name: String,
@@ -56,9 +65,18 @@ impl CapabilityQuery {
         Capability::get_level_counts_by_name(name)
     }
 
+    pub async fn capability_counts_by_domain(
+        &self, 
+        _context: &Context<'_>,
+        domain: SkillDomain,
+    ) -> Result<Vec<CapabilityCount>> {
+
+        Capability::get_level_counts_by_domain(domain)
+    }
+
     // Skills
 
-    pub async fn get_skills(
+    pub async fn skills(
         &self, 
         _context: &Context<'_>,
     ) -> Result<Vec<Skill>> {
@@ -75,7 +93,7 @@ impl CapabilityQuery {
         Skill::get_by_id(&id)
     }
 
-    pub async fn get_skill_by_name(
+    pub async fn skill_by_name(
         &self, 
         _context: &Context<'_>,
         name: String,

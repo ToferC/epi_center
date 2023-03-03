@@ -210,6 +210,8 @@ CREATE TABLE IF NOT EXISTS capabilities (
     name_en VARCHAR(256) NOT NULL,
     name_fr VARCHAR(256) NOT NULL,
 
+    domain skill_domain NOT NULL,
+
     person_id UUID NOT NULL,
     FOREIGN KEY(person_id)
         REFERENCES persons(id) ON DELETE RESTRICT,

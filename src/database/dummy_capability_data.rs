@@ -231,7 +231,7 @@ pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, scienc
 
         // Choose 3-5 random skills from each domain
 
-        let skills_in_domain = Skill::get_by_skill_domain(domain)?;
+        let skills_in_domain = Skill::get_by_domain(domain)?;
 
         // Choose 3-5 random skills from domain
 

@@ -33,12 +33,14 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
+    use super::sql_types::SkillDomain;
     use super::sql_types::CapabilityLevel;
 
     capabilities (id) {
         id -> Uuid,
         name_en -> Varchar,
         name_fr -> Varchar,
+        domain -> SkillDomain,
         person_id -> Uuid,
         skill_id -> Uuid,
         organization_id -> Uuid,
