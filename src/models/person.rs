@@ -180,6 +180,10 @@ impl Person {
         Organization::get_by_id(&self.organization_id)
     }
 
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Analyst)",
+        visible = "is_analyst",
+    )]
     pub async fn roles(&self) -> Result<Vec<Role>> {
         Role::get_by_person_id(self.id)
     }
@@ -200,6 +204,10 @@ impl Person {
         OrgTier::get_by_ids(&org_tier_ids)
     }
 
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Analyst)",
+        visible = "is_analyst",
+    )]
     pub async fn capabilities(&self) -> Result<Vec<Capability>> {
         Capability::get_by_person_id(self.id)
     }
@@ -208,6 +216,10 @@ impl Person {
         Publication::get_by_contributor_id(&self.id)
     }
 
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Analyst)",
+        visible = "is_analyst",
+    )]
     pub async fn language_data(&self) -> Result<Vec<LanguageData>> {
         LanguageData::get_by_person_id(self.id)
     }

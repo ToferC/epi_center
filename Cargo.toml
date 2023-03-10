@@ -48,7 +48,6 @@ rand = "0.8.4"
 alcoholic_jwt = "1.0.0"
 reqwest = { version = "0.11.7", features = ["json"] }
 env_logger = "0.9.0"
-bdays = "0.1.1"
 bytes = "1.1.0"
 
 graphql_client = "0.10.0"

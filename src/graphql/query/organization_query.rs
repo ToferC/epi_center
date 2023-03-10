@@ -25,7 +25,7 @@ impl OrganizationQuery {
         Organization::get_all()
     }
 
-    #[graphql(name = "countOrganizations")]
+    #[graphql(name = "organizations")]
     /// Accepts argument "count" and returns a vector of {count} organizations
     pub async fn get_count_organizations(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Organization>> {
         

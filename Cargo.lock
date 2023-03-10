@@ -1057,15 +1057,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4a4ddaa51a5bc52a6948f74c06d20aaaddb71924eab79b8c97a8c556e942d6a"
 
 [[package]]
-name = "bdays"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d39efa2ebaf6d5ff6e5eee0a764d1fb1798719f9e67bc78db1180325fae2023"
-dependencies = [
- "chrono",
-]
-
-[[package]]
 name = "bindgen"
 version = "0.48.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2976,7 +2967,6 @@ dependencies = [
  "async-graphql-actix-web",
  "async-stream",
  "async-trait",
- "bdays",
  "bytes 1.4.0",
  "calamine",
  "chrono",

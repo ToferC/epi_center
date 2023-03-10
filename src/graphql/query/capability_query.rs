@@ -1,14 +1,9 @@
-use diesel::{RunQueryDsl};
-use crate::schema::*;
-
 use async_graphql::*;
 
-use crate::models::{Person, User, TeamOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityCount, SkillDomain, CapabilityLevel};
+use crate::models::{Capability, Skill, CapabilityCount, SkillDomain, CapabilityLevel};
 use uuid::Uuid;
 
-use crate::graphql::{get_connection_from_context};
-use crate::common_utils::{RoleGuard, is_admin, UserRole};
+//use crate::common_utils::{RoleGuard, is_admin, UserRole};
 
 #[derive(Default)]
 pub struct CapabilityQuery;
@@ -17,7 +12,7 @@ pub struct CapabilityQuery;
 impl CapabilityQuery {
 
     // Capabilities
-
+    /// Returns all Capabilities in the system
     pub async fn capabilities(
         &self, 
         _context: &Context<'_>,
@@ -26,6 +21,7 @@ impl CapabilityQuery {
         Capability::get_all()
     }
 
+    /// Returns a capability by its Uuid
     pub async fn capability_by_id(
         &self, 
         _context: &Context<'_>,
@@ -35,6 +31,8 @@ impl CapabilityQuery {
         Capability::get_by_id(&id)
     }
 
+    /// Accepts a String "name" and returns a vector of capabilities that 
+    /// match in EN or FR against it
     pub async fn capabilities_by_name(
         &self, 
         _context: &Context<'_>,
@@ -44,6 +42,7 @@ impl CapabilityQuery {
         Capability::get_by_name(&name)
     }
 
+    /// Accepts a String "name" and a CapabilityLevel and returns matches against both
     pub async fn capabilities_by_name_and_level(
         &self, 
         _context: &Context<'_>,
@@ -54,7 +53,6 @@ impl CapabilityQuery {
         Capability::get_by_name_and_level(&name, level)
     }
        
-
     /// Return a count of the number of people who have a capability at each level of the capability
     pub async fn capability_counts_by_name(
         &self, 
@@ -65,6 +63,7 @@ impl CapabilityQuery {
         Capability::get_level_counts_by_name(name)
     }
 
+    /// Return a CapabilityCount by a specific SkillDomain (SCIENTIFIC, etc.)
     pub async fn capability_counts_by_domain(
         &self, 
         _context: &Context<'_>,
