@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS works (
     work_description VARCHAR(256) NOT NULL,
     domain skill_domain NOT NULL,
     capability_level capability_level NOT NULL,
+    effort INT NOT NULL,
 
     work_status task_status NOT NULL,
 

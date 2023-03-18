@@ -17,7 +17,7 @@ use crate::database::connection;
 use crate::schema::*;
 
 use crate::models::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability, Affiliation, LanguageData, 
-    Publication, PublicationContributor};
+    Publication, Work};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -186,6 +186,10 @@ impl Person {
     )]
     pub async fn roles(&self) -> Result<Vec<Role>> {
         Role::get_by_person_id(self.id)
+    }
+
+    pub async fn work(&self) -> Result<Vec<Work>> {
+        Work::get_by_person_id(&self.id)
     }
 
     pub async fn affiliations(&self) -> Result<Vec<Affiliation>> {

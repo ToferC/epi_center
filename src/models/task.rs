@@ -7,14 +7,16 @@ use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMetho
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use rand::{Rng, thread_rng};
 
 use crate::schema::*;
 use crate::database::connection;
 
-use super::SkillDomain;
+use crate::models::SkillDomain;
+
+use super::Work;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[graphql(complex)]
 #[table_name = "tasks"]
 pub struct Task {
     pub id: Uuid,
@@ -27,10 +29,17 @@ pub struct Task {
     pub start_datestamp: NaiveDateTime,
     pub target_completion_date: NaiveDateTime,
     pub task_status: TaskStatus,
-    pub effort: f64,
+    pub effort: i32,
     pub completed_date: Option<NaiveDateTime>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+#[ComplexObject]
+impl Task {
+    pub async fn work(&self) -> Result<Vec<Work>> {
+        Work::get_by_task_id(&self.id)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
@@ -132,7 +141,7 @@ pub struct NewTask {
     pub start_datestamp: NaiveDateTime,
     pub target_completion_date: NaiveDateTime,
     pub task_status: TaskStatus,
-    pub effort: f64,
+    pub effort: i32,
 }
 
 impl NewTask {
@@ -146,7 +155,7 @@ impl NewTask {
         start_datestamp: NaiveDateTime,
         target_completion_date: NaiveDateTime,
         task_status: TaskStatus,
-        effort: f64,
+        effort: i32,
 
     ) -> Self {
         NewTask {

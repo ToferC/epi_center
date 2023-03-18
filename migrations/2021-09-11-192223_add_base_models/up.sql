@@ -279,7 +279,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     target_completion_date TIMESTAMP NOT NULL,
 
     task_status task_status NOT NULL DEFAULT 'planning',
-    effort FLOAT NOT NULL,
+    effort INT NOT NULL,
 
     completed_date TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),

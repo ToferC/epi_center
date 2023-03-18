@@ -1,13 +1,12 @@
 use std::fmt::Debug;
 
 use chrono::{prelude::*};
-use diesel_derive_enum::DbEnum;
+use diesel::dsl::sum;
 use serde::{Deserialize, Serialize};
 use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use rand::{Rng, thread_rng};
 
 use crate::schema::*;
 use crate::models::{TaskStatus, SkillDomain, Person, Task, CapabilityLevel};
@@ -29,6 +28,7 @@ pub struct Work {
     pub work_description: String,
     pub domain: SkillDomain,
     pub capability_level: CapabilityLevel,
+    pub effort: i32,
     pub work_status: TaskStatus,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -115,6 +115,36 @@ impl Work {
         Ok(res)
     }
 
+    /// Return the numeric indicator of the total effort allocated to a person.
+    pub fn sum_person_effort(person_id: &Uuid) -> Result<i32> {
+        let mut conn = connection()?;
+
+        let res = works::table
+            .filter(works::person_id.eq(person_id))
+            .select(works::effort)
+            .load::<i32>(&mut conn)?;
+
+        let total_effort = res.into_iter()
+            .sum();
+
+        Ok(total_effort)
+    }
+
+    /// Return the numeric indicator of the total effort allocated to a task.
+    pub fn sum_task_effort(task_id: &Uuid) -> Result<i32> {
+        let mut conn = connection()?;
+
+        let res = works::table
+            .filter(works::task_id.eq(task_id))
+            .select(works::effort)
+            .load::<i32>(&mut conn)?;
+
+        let total_effort = res.into_iter()
+            .sum();
+
+        Ok(total_effort)
+    }
+
     pub fn get_by_task_id(task_id: &Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
@@ -145,6 +175,7 @@ pub struct NewWork {
     pub work_description: String,
     pub domain: SkillDomain,
     pub capability_level: CapabilityLevel,
+    pub effort: i32,
     pub work_status: TaskStatus,
 }
 
@@ -156,6 +187,7 @@ impl NewWork {
         work_description: String,
         domain: SkillDomain,
         capability_level: CapabilityLevel,
+        effort: i32,
         work_status: TaskStatus,
     ) -> Self {
         NewWork {
@@ -164,6 +196,7 @@ impl NewWork {
             work_description,
             domain,
             capability_level,
+            effort,
             work_status,
         }
     }
