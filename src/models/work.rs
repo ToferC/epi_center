@@ -10,36 +10,41 @@ use async_graphql::*;
 use rand::{Rng, thread_rng};
 
 use crate::schema::*;
+use crate::models::{TaskStatus, SkillDomain, Person, Task, CapabilityLevel};
 use crate::database::connection;
 
+/// Data structure for a relationship between a person and work
+/// This is a many to many relationship as multiple people may be 
+/// assigned to a specific piece of work and a person may be assigned
+/// to multiple pieces of work
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
+#[graphql(complex)]
 #[table_name = "works"]
 pub struct Work {
     pub id: Uuid,
-    pub created_by_person_id: Uuid, // Person
-    pub assigned_to_person_id: Option<Uuid>, // Person
-    pub team_id: Uuid, // Team
-    pub title_en: String,
-    pub outcome_en: String,
-    pub outcome_fr: String,
-    pub start_datestamp: NaiveDateTime,
-    pub target_completion_date: NaiveDateTime,
-    pub work_status: WorkStatus,
-    pub effort: f64,
-    pub completed_date: Option<NaiveDateTime>,
+    #[graphql(skip)]
+    pub task_id: Uuid,
+    #[graphql(skip)]
+    pub person_id: Uuid,
+    pub work_description: String,
+    pub domain: SkillDomain,
+    pub capability_level: CapabilityLevel,
+    pub work_status: TaskStatus,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
-#[ExistingTypePath = "crate::schema::sql_types::WorkStatus"]
-pub enum WorkStatus {
-    Planning,
-    InProgress,
-    Completed,
-    Blocked,
-    Cancelled,
+#[ComplexObject]
+impl Work {
+    pub async fn task(&self) -> Result<Task> {
+        Task::get_by_id(&self.task_id)
+    }
+
+    pub async fn person(&self) -> Result<Person> {
+        Person::get_by_id(&self.person_id)
+    }
 }
+
 
 // Non Graphql
 impl Work {
@@ -47,8 +52,8 @@ impl Work {
         let mut conn = connection()?;
 
         let res = diesel::insert_into(works::table)
-        .values(work)
-        .get_result(&mut conn)?;
+            .values(work)
+            .get_result(&mut conn)?;
         
         Ok(res)
     }
@@ -57,13 +62,11 @@ impl Work {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::created_by_person_id.eq(&work.created_by_person_id)
-                .and(works::title_en.eq(&work.title_en))
-                .and(works::assigned_to_person_id.eq(&work.assigned_to_person_id))
-                .and(works::target_completion_date.eq(&work.target_completion_date))
-            )
-            .distinct()
-            .first(&mut conn);
+        .filter(works::task_id.eq(&work.task_id)
+            .and(works::person_id.eq(&work.person_id))
+            .and(works::work_description.eq(&work.work_description)))
+        .distinct()
+        .first(&mut conn);
         
         let work = match res {
             Ok(p) => p,
@@ -79,50 +82,44 @@ impl Work {
 
     pub fn get_all() -> Result<Vec<Self>> {
         let mut conn = connection()?;
-        let res = works::table.load::<Work>(&mut conn)?;
-        Ok(res)
+        let persons = works::table.load::<Work>(&mut conn)?;
+        Ok(persons)
     }
 
-    pub fn get_count(count: i64) -> Result<Vec<Self>> {
+    pub fn get_worker_ids(task_id: &Uuid) -> Result<Vec<Uuid>> {
+
         let mut conn = connection()?;
-        let res = works::table
-            .limit(count)
-            .load::<Work>(&mut conn)?;
-        
+        let res: Vec<Uuid> = works::table
+            .filter(works::task_id.eq(task_id))
+            .select((works::person_id))
+            .load::<Uuid>(&mut conn)?;
+
         Ok(res)
     }
 
-    pub fn get_by_id(id: Uuid) -> Result<Self> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
-        let res = works::table.filter(works::id.eq(id)).first(&mut conn)?;
-        Ok(res)
+        let person = works::table
+            .filter(works::id.eq(id))
+            .first(&mut conn)?;
+        Ok(person)
     }
 
-    pub fn get_by_team_id(id: Uuid) -> Result<Vec<Work>> {
-        let mut conn = connection()?;
-
-        let res = works::table
-            .filter(works::team_id.eq(id))
-            .load::<Work>(&mut conn)?;
-
-        Ok(res)
-    }
-
-    pub fn get_by_assigning_person_id(id: Uuid) -> Result<Vec<Work>> {
+    pub fn get_by_person_id(person_id: &Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::created_by_person_id.eq(id))
+            .filter(works::person_id.eq(person_id))
             .load::<Work>(&mut conn)?;
 
         Ok(res)
     }
 
-    pub fn get_by_assigned_person_id(id: Uuid) -> Result<Vec<Work>> {
+    pub fn get_by_task_id(task_id: &Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = works::table
-            .filter(works::assigned_to_person_id.eq(id))
+            .filter(works::task_id.eq(task_id))
             .load::<Work>(&mut conn)?;
 
         Ok(res)
@@ -140,47 +137,34 @@ impl Work {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, SimpleObject, InputObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 #[table_name = "works"]
 pub struct NewWork {
-    pub created_by_person_id: Uuid, // Person
-    pub assigned_to_person_id: Option<Uuid>, // Person
-    pub team_id: Uuid, // Team
-    pub title_en: String,
-    pub outcome_en: String,
-    pub outcome_fr: String,
-    pub start_datestamp: NaiveDateTime,
-    pub target_completion_date: NaiveDateTime,
-    pub work_status: WorkStatus,
-    pub effort: f64,
+    pub task_id: Uuid,
+    pub person_id: Uuid,
+    pub work_description: String,
+    pub domain: SkillDomain,
+    pub capability_level: CapabilityLevel,
+    pub work_status: TaskStatus,
 }
 
 impl NewWork {
 
     pub fn new(
-        created_by_person_id: Uuid, // Person
-        assigned_to_person_id: Option<Uuid>, // Person
-        team_id: Uuid, // Work
-        title_en: String,
-        outcome_en: String,
-        outcome_fr: String,
-        start_datestamp: NaiveDateTime,
-        target_completion_date: NaiveDateTime,
-        work_status: WorkStatus,
-        effort: f64,
-
+        task_id: Uuid,
+        person_id: Uuid,
+        work_description: String,
+        domain: SkillDomain,
+        capability_level: CapabilityLevel,
+        work_status: TaskStatus,
     ) -> Self {
         NewWork {
-            created_by_person_id,
-            assigned_to_person_id,
-            team_id,
-            title_en,
-            outcome_en,
-            outcome_fr,
-            start_datestamp,
-            target_completion_date,
+            task_id,
+            person_id,
+            work_description,
+            domain,
+            capability_level,
             work_status,
-            effort,
         }
     }
 }

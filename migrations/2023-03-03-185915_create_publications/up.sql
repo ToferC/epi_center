@@ -53,3 +53,24 @@ CREATE TABLE IF NOT EXISTS publication_contributors (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS works (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    task_id UUID NOT NULL,
+    FOREIGN KEY(task_id)
+        REFERENCES tasks(id) ON DELETE RESTRICT,
+
+    person_id UUID NOT NULL,
+    FOREIGN KEY(person_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    work_description VARCHAR(256) NOT NULL,
+    domain skill_domain NOT NULL,
+    capability_level capability_level NOT NULL,
+
+    work_status task_status NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

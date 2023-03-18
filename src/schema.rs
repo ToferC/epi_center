@@ -26,8 +26,8 @@ pub mod sql_types {
     pub struct SkillDomain;
 
     #[derive(diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "work_status"))]
-    pub struct WorkStatus;
+    #[diesel(postgres_type(name = "task_status"))]
+    pub struct TaskStatus;
 }
 
 diesel::table! {
@@ -212,6 +212,29 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::SkillDomain;
+    use super::sql_types::TaskStatus;
+
+    tasks (id) {
+        id -> Uuid,
+        created_by_person_id -> Uuid,
+        title -> Varchar,
+        domain -> SkillDomain,
+        intended_outcome -> Varchar,
+        final_outcome -> Nullable<Varchar>,
+        approval_tier -> Int4,
+        start_datestamp -> Timestamp,
+        target_completion_date -> Timestamp,
+        task_status -> TaskStatus,
+        effort -> Float8,
+        completed_date -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     team_ownerships (id) {
         id -> Uuid,
         person_id -> Uuid,
@@ -260,21 +283,18 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::WorkStatus;
+    use super::sql_types::SkillDomain;
+    use super::sql_types::CapabilityLevel;
+    use super::sql_types::TaskStatus;
 
     works (id) {
         id -> Uuid,
-        created_by_person_id -> Uuid,
-        assigned_to_person_id -> Nullable<Uuid>,
-        team_id -> Uuid,
-        title_en -> Varchar,
-        outcome_en -> Varchar,
-        outcome_fr -> Varchar,
-        start_datestamp -> Timestamp,
-        target_completion_date -> Timestamp,
-        work_status -> WorkStatus,
-        effort -> Float8,
-        completed_date -> Nullable<Timestamp>,
+        task_id -> Uuid,
+        person_id -> Uuid,
+        work_description -> Varchar,
+        domain -> SkillDomain,
+        capability_level -> CapabilityLevel,
+        work_status -> TaskStatus,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -296,12 +316,14 @@ diesel::joinable!(publications -> organizations (publishing_organization_id));
 diesel::joinable!(publications -> persons (lead_author_id));
 diesel::joinable!(roles -> persons (person_id));
 diesel::joinable!(roles -> teams (team_id));
+diesel::joinable!(tasks -> persons (created_by_person_id));
 diesel::joinable!(team_ownerships -> persons (person_id));
 diesel::joinable!(team_ownerships -> teams (team_id));
 diesel::joinable!(teams -> org_tiers (org_tier_id));
 diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
-diesel::joinable!(works -> teams (team_id));
+diesel::joinable!(works -> persons (person_id));
+diesel::joinable!(works -> tasks (task_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     affiliations,
@@ -315,6 +337,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     publications,
     roles,
     skills,
+    tasks,
     team_ownerships,
     teams,
     users,

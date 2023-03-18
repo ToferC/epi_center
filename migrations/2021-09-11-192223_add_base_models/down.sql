@@ -4,8 +4,8 @@ DROP TABLE IF EXISTS language_datas;
 DROP TYPE IF EXISTS language_level;
 DROP TYPE IF EXISTS language_name;
 
-DROP TABLE IF EXISTS works;
-DROP TYPE IF EXISTS work_status;
+DROP TABLE IF EXISTS tasks;
+DROP TYPE IF EXISTS task_status;
 
 DROP TABLE IF EXISTS affiliations;
 DROP TABLE IF EXISTS capabilities;
