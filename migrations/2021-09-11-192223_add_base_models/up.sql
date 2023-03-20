@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS affiliations (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TYPE task_status AS ENUM (
+CREATE TYPE work_status AS ENUM (
     'backlog',
     'planning',
     'in_progress',
@@ -264,9 +264,9 @@ CREATE TYPE task_status AS ENUM (
 CREATE TABLE IF NOT EXISTS tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    created_by_person_id UUID NOT NULL,
-    FOREIGN KEY(created_by_person_id)
-        REFERENCES persons(id) ON DELETE RESTRICT,
+    created_by_role_id UUID NOT NULL,
+    FOREIGN KEY(created_by_role_id)
+        REFERENCES roles(id) ON DELETE RESTRICT,
 
     title VARCHAR(144) NOT NULL,
     domain skill_domain NOT NULL,
@@ -278,8 +278,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     start_datestamp TIMESTAMP NOT NULL DEFAULT NOW(),
     target_completion_date TIMESTAMP NOT NULL,
 
-    task_status task_status NOT NULL DEFAULT 'planning',
-    effort INT NOT NULL,
+    task_status work_status NOT NULL DEFAULT 'planning',
 
     completed_date TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),

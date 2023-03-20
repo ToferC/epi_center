@@ -61,16 +61,16 @@ CREATE TABLE IF NOT EXISTS works (
     FOREIGN KEY(task_id)
         REFERENCES tasks(id) ON DELETE RESTRICT,
 
-    person_id UUID NOT NULL,
-    FOREIGN KEY(person_id)
-        REFERENCES persons(id) ON DELETE RESTRICT,
+    role_id UUID NOT NULL,
+    FOREIGN KEY(role_id)
+        REFERENCES roles(id) ON DELETE RESTRICT,
 
     work_description VARCHAR(256) NOT NULL,
     domain skill_domain NOT NULL,
     capability_level capability_level NOT NULL,
     effort INT NOT NULL,
 
-    work_status task_status NOT NULL,
+    work_status work_status NOT NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()

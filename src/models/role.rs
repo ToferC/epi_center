@@ -14,7 +14,7 @@ use crate::config_variables::DATE_FORMAT;
 use crate::schema::*;
 use crate::database::connection;
 
-use super::{Person, Team};
+use super::{Person, Team, Work};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = roles)]
@@ -58,8 +58,15 @@ impl Role {
         Ok(self.title_fr.to_owned())
     }
 
-    pub async fn effort(&self) -> Result<f64> {
-        Ok(self.effort)
+    /// Returns the sum effort of all active work underway
+    /// Maximum work should be around 10
+    pub async fn effort(&self) -> Result<i32> {
+        Work::sum_role_effort(&self.id)
+    }
+
+    /// Returns a vector of the work undertaken by this role
+    pub async fn work(&self) -> Result<Vec<Work>> {
+        Work::get_by_role_id(&self.id)
     }
 
     pub async fn active(&self) -> Result<String> {
@@ -146,7 +153,7 @@ impl Role {
         Ok(roles)
     }
 
-    pub fn get_by_id(id: Uuid) -> Result<Self> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
         let role = roles::table.filter(roles::id.eq(id)).first(&mut conn)?;
         Ok(role)

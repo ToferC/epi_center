@@ -26,8 +26,8 @@ pub mod sql_types {
     pub struct SkillDomain;
 
     #[derive(diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "task_status"))]
-    pub struct TaskStatus;
+    #[diesel(postgres_type(name = "work_status"))]
+    pub struct WorkStatus;
 }
 
 diesel::table! {
@@ -214,11 +214,11 @@ diesel::table! {
 diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::SkillDomain;
-    use super::sql_types::TaskStatus;
+    use super::sql_types::WorkStatus;
 
     tasks (id) {
         id -> Uuid,
-        created_by_person_id -> Uuid,
+        created_by_role_id -> Uuid,
         title -> Varchar,
         domain -> SkillDomain,
         intended_outcome -> Varchar,
@@ -226,8 +226,7 @@ diesel::table! {
         approval_tier -> Int4,
         start_datestamp -> Timestamp,
         target_completion_date -> Timestamp,
-        task_status -> TaskStatus,
-        effort -> Int4,
+        task_status -> WorkStatus,
         completed_date -> Nullable<Timestamp>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -285,17 +284,17 @@ diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::SkillDomain;
     use super::sql_types::CapabilityLevel;
-    use super::sql_types::TaskStatus;
+    use super::sql_types::WorkStatus;
 
     works (id) {
         id -> Uuid,
         task_id -> Uuid,
-        person_id -> Uuid,
+        role_id -> Uuid,
         work_description -> Varchar,
         domain -> SkillDomain,
         capability_level -> CapabilityLevel,
         effort -> Int4,
-        work_status -> TaskStatus,
+        work_status -> WorkStatus,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -317,13 +316,13 @@ diesel::joinable!(publications -> organizations (publishing_organization_id));
 diesel::joinable!(publications -> persons (lead_author_id));
 diesel::joinable!(roles -> persons (person_id));
 diesel::joinable!(roles -> teams (team_id));
-diesel::joinable!(tasks -> persons (created_by_person_id));
+diesel::joinable!(tasks -> roles (created_by_role_id));
 diesel::joinable!(team_ownerships -> persons (person_id));
 diesel::joinable!(team_ownerships -> teams (team_id));
 diesel::joinable!(teams -> org_tiers (org_tier_id));
 diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
-diesel::joinable!(works -> persons (person_id));
+diesel::joinable!(works -> roles (role_id));
 diesel::joinable!(works -> tasks (task_id));
 
 diesel::allow_tables_to_appear_in_same_query!(

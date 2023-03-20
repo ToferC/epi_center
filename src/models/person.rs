@@ -180,16 +180,14 @@ impl Person {
         Organization::get_by_id(&self.organization_id)
     }
 
+    /*
     #[graphql(
         guard = "RoleGuard::new(UserRole::Analyst)",
         visible = "is_analyst",
     )]
+     */
     pub async fn roles(&self) -> Result<Vec<Role>> {
         Role::get_by_person_id(self.id)
-    }
-
-    pub async fn work(&self) -> Result<Vec<Work>> {
-        Work::get_by_person_id(&self.id)
     }
 
     pub async fn affiliations(&self) -> Result<Vec<Affiliation>> {

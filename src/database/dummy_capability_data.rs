@@ -7,7 +7,7 @@ use crate::models::{Affiliation, NewAffiliation, Organization, NewPerson, NewOrg
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData};
 
-pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
+pub fn pre_populate_skills() -> Result<(), Error> {
 
     let public_health_skills: Vec<&str> = "
         Epidemiology; One Health; Community Health; Mental Health; Health Inequalities; Multi-sectoral Partnerships; Drug Use; Vaccines; 
@@ -192,7 +192,11 @@ pub fn pre_populate_skills() -> Result<Vec<Skill>, Error> {
         let _res = Skill::create(&ns)?;
     }
 
-    Skill::get_all()
+    // create tasks for each skill
+
+    let skills = Skill::get_all();
+
+    Ok(())
 
 }
 
@@ -297,8 +301,9 @@ pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, scienc
             let nc = NewCapability::new(person_id, skill.id, org_id, capability_level);
             let res = Capability::create(&nc)?;
             capability_level = capability_level.step_down();
-            println!("Created {}: {}", res.name_en, res.self_identified_level)
         }
+
+        // create work and tasks
     }
 
     Ok(())

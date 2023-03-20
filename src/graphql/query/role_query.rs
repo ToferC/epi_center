@@ -34,6 +34,6 @@ impl RoleQuery {
         id: Uuid,
     ) -> Result<Role> {
 
-        Role::get_by_id(id)
+        Role::get_by_id(&id)
     }
 }

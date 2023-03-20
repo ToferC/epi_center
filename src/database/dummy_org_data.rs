@@ -5,9 +5,9 @@ use rand::{thread_rng, seq::SliceRandom};
 
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership, HrGroup};
+    TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
 
-use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors};
+use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors, generate_tasks};
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
 pub fn pre_populate_db_schema() {
@@ -333,6 +333,12 @@ pub fn pre_populate_db_schema() {
         Sr. Data Analyst; Data Analyst; Jr. Data Analyst; Project Officer; Scientist; Researcher; 
         ".split("; ").collect();
 
+    let work_verbs: Vec<&str> = "
+        design; write; revise; audit; draft; review; approve; present; 
+        research; analyze data on; visualize data on; develop; plan; 
+        create mvp on; test; prototype; peer review on; 
+        ".split("; ").collect();
+
     // Set up OrgTierOwnership
 
     for (ind, ot) in org_tiers.clone().iter().enumerate() {
@@ -391,7 +397,36 @@ pub fn pre_populate_db_schema() {
             None
         );
 
-        let _res = Role::create(&nr).unwrap();
+        let role_res = Role::create(&nr).unwrap();
+
+        // Set up tasks from this manager
+        // Could base this on the managers skills, but too much detail for now
+        let sd: SkillDomain = rand::random();
+
+        let subjects = Skill::get_by_domain(sd)
+                .expect("Unable to get skills");
+
+        let mut tasks = Vec::new();
+
+        // Generate tasks for team based on skills under chosen domain
+        for i in 0..=8 {
+
+            let subject = subjects
+                .choose(&mut rng)
+                .unwrap()
+                .clone();
+
+            let task = generate_tasks(
+                &mut rng,
+                &sd,
+                &subject.name_en, 
+                &role_res.id,
+                ot.tier_level
+            ).unwrap();
+
+            tasks.push(task);
+            
+        }
 
         // Set team ownership
 
@@ -426,13 +461,44 @@ pub fn pre_populate_db_schema() {
                 None
             );
 
-            let _res = Role::create(&nr).unwrap();
+            let role_res = Role::create(&nr).unwrap();
+
+            // Assign work to the roles based on the team's tasks
+
+            for i in 0..rng.gen_range(2..=4) {
+
+                let task = tasks.choose(&mut rng).unwrap().clone();
+
+                let capability_level: CapabilityLevel = rand::random();
+                
+                let effort = rng.gen_range(1..=3);
+
+                let task_status: WorkStatus = rand::random();
+
+                let nw = NewWork::new(
+                    task.id,
+                    role_res.id,
+                    format!("{} {}",
+                        work_verbs.choose(&mut rng).unwrap().trim(),
+                        task.title.trim()),
+                    task.domain,
+                    capability_level,
+                    effort,
+                    task_status,
+                );
+
+                let _work = Work::create(&nw)
+                    .expect("Unable to create work");
+            }
+
+
         }    
     }
 
     // Create Publications and Assign Contributors
     let _res = generate_dummy_publications_and_contributors(&science_org_ids)
         .expect("Unable to create publications and contributors");
+
 }
 
 
