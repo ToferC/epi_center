@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS works (
         REFERENCES roles(id) ON DELETE RESTRICT,
 
     work_description VARCHAR(256) NOT NULL,
+    url VARCHAR(256),
     domain skill_domain NOT NULL,
     capability_level capability_level NOT NULL,
     effort INT NOT NULL,

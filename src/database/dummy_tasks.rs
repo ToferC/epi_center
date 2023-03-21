@@ -36,6 +36,7 @@ pub fn generate_tasks(
         *domain,
         outcome.choose(rng).unwrap().to_string(),
         tier_level,
+        "https://www.phac-aspc.ca/some_url".to_string(),
         chrono::Utc::now().naive_utc(),
         chrono::Utc::now().naive_utc(),
         WorkStatus::InProgress,

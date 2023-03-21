@@ -274,6 +274,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     final_outcome VARCHAR(1256),
 
     approval_tier INT NOT NULL DEFAULT 4,
+    url VARCHAR(256) NOT NULL,
 
     start_datestamp TIMESTAMP NOT NULL DEFAULT NOW(),
     target_completion_date TIMESTAMP NOT NULL,

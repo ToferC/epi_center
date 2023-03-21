@@ -13,6 +13,8 @@ use super::{create_fake_capabilities_for_person, generate_dummy_publications_and
 pub fn pre_populate_db_schema() {
 
     // Set up Organization
+    println!("Creating Organization");
+
     let mut science_org_ids: Vec<uuid::Uuid> = Vec::new();
 
     let o = NewOrganization::new(
@@ -272,6 +274,8 @@ pub fn pre_populate_db_schema() {
     ]);
 
     // Set up Persons
+    println!("Set up people and capabilities");
+
     let mut rng = rand::thread_rng();
 
     let mut people: Vec<Person> = Vec::new();
@@ -320,6 +324,8 @@ pub fn pre_populate_db_schema() {
     } 
 
     // Set up Teams and roles data
+    println!("Set up teams and roles");
+
 
     let teams = vec![("PMO", 5), ("VPO", 5), ("DGO DMIA", 5), ("DGO SPDI", 5), 
             ("Director Data Science", 2), ("Director Data Policy", 2), ("Director Data Partnerships", 2), ("Director Strategic Policy", 2),
@@ -481,6 +487,7 @@ pub fn pre_populate_db_schema() {
                     format!("{} {}",
                         work_verbs.choose(&mut rng).unwrap().trim(),
                         task.title.trim()),
+                    "https://www.phac-aspc.ca/some_url".to_string(),
                     task.domain,
                     capability_level,
                     effort,
@@ -496,6 +503,8 @@ pub fn pre_populate_db_schema() {
     }
 
     // Create Publications and Assign Contributors
+    println!("Pre-populating Publications and contributors");
+
     let _res = generate_dummy_publications_and_contributors(&science_org_ids)
         .expect("Unable to create publications and contributors");
 
