@@ -1,14 +1,9 @@
-use std::{io::stdin};
-use chrono::prelude::*;
-use chrono::Duration;
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use lazy_static::lazy_static;
 use r2d2::{self};
-use rand::Rng;
 use std::env;
-use uuid::Uuid;
-use rand::{thread_rng, seq::SliceRandom};
+
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 use crate::database::pre_populate_db_schema;
@@ -17,10 +12,6 @@ use crate::errors::error_handler::CustomError;
 
 pub type PostgresPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
-
-use crate::models::{Person, Organization, NewPerson, NewOrganization, 
-    Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership};
 
 use crate::models::{User, UserData, InsertableUser};
 

@@ -1,11 +1,10 @@
-use diesel::prelude::*;
 use async_graphql::Error;
 use rand::seq::SliceRandom;
 use uuid::Uuid;
 use chrono::{Duration, Utc};
 use rand::Rng;
 
-use crate::models::{Capability, CapabilityLevel, Person, Publication, PublicationContributor, Organization, SkillDomain, 
+use crate::models::{Capability, CapabilityLevel, Person, Publication, PublicationContributor, SkillDomain, 
     NewPublication, PublicationStatus, NewPublicationContributor};
 
 pub fn generate_dummy_publications_and_contributors(science_org_ids: &Vec<Uuid>) -> Result<(), Error> {

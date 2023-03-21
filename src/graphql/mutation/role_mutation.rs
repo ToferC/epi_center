@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use async_graphql::*;
 use chrono::NaiveDateTime;
 use serde::{Serialize, Deserialize};
@@ -7,8 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{Role, NewRole};
 use crate::common_utils::{UserRole,
-    is_operator,
-    is_admin, RoleGuard};
+    is_operator, RoleGuard};
 use crate::schema::roles;
 // use rdkafka::producer::FutureProducer;
 // use crate::kafka::send_message;

@@ -1,7 +1,6 @@
 
 use rand::Rng;
-use rand::distributions::Standard;
-use rand::{thread_rng, seq::SliceRandom};
+use rand::{seq::SliceRandom};
 
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
@@ -417,7 +416,7 @@ pub fn pre_populate_db_schema() {
         let mut tasks = Vec::new();
 
         // Generate tasks for team based on skills under chosen domain
-        for i in 0..=8 {
+        for _ in 0..=8 {
 
             let subject = subjects
                 .choose(&mut rng)
@@ -473,7 +472,7 @@ pub fn pre_populate_db_schema() {
 
             // Assign work to the roles based on the team's tasks
 
-            for i in 0..rng.gen_range(2..=4) {
+            for _ in 0..rng.gen_range(2..=4) {
 
                 let task = tasks.choose(&mut rng).unwrap().clone();
 

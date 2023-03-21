@@ -3,9 +3,7 @@ use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 use async_graphql::Error;
 
-use crate::models::{Affiliation, NewAffiliation, Organization, NewPerson, NewOrganization, 
-    Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData};
+use crate::models::{Affiliation, NewAffiliation, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData};
 
 pub fn pre_populate_skills() -> Result<(), Error> {
 
@@ -194,7 +192,7 @@ pub fn pre_populate_skills() -> Result<(), Error> {
 
     // create tasks for each skill
 
-    let skills = Skill::get_all();
+    let _skills = Skill::get_all();
 
     Ok(())
 
@@ -299,7 +297,7 @@ pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, scienc
 
         for skill in selected_skills {
             let nc = NewCapability::new(person_id, skill.id, org_id, capability_level);
-            let res = Capability::create(&nc)?;
+            let _res = Capability::create(&nc)?;
             capability_level = capability_level.step_down();
         }
 
