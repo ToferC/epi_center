@@ -1,13 +1,15 @@
+use std::cmp::Ordering;
+
 use async_graphql::Guard;
 use async_graphql::*;
 
-#[derive(Eq, PartialEq, Display, EnumString, Copy, Clone)]
+#[derive(Eq, PartialEq, Display, EnumString, Copy, Clone, PartialOrd, Ord)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserRole {
-    Admin,
-    Operator,
-    Analyst,
     User,
+    Analyst,
+    Operator,
+    Admin,
 }
 
 pub struct RoleGuard {
@@ -39,15 +41,31 @@ impl Guard for RoleGuard {
 /// Field will be visible to users with UserRole::Admin and
 /// UserRole::Analyst
 pub fn is_analyst(ctx: &Context<'_>) -> bool {
-    ctx.data_opt::<UserRole>() == Some(&UserRole::Admin) ||
-    ctx.data_opt::<UserRole>() == Some(&UserRole::Analyst)
+    if let Some(role) = ctx.data_opt::<UserRole>() {
+        let result = match role.cmp(&UserRole::Analyst) {
+            Ordering::Less => false,
+            Ordering::Equal => true,
+            Ordering::Greater => true,
+        };
+        return result
+    } else {
+        return false
+    };
 }
 
 /// Field will be visible to users with UserRole::Admin and
 /// UserRole::Analyst
 pub fn is_operator(ctx: &Context<'_>) -> bool {
-    ctx.data_opt::<UserRole>() == Some(&UserRole::Admin) ||
-    ctx.data_opt::<UserRole>() == Some(&UserRole::Operator)
+    if let Some(role) = ctx.data_opt::<UserRole>() {
+        let result = match role.cmp(&UserRole::Operator) {
+            Ordering::Less => false,
+            Ordering::Equal => true,
+            Ordering::Greater => true,
+        };
+        return result
+    } else {
+        return false
+    };
 }
 
 /// Field will only be visible to users with UserRole::Admin
