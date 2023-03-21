@@ -23,6 +23,7 @@ pub fn pre_populate_db_schema() {
         "PHAC".to_string(),
         "ASPC".to_string(),
         "Government".to_string(),
+        "some_url".to_string(),
     );
 
     let org = Organization::create(&o).expect("Unable to create new organization");
@@ -43,6 +44,7 @@ pub fn pre_populate_db_schema() {
             place.1.to_owned(),
             place.1.to_owned(),
             "Academic".to_string(),
+            "some_url".to_string(),
         );
 
         let science_org = Organization::create(&new_science_org)
@@ -487,7 +489,7 @@ pub fn pre_populate_db_schema() {
                     format!("{} {}",
                         work_verbs.choose(&mut rng).unwrap().trim(),
                         task.title.trim()),
-                    "https://www.phac-aspc.ca/some_url".to_string(),
+                    Some("https://www.phac-aspc.ca/some_url".to_string()),
                     task.domain,
                     capability_level,
                     effort,

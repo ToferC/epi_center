@@ -19,8 +19,8 @@ use crate::models::{CapabilityCount, CapabilityLevel, Affiliation, SkillDomain, 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, SimpleObject)]
 #[table_name = "organizations"]
 #[graphql(complex)]
-/// Should get this from an API or have standard data
-/// Now pre-loaded as prt of context
+/// Represents an organization as a core structure within which are
+/// Person(s), OrgTiers, Publications
 pub struct Organization {
     pub id: Uuid,
     pub name_en: String,
@@ -28,6 +28,7 @@ pub struct Organization {
     pub acroynm_en: String,
     pub acronym_fr: String,
     pub org_type: String,
+    pub url: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
@@ -140,6 +141,7 @@ pub struct NewOrganization {
     pub acronym_en: String,
     pub acronym_fr: String,
     pub org_type: String,
+    pub url: String,
 }
 
 impl NewOrganization {
@@ -149,6 +151,7 @@ impl NewOrganization {
         acronym_en: String,
         acronym_fr: String,
         org_type: String,
+        url: String,
 
     ) -> Self {
         NewOrganization {
@@ -157,6 +160,7 @@ impl NewOrganization {
             acronym_en,
             acronym_fr,
             org_type,
+            url,
         }
     }
 }

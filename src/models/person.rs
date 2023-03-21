@@ -23,8 +23,10 @@ use crate::models::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability
 #[graphql(complex)]
 #[diesel(table_name = persons)]
 #[diesel(belongs_to(Organization))]
+/// Represents a person working in an organization
 /// Referenced by Team
 /// Referenced by ReportingRelationship
+/// Will break out address and contact info soon
 pub struct Person {
     pub id: Uuid,
     pub user_id: Uuid,

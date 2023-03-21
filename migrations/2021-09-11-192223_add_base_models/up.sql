@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS organizations (
     acronym_en VARCHAR(16) UNIQUE NOT NULL,
     acronym_fr VARCHAR(16) UNIQUE NOT NULL,
     org_type VARCHAR(32) NOT NULL,
+    url VARCHAR(256) NOT NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),

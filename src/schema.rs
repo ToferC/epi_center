@@ -114,6 +114,7 @@ diesel::table! {
         acronym_en -> Varchar,
         acronym_fr -> Varchar,
         org_type -> Varchar,
+        url -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,

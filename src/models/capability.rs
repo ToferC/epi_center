@@ -22,6 +22,7 @@ use crate::models::{Person, Skill, Organization, SkillDomain};
 #[diesel(belongs_to(Organization))]
 #[diesel(table_name = capabilities)]
 #[graphql(complex)]
+/// A representation of a persons ability to use a skill at a specific level
 pub struct Capability {
     pub id: Uuid,
 

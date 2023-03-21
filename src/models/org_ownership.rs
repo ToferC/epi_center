@@ -10,11 +10,11 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use super::OrgTier;
-
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = org_tier_ownerships)]
 #[diesel(belongs_to(Person))]
+/// Represents a relationship between a person (owner) and an organizational tier
+/// Will be used to inform approvals and organizational authority
 pub struct OrgOwnership {
     pub id: Uuid,
     pub owner_id: Uuid,

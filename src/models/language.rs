@@ -21,8 +21,7 @@ use crate::schema::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, AsChangeset, SimpleObject, PartialEq)]
 #[table_name = "language_datas"]
-/// Should get this from an API or have standard data
-/// Now pre-loaded as prt of context
+/// A representation of a persons' language proficiency
 pub struct LanguageData {
     pub id: Uuid,
     pub person_id: Uuid,
@@ -37,6 +36,7 @@ pub struct LanguageData {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
 #[ExistingTypePath = "crate::schema::sql_types::LanguageName"]
+/// A selection of languages (to be expanded)
 pub enum LanguageName {
     English,
     French,
@@ -52,6 +52,9 @@ pub enum LanguageName {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
 #[ExistingTypePath = "crate::schema::sql_types::LanguageLevel"]
+/// Government of Canada language proficiency ratings
+/// A == basic, B == beginner, C == intermediate, E = advanced or exempt
+/// X == no proficiency
 pub enum LanguageLevel {
     A,
     B,

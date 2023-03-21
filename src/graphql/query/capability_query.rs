@@ -75,6 +75,7 @@ impl CapabilityQuery {
 
     // Skills
 
+    /// Returns vector of all skills
     pub async fn skills(
         &self, 
         _context: &Context<'_>,
@@ -83,6 +84,7 @@ impl CapabilityQuery {
         Skill::get_all()
     }
 
+    /// Returns a specific skill by ID
     pub async fn skill_by_id(
         &self, 
         _context: &Context<'_>,
@@ -92,6 +94,7 @@ impl CapabilityQuery {
         Skill::get_by_id(&id)
     }
 
+    /// Returns a vector of skills matching some part of the name provided
     pub async fn skill_by_name(
         &self, 
         _context: &Context<'_>,

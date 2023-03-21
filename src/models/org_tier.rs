@@ -16,6 +16,9 @@ use super::{Organization, Person, OrgOwnership};
 #[graphql(complex)]
 #[diesel(table_name = org_tiers)]
 #[diesel(belongs_to(Organization))]
+/// Represents an organizational level starting at the top (CEO or President's office) as 0
+/// and then increasing in tier number as you go deeper into the organization.
+/// Used to model an organizational hierarchy independent of people
 pub struct OrgTier {
     pub id: Uuid,
 
