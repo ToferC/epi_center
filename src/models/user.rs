@@ -2,7 +2,7 @@
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use diesel::{self, ExpressionMethods, Insertable, PgConnection, QueryDsl, Queryable, RunQueryDsl};
+use diesel::{self, ExpressionMethods, Insertable, QueryDsl, Queryable, RunQueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
 
@@ -44,6 +44,13 @@ pub struct User {
         guard = "RoleGuard::new(UserRole::Admin)",
         visible = "is_admin",
     )]
+
+    pub updated_at: NaiveDateTime,
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Admin)",
+        visible = "is_admin",
+    )]
+
     /// Access Level: Admin
     pub access_key: String,
 
@@ -84,11 +91,14 @@ impl User {
         Ok(user)
     }
 
-    pub fn update(&self) -> Result<Self> {
+    pub fn update(&mut self) -> Result<Self> {
         let mut conn = connection()?;
+
+        self.updated_at = chrono::Utc::now().naive_utc();
+
         let user = diesel::update(users::table)
             .filter(users::id.eq(&self.id))
-            .set(self)
+            .set(self.clone())
             .get_result(&mut conn)?;
 
         Ok(user)
@@ -104,6 +114,7 @@ pub struct InsertableUser {
     pub name: String,
     pub access_level: String, // AccessLevelEnum
     pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
     pub access_key: String,
     pub approved_by_user_uid: Option<Uuid>,
 }
@@ -148,6 +159,9 @@ impl From<SlimUser> for LoggedUser {
 
 impl From<UserData> for InsertableUser {
     fn from(user_data: UserData) -> Self {
+
+        let updated_at = chrono::Utc::now().naive_utc();
+
         let UserData {
             name,
             email,
@@ -163,6 +177,7 @@ impl From<UserData> for InsertableUser {
             email,
             hash,
             created_at: chrono::Utc::now().naive_utc(),
+            updated_at,
             name,
             role,
             access_key: "".to_owned(),

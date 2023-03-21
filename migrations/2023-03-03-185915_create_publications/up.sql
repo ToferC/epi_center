@@ -76,3 +76,20 @@ CREATE TABLE IF NOT EXISTS works (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS validations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    validator_id UUID NOT NULL,
+    FOREIGN KEY(validator_id)
+        REFERENCES persons(id) ON DELETE RESTRICT,
+
+    capability_id UUID NOT NULL,
+    FOREIGN KEY(capability_id)
+        REFERENCES capabilities(id) ON DELETE RESTRICT,
+
+    validated_level capability_level NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

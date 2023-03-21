@@ -5,9 +5,7 @@ use chrono::NaiveDateTime;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::models::{InsertableUser, LoginQuery,
-    User, UserData, create_token, decode_token,
-    verify_password, UserUpdate, hash_password, Person, NewPerson};
+use crate::models::{Person, NewPerson};
 use crate::common_utils::{UserRole,
     is_operator,
     is_admin, RoleGuard};
@@ -31,10 +29,10 @@ impl PersonMutation {
     pub async fn create_person(
         &self,
         _context: &Context<'_>,
-        person_data: NewPerson,
+        data: NewPerson,
     ) -> Result<Person> {
         
-        let person = Person::create(&person_data)?;
+        let person = Person::create(&data)?;
 
         Ok(person)
     }
@@ -47,67 +45,63 @@ impl PersonMutation {
     pub async fn update_person(
         &self,
         _context: &Context<'_>,
-        person_data: PersonData,
+        data: PersonData,
     ) -> Result<Person> {
         
-        let mut person = Person::get_by_id(&person_data.id)?;
+        let mut person = Person::get_by_id(&data.id)?;
 
-        if let Some(id) = person_data.user_id {
+        if let Some(id) = data.user_id {
             person.user_id = id;
         };
 
-        if let Some(s) = person_data.family_name {
+        if let Some(s) = data.family_name {
             person.family_name = s;
         };
 
-        if let Some(s) = person_data.given_name {
+        if let Some(s) = data.given_name {
             person.given_name = s;
         };
 
-        if let Some(s) = person_data.email {
+        if let Some(s) = data.email {
             person.email = s;
         };
 
-        if let Some(s) = person_data.phone {
+        if let Some(s) = data.phone {
             person.phone = s;
         };
 
-        if let Some(s) = person_data.work_address {
+        if let Some(s) = data.work_address {
             person.work_address = s;
         };
 
-        if let Some(s) = person_data.city {
+        if let Some(s) = data.city {
             person.city = s;
         };
 
-        if let Some(s) = person_data.province {
+        if let Some(s) = data.province {
             person.province = s;
         };
 
-        if let Some(s) = person_data.postal_code {
+        if let Some(s) = data.postal_code {
             person.postal_code = s;
         };
 
-        if let Some(s) = person_data.organization_id {
+        if let Some(s) = data.organization_id {
             person.organization_id = s;
         };
 
-        if let Some(s) = person_data.peoplesoft_id {
+        if let Some(s) = data.peoplesoft_id {
             person.peoplesoft_id = s;
         };
 
-        if let Some(s) = person_data.orcid_id {
+        if let Some(s) = data.orcid_id {
             person.orcid_id = s;
         };
 
-        if let Some(s) = person_data.updated_at {
-            person.updated_at = s;
-        };
-
-        if let Some(s) = person_data.retired_at {
+        
+        if let Some(s) = data.retired_at {
             person.retired_at = Some(s);
         };
-
 
         Ok(person)
     }

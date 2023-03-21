@@ -17,7 +17,7 @@ use crate::database::connection;
 use crate::schema::*;
 
 use crate::models::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability, Affiliation, LanguageData, 
-    Publication, Work};
+    Publication};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -134,12 +134,14 @@ impl Person {
         Ok(res)
     }
     
-    pub fn update(&self) -> Result<Self> {
+    pub fn update(&mut self) -> Result<Self> {
         let mut conn = connection()?;
+
+        self.updated_at = chrono::Utc::now().naive_utc();
 
         let res = diesel::update(persons::table)
         .filter(persons::id.eq(&self.id))
-        .set(self)
+        .set(self.clone())
         .get_result(&mut conn)?;
         
         Ok(res)

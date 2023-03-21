@@ -179,12 +179,14 @@ impl Role {
         Ok(res)
     }
     
-    pub fn update(&self) -> Result<Self> {
+    pub fn update(&mut self) -> Result<Self> {
         let mut conn = connection()?;
+
+        self.updated_at = chrono::Utc::now().naive_utc();
 
         let res = diesel::update(roles::table)
         .filter(roles::id.eq(&self.id))
-        .set(self)
+        .set(self.clone())
         .get_result(&mut conn)?;
         
         Ok(res)

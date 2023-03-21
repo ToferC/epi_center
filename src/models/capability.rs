@@ -38,7 +38,6 @@ pub struct Capability {
     #[graphql(visible = false)]
     pub skill_id: Uuid, // Skill
     pub self_identified_level: CapabilityLevel,
-    pub validated_level: Option<CapabilityLevel>,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -268,7 +267,6 @@ pub struct NewCapability {
     pub skill_id: Uuid, // Skill
     pub organization_id: Uuid,
     pub self_identified_level: CapabilityLevel,
-    pub validated_level: Option<CapabilityLevel>,
 }
 
 impl NewCapability {
@@ -290,7 +288,6 @@ impl NewCapability {
             skill_id,
             organization_id,
             self_identified_level,
-            validated_level: Some(self_identified_level),
         }
     }
 }

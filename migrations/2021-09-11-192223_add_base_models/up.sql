@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(256) NOT NULL,
     access_level VARCHAR(64) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     access_key VARCHAR(256) NOT NULL,
     approved_by_user_uid UUID
 );
@@ -227,7 +228,6 @@ CREATE TABLE IF NOT EXISTS capabilities (
         REFERENCES organizations(id) ON DELETE RESTRICT,
 
     self_identified_level capability_level NOT NULL,
-    validated_level capability_level,
 
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),

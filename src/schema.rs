@@ -57,7 +57,6 @@ diesel::table! {
         skill_id -> Uuid,
         organization_id -> Uuid,
         self_identified_level -> CapabilityLevel,
-        validated_level -> Nullable<CapabilityLevel>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,
@@ -271,6 +270,7 @@ diesel::table! {
         name -> Varchar,
         access_level -> Varchar,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
         access_key -> Varchar,
         approved_by_user_uid -> Nullable<Uuid>,
     }
@@ -279,6 +279,20 @@ diesel::table! {
 diesel::table! {
     valid_roles (role) {
         role -> Varchar,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::CapabilityLevel;
+
+    validations (id) {
+        id -> Uuid,
+        validator_id -> Uuid,
+        capability_id -> Uuid,
+        validated_level -> CapabilityLevel,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -325,6 +339,8 @@ diesel::joinable!(team_ownerships -> teams (team_id));
 diesel::joinable!(teams -> org_tiers (org_tier_id));
 diesel::joinable!(teams -> organizations (organization_id));
 diesel::joinable!(users -> valid_roles (role));
+diesel::joinable!(validations -> capabilities (capability_id));
+diesel::joinable!(validations -> persons (validator_id));
 diesel::joinable!(works -> roles (role_id));
 diesel::joinable!(works -> tasks (task_id));
 
@@ -345,5 +361,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     teams,
     users,
     valid_roles,
+    validations,
     works,
 );
