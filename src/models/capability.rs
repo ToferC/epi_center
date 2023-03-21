@@ -14,7 +14,7 @@ use crate::{database::connection};
 
 use crate::{schema::*, database};
 
-use crate::models::{Person, Skill, Organization, SkillDomain};
+use crate::models::{Person, Skill, Organization, SkillDomain, Validation};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject, Associations)]
 #[diesel(belongs_to(Person))]
@@ -93,6 +93,10 @@ impl Capability {
 
     pub async fn skill(&self) -> Result<Skill> {
         Skill::get_by_id(&self.skill_id)
+    }
+
+    pub async fn validations(&self) -> Result<Vec<Validation>> {
+        Validation::get_by_capability_id(&self.id)
     }
 }
 

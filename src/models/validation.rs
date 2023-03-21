@@ -9,6 +9,7 @@ use async_graphql::*;
 
 use crate::schema::*;
 use crate::database::connection;
+use crate::models::{CapabilityLevel};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[diesel(table_name = validations)]
@@ -43,10 +44,10 @@ impl Validation {
         let mut conn = connection()?;
 
         let res = validations::table
-        .filter(validations::validator_id.eq(&validation.person_id))
-        .filter(validations::capability_id.eq(&validation.team_id))
-        .distinct()
-        .first(&mut conn);
+            .filter(validations::validator_id.eq(&validation.validator_id))
+            .filter(validations::capability_id.eq(&validation.capability_id))
+            .distinct()
+            .first(&mut conn);
         
         let validation = match res {
             Ok(p) => p,
@@ -89,22 +90,22 @@ impl Validation {
         Ok(res)
     }
 
-    pub fn get_by_capability_id(id: &Uuid) -> Result<Self> {
+    pub fn get_by_capability_id(id: &Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = validations::table
             .filter(validations::capability_id.eq(id))
-            .first(&mut conn)?;
+            .load::<Self>(&mut conn)?;
 
         Ok(res)
     }
 
-    pub fn get_by_validator_id(id: &Uuid) -> Result<Self> {
+    pub fn get_by_validator_id(id: &Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = validations::table
             .filter(validations::validator_id.eq(id))
-            .first(&mut conn)?;
+            .load::<Self>(&mut conn)?;
 
         Ok(res)
     }

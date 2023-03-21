@@ -19,6 +19,8 @@ use crate::schema::*;
 use crate::models::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability, Affiliation, LanguageData, 
     Publication};
 
+use super::Validation;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
 #[diesel(table_name = persons)]
@@ -216,6 +218,10 @@ impl Person {
     )]
     pub async fn capabilities(&self) -> Result<Vec<Capability>> {
         Capability::get_by_person_id(self.id)
+    }
+
+    pub async fn validations(&self) -> Result<Vec<Validation>> {
+        Validation::get_by_validator_id(&self.id)
     }
 
     pub async fn publications(&self) -> Result<Vec<Publication>> {
