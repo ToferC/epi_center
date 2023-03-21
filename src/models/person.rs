@@ -212,10 +212,12 @@ impl Person {
         OrgTier::get_by_ids(&org_tier_ids)
     }
 
+    /*
     #[graphql(
         guard = "RoleGuard::new(UserRole::Analyst)",
         visible = "is_analyst",
     )]
+     */
     pub async fn capabilities(&self) -> Result<Vec<Capability>> {
         Capability::get_by_person_id(self.id)
     }
