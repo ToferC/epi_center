@@ -169,11 +169,13 @@ impl Role {
         Ok(res)
     }
 
-    pub fn get_by_person_id(id: Uuid) -> Result<Vec<Role>> {
+    /// Get roles by person ID. Can add a boolean to choose between active or inactive roles.
+    pub fn get_by_person_id(id: Uuid, active: bool) -> Result<Vec<Role>> {
         let mut conn = connection()?;
 
         let res = roles::table
             .filter(roles::person_id.eq(id))
+            .filter(roles::active.eq(active))
             .load::<Role>(&mut conn)?;
 
         Ok(res)

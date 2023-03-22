@@ -1,10 +1,8 @@
 #[macro_use]
 extern crate diesel;
 
-#[macro_use]
 extern crate diesel_migrations;
 
-#[macro_use]
 extern crate async_graphql;
 
 #[macro_use]
@@ -12,15 +10,10 @@ extern crate shrinkwraprs;
 
 #[macro_use]
 extern crate strum_macros;
-
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use async_graphql::*;
 use tera::{Tera};
 
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
-use uuid::Uuid;
 
 pub mod models;
 pub mod handlers;
@@ -30,9 +23,7 @@ pub mod database;
 pub mod graphql;
 pub mod common_utils;
 pub mod config_variables;
-//ub mod kafka;
-
-use crate::graphql::{get_connection_from_context};
+//pub mod kafka;
 
 pub struct AppData {
     pub tmpl: Tera

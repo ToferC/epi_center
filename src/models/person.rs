@@ -192,8 +192,8 @@ impl Person {
         visible = "is_analyst",
     )]
      */
-    pub async fn roles(&self) -> Result<Vec<Role>> {
-        Role::get_by_person_id(self.id)
+    pub async fn roles(&self, active: bool) -> Result<Vec<Role>> {
+        Role::get_by_person_id(self.id, active)
     }
 
     pub async fn affiliations(&self) -> Result<Vec<Affiliation>> {

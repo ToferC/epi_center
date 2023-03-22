@@ -234,8 +234,8 @@ impl Distribution<WorkStatus> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> WorkStatus {
         match rng.gen_range(0..=10) {
             0..=1 => WorkStatus::Planning,
-            2..=5 => WorkStatus::InProgress,
-            6..=8 => WorkStatus::Completed,
+            2..=7 => WorkStatus::InProgress,
+            8 => WorkStatus::Completed,
             9 => WorkStatus::Cancelled,
             10 => WorkStatus::Blocked,
             _ => WorkStatus::Blocked,
