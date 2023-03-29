@@ -65,182 +65,81 @@ pub fn pre_populate_db_schema() {
 
     let top_tier = OrgTier::create(&tt).unwrap();
 
-    // Second Tier
+    org_tiers.push(top_tier.clone());
 
-    let adm = NewOrgTier::new(
-        org.id, 
-        2, 
-        "VP CDSB".to_string(), 
-        "VP CDSB".to_string(), 
-        Some(top_tier.id),
-    );
+    let org_path = "org_structure.csv";
 
-    let adm_tier = OrgTier::create(&adm).unwrap();
+    let mut reader = csv::Reader::from_path(org_path)
+        .expect("Unable to load csv");
 
-    // Third Tier
+    for r in reader.records() {
+
+        let record = r.unwrap();
+
+        let division: String = String::from(&record[0]);
+        let centre: String = String::from(&record[1]);
+        let branch: String = String::from(&record[2]);
+
+        // create org tiers if not already existing
+        // Create branch and get id
+        let adm = NewOrgTier::new(
+            org.id, 
+            2, 
+            branch.to_owned(), 
+            branch.to_owned(), 
+            Some(top_tier.id),
+        );
     
-    let dg = NewOrgTier::new(
-        org.id, 
-        3, 
-        "DG DMIA".to_string(), 
-        "DG DMIA".to_string(), 
-        Some(adm_tier.id),
-    );
+        let adm_tier = OrgTier::get_or_create(&adm)
+            .expect("Unable to get or create org_tier");
 
-    let dg_tier = OrgTier::create(&dg).unwrap();
+        org_tiers.push(adm_tier.clone());
 
-    let dg2 = NewOrgTier::new(
-        org.id, 
-        3, 
-        "DG SDPI".to_string(), 
-        "DG SDPI".to_string(), 
-        Some(adm_tier.id),
-    );
+        // Create centre and get id
+        let ctr = NewOrgTier::new(
+            org.id, 
+            3, 
+            centre.to_owned(), 
+            centre.to_owned(), 
+            Some(adm_tier.id),
+        );
+    
+        let ctr_tier = OrgTier::get_or_create(&ctr)
+            .expect("Unable to get or create org_tier");
 
-    let dg_tier2 = OrgTier::create(&dg2).unwrap();
+        org_tiers.push(ctr_tier.clone());
 
-    // Fourth Tier
+        // Create division and get id
+        let div = NewOrgTier::new(
+            org.id, 
+            4, 
+            division.to_owned(), 
+            division.to_owned(), 
+            Some(ctr_tier.id),
+        );
+    
+        let div_tier = OrgTier::get_or_create(&div)
+            .expect("Unable to get or create org_tier");
 
-    let d1 = NewOrgTier::new(
-        org.id, 
-        4, 
-        "DIR Data Science".to_string(), 
-        "DIR Science de Donnees".to_string(), 
-        Some(dg_tier.id),
-    );
+        org_tiers.push(div_tier.clone());
 
-    let dir1 = OrgTier::create(&d1).unwrap();
+        // Create 3 teams per division
+        for i in 1..=3 {
+            let tm = NewOrgTier::new(
+                org.id, 
+                5, 
+                format!("{} Team {}", division.to_owned(), i), 
+                format!("{} Team {}", division.to_owned(), i),
+                Some(div_tier.id),
+            );
+        
+            let tm_tier = OrgTier::get_or_create(&tm)
+                .expect("Unable to get or create org_tier");
+            
+            org_tiers.push(tm_tier);
+        }
 
-    let d2 = NewOrgTier::new(
-        org.id, 
-        4, 
-        "DIR Data Policy".to_string(), 
-        "DIR Politique de Donnees".to_string(), 
-        Some(dg_tier.id),
-    );
-
-    let dir2 = OrgTier::create(&d2).unwrap();
-
-
-    let d3 = NewOrgTier::new(
-        org.id, 
-        4, 
-        "DIR Data Partnerships".to_string(), 
-        "DIR Partenariat de Donnees".to_string(), 
-        Some(dg_tier2.id),
-    );
-
-    let dir3 = OrgTier::create(&d3).unwrap();
-
-    let d4 = NewOrgTier::new(
-        org.id, 
-        4, 
-        "DIR Strategic Policy".to_string(), 
-        "DIR Politique Strategique".to_string(), 
-        Some(dg_tier2.id),
-    );
-
-    let dir4 = OrgTier::create(&d4).unwrap();
-
-    // Fifth Tier
-
-    let m1 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR Data Ingestion".to_string(), 
-        "MGR Data Ingestion".to_string(), 
-        Some(dir1.id),
-    );
-
-    let man1 = OrgTier::create(&m1).unwrap();
-
-    let m2 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR Data Mgt".to_string(), 
-        "MGR Data Mgt".to_string(), 
-        Some(dir1.id),
-    );
-
-    let man2 = OrgTier::create(&m2).unwrap();
-
-    let m3 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR Data Ethics".to_string(), 
-        "MGR Data Ethics".to_string(), 
-        Some(dir2.id),
-    );
-
-    let man3 = OrgTier::create(&m3).unwrap();
-
-    let m4 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR Data Governance".to_string(), 
-        "MGR Data Governance".to_string(), 
-        Some(dir2.id),
-    );
-
-    let man4 = OrgTier::create(&m4).unwrap();
-
-
-    let m5 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR Internal Partnerships".to_string(), 
-        "MGR Internal Partnerships".to_string(), 
-        Some(dir3.id),
-    );
-
-    let man5 = OrgTier::create(&m5).unwrap();
-
-    let m6 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR International Partnerships".to_string(), 
-        "MGR International Partnerships".to_string(), 
-        Some(dir3.id),
-    );
-
-    let man6 = OrgTier::create(&m6).unwrap();
-
-    let m7 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR MCs and TBsubs".to_string(), 
-        "MGR MCs and TBsubs".to_string(), 
-        Some(dir4.id),
-    );
-
-    let man7 = OrgTier::create(&m7).unwrap();
-
-    let m8 = NewOrgTier::new(
-        org.id, 
-        5, 
-        "MGR New Public Health".to_string(), 
-        "MGR New Public Health".to_string(), 
-        Some(dir4.id),
-    );
-
-    let man8 = OrgTier::create(&m8).unwrap();
-
-    org_tiers.push(top_tier);
-    org_tiers.push(adm_tier);
-    org_tiers.push(dg_tier);
-    org_tiers.push(dg_tier2);
-    org_tiers.push(dir1);
-    org_tiers.push(dir2);
-    org_tiers.push(dir3);
-    org_tiers.push(dir4);
-    org_tiers.push(man1);
-    org_tiers.push(man2);
-    org_tiers.push(man3);
-    org_tiers.push(man4);
-    org_tiers.push(man5);
-    org_tiers.push(man6);
-    org_tiers.push(man7);
-    org_tiers.push(man8);
+    }
 
     // Create Org Addresses
 
