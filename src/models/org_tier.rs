@@ -100,6 +100,7 @@ impl OrgTier {
         let mut conn = connection()?;
         let res = org_tiers::table
             .limit(count)
+            .order(org_tiers::tier_level)
             .load::<OrgTier>(&mut conn)?;
 
         Ok(res)

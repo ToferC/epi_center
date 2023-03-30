@@ -59,8 +59,8 @@ pub fn pre_populate_db_schema() {
     let tt = NewOrgTier::new(
             org.id, 
             1, 
-            "President".to_string(), 
-            "President".to_string(), 
+            "Office of the President and Chief Public Health Officer (OPCPHO)".to_string(), 
+            "Office of the President and Chief Public Health Officer (OPCPHO)_FR".to_string(), 
             None);
 
     let top_tier = OrgTier::create(&tt).unwrap();
@@ -239,7 +239,7 @@ pub fn pre_populate_db_schema() {
 
     // Set up OrgTierOwnership
 
-    for (ind, ot) in org_tiers.clone().iter().enumerate() {
+    for ot in org_tiers.clone() {
         // allocate people to org tiers - starting at the top
 
         // set org_tier_owner
@@ -247,13 +247,13 @@ pub fn pre_populate_db_schema() {
         
         // set exec grp and level
 
-        let (grp, lvl, num_members) = match ot.tier_level {
-            1 => (HrGroup::DM, 1, 7),
-            2 => (HrGroup::EX, 4, 5),
-            3 => (HrGroup::EX, 3, 5),
-            4 => (HrGroup::EX, 1, 2),
-            5 => (HrGroup::EC, 7, 7),
-            _ => (HrGroup::EC, 4, 5),
+        let (grp, lvl, num_members, title_str) = match ot.tier_level {
+            1 => (HrGroup::DM, 1, 3, "President"),
+            2 => (HrGroup::EX, 4, 3, "Vice President"),
+            3 => (HrGroup::EX, 3, 3, "Director General"),
+            4 => (HrGroup::EX, 1, 2, "Director"),
+            5 => (HrGroup::EC, 7, 5, "Manager"),
+            _ => (HrGroup::EC, 4, 5, "Special Advisor"),
         };
 
         let owner = owner.update().expect("Unable to update person");
@@ -267,13 +267,7 @@ pub fn pre_populate_db_schema() {
 
         // create team at this level
 
-        let mut team_name: String = String::new();
-
-        if ot.tier_level == 5 {
-            team_name = format!("{} - {}", &ot.name_en.trim(), rng.gen_range(1..99));
-        } else {
-            team_name = ot.name_en.clone().trim().to_string();
-        }
+        let team_name = ot.name_en.clone().trim().to_string();
 
         let new_team = NewTeam::new(
             team_name.trim().to_string(), 
@@ -284,15 +278,15 @@ pub fn pre_populate_db_schema() {
             "Description_FR".to_string()
         );
 
-        let team = Team::create(&new_team).expect("Unable to create team");
+        let team = Team::get_or_create(&new_team).expect("Unable to create team");
         
         // if owner, also set management role for team at that tier
 
         let nr = NewRole::new(
             owner.id, 
             team.id, 
-            ot.name_en.clone(), 
-            ot.name_fr.clone(), 
+            format!("{} - {}", title_str, ot.name_en.clone()), 
+            format!("{} - {}", title_str, ot.name_fr.clone()), 
             0.80, 
             true,
             grp,
@@ -396,8 +390,6 @@ pub fn pre_populate_db_schema() {
                 let _work = Work::create(&nw)
                     .expect("Unable to create work");
             }
-
-
         }    
     }
 
