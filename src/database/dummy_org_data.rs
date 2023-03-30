@@ -338,8 +338,13 @@ pub fn pre_populate_db_schema() {
 
         // Populate the rest of the team, assigning roles at random
 
+        // get team ids to set up validations
+        let mut team_member_ids = Vec::new();
+
         for _i in 0..num_members.min(people.len()) {
             let person = people.pop().unwrap();
+
+            team_member_ids.push(&person.id);
 
             let role = *roles.choose(&mut rng).unwrap();
 
