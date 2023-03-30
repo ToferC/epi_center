@@ -40,6 +40,19 @@ impl PersonQuery {
         Person::get_count(count)
     }
 
+    #[graphql(name = "peopleCount")]
+    /// Accepts argument of "count" and returns a vector of {count} persons ordered by
+    /// family name
+    pub async fn people_count(
+        &self, 
+        _context: &Context<'_>,
+    ) -> Result<i64> {
+
+        Person::count()
+    }
+
+    
+
     #[graphql(name = "personById")]
     pub async fn person_by_id(
         &self, 

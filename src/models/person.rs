@@ -126,6 +126,16 @@ impl Person {
         Ok(res)
     }
 
+    pub fn count() -> Result<i64> {
+        let mut conn = connection()?;
+
+        let res = persons::table
+            .count()
+            .get_result(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_name(name: &String) -> Result<Vec<Person>> {
         let mut conn = connection()?;
 
@@ -192,20 +202,29 @@ impl Person {
         visible = "is_analyst",
     )]
      */
+    /// Returns active or inactive roles depending on the active boolean of true or false
     pub async fn roles(&self, active: bool) -> Result<Vec<Role>> {
         Role::get_by_person_id(self.id, active)
     }
 
+    /// Returns active role
+    pub async fn active_roles(&self) -> Result<Vec<Role>> {
+        Role::get_by_person_id(self.id, true)
+    }
+
+    /// Returns person's affiliations with other organizations
     pub async fn affiliations(&self) -> Result<Vec<Affiliation>> {
         Affiliation::get_by_person_id(self.id)
     }
 
+    /// Returns a vector of the teams owned by this person
     pub async fn owned_teams(&self) -> Result<Vec<Team>> {
         let team_ids = TeamOwnership::get_team_ids_by_owner_id(&self.id).unwrap();
 
         Team::get_by_ids(&team_ids)
     }
 
+    /// Returns a vector of the organizational tiers owned by this person
     pub async fn owned_org_tiers(&self) -> Result<Vec<OrgTier>> {
         let org_tier_ids = OrgOwnership::get_org_tier_ids_by_owner_id(&self.id).unwrap();
 

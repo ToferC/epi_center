@@ -144,13 +144,23 @@ impl Role {
         Ok(roles)
     }
 
-    pub fn get_count(count: i64) -> Result<Vec<Self>> {
+    pub fn get(count: i64) -> Result<Vec<Self>> {
         let mut conn = connection()?;
         let roles = roles::table
             .limit(count)
             .load::<Role>(&mut conn)?;
         
         Ok(roles)
+    }
+
+    pub fn count() -> Result<i64> {
+        let mut conn = connection()?;
+
+        let res = roles::table
+            .count()
+            .get_result(&mut conn)?;
+
+        Ok(res)
     }
 
     pub fn get_by_id(id: &Uuid) -> Result<Self> {
