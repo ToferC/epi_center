@@ -226,14 +226,6 @@ pub fn pre_populate_db_schema() {
     // Set up Teams and roles data
     println!("Set up teams and roles");
 
-
-    let teams = vec![("PMO", 5), ("VPO", 5), ("DGO DMIA", 5), ("DGO SPDI", 5), 
-            ("Director Data Science", 2), ("Director Data Policy", 2), ("Director Data Partnerships", 2), ("Director Strategic Policy", 2),
-            ("Data Ingestion", 8), ("Data Management", 8), ("Data Ethics", 8), ("Data Governance", 8),
-            ("Internal Partnerships", 8), ("International Partnerships", 8), ("MCs and TBsubs", 8),
-            ("New Public Health", 8),
-        ];
-
     let roles: Vec<&str> = "
         Sr. Policy Analyst; Policy Analyst; Jr. Policy Analyst; Epidemiologist; Administrative Officer; Designer; 
         Sr. Data Analyst; Data Analyst; Jr. Data Analyst; Project Officer; Scientist; Researcher; 
@@ -255,13 +247,13 @@ pub fn pre_populate_db_schema() {
         
         // set exec grp and level
 
-        let (grp, lvl) = match ot.tier_level {
-            1 => (HrGroup::DM, 1),
-            2 => (HrGroup::EX, 4),
-            3 => (HrGroup::EX, 3),
-            4 => (HrGroup::EX, 1),
-            5 => (HrGroup::EC, 7),
-            _ => (HrGroup::EC, 4),
+        let (grp, lvl, num_members) = match ot.tier_level {
+            1 => (HrGroup::DM, 1, 7),
+            2 => (HrGroup::EX, 4, 5),
+            3 => (HrGroup::EX, 3, 5),
+            4 => (HrGroup::EX, 1, 2),
+            5 => (HrGroup::EC, 7, 7),
+            _ => (HrGroup::EC, 4, 5),
         };
 
         let owner = owner.update().expect("Unable to update person");
@@ -275,7 +267,13 @@ pub fn pre_populate_db_schema() {
 
         // create team at this level
 
-        let (team_name, num_members) = teams[ind];
+        let mut team_name: String = String::new();
+
+        if ot.tier_level == 5 {
+            team_name = format!("{} - {}", &ot.name_en.trim(), rng.gen_range(1..99));
+        } else {
+            team_name = ot.name_en.clone().trim().to_string();
+        }
 
         let new_team = NewTeam::new(
             team_name.trim().to_string(), 
@@ -331,7 +329,6 @@ pub fn pre_populate_db_schema() {
             ).unwrap();
 
             tasks.push(task);
-            
         }
 
         // Set team ownership
@@ -368,6 +365,8 @@ pub fn pre_populate_db_schema() {
             );
 
             let role_res = Role::create(&nr).unwrap();
+
+            print!(".");
 
             // Assign work to the roles based on the team's tasks
 
