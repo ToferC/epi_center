@@ -11,19 +11,30 @@ use crate::schema::*;
 use crate::database::connection;
 use crate::models::{CapabilityLevel};
 
+use super::Person;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[diesel(table_name = validations)]
 #[diesel(belongs_to(Person))]
 #[diesel(belongs_to(Capability))]
+#[graphql(complex)]
 // Represents ownership of a team by a person
 /// Other people's validations of an individuals Capability
 pub struct Validation {
     pub id: Uuid,
+    #[graphql(skip)]
     pub validator_id: Uuid, // Person
     pub capability_id: Uuid, // Capability
     pub validated_level: CapabilityLevel,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+}
+
+#[ComplexObject]
+impl Validation {
+    pub async fn validator(&self) -> Result<Person> {
+        Person::get_by_id(&self.validator_id)
+    }
 }
 
 // Non Graphql

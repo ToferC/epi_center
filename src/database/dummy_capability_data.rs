@@ -3,7 +3,7 @@ use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 use async_graphql::Error;
 
-use crate::models::{Affiliation, NewAffiliation, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData};
+use crate::models::{Affiliation, NewAffiliation, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData, Person, NewValidation, Validation};
 
 pub fn pre_populate_skills() -> Result<(), Error> {
 
@@ -198,7 +198,11 @@ pub fn pre_populate_skills() -> Result<(), Error> {
 
 }
 
-pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, science_org_id: Uuid) -> Result<(), Error>{
+pub fn create_fake_capabilities_for_person(
+    person_id: Uuid, 
+    org_id: Uuid, 
+    science_org_id: Uuid,
+) -> Result<(), Error>{
 
     let mut rng = rand::thread_rng();
 
@@ -302,6 +306,41 @@ pub fn create_fake_capabilities_for_person(person_id: Uuid, org_id: Uuid, scienc
         }
 
         // create work and tasks
+    }
+
+    Ok(())
+}
+
+pub fn create_validations() -> Result<(), Error> {
+    println!("Adding validations to capabilities");
+
+    let mut rng = rand::thread_rng();
+
+    let person_ids = Person::get_all_ids()?;
+
+    let capabilities = Capability::get_all()?;
+
+    for c in capabilities {
+        let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4).cloned().collect();
+
+        for validator in validators {
+
+            let assessment = match rng.gen_range(0..10) {
+                0..=3 => c.self_identified_level.step_down(),
+                4..=6 => c.self_identified_level,
+                7..=9 => c.self_identified_level.step_up(),
+                _ => c.self_identified_level.step_up(),
+            };
+    
+            let v = NewValidation::new(
+                validator,
+                c.id,
+                assessment,
+            );
+    
+            let _res = Validation::create(&v)
+                .expect("Unable to create validation");
+        }
     }
 
     Ok(())

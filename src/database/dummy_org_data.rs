@@ -2,6 +2,7 @@
 use rand::Rng;
 use rand::{seq::SliceRandom};
 
+use crate::database::create_validations;
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
@@ -338,13 +339,8 @@ pub fn pre_populate_db_schema() {
 
         // Populate the rest of the team, assigning roles at random
 
-        // get team ids to set up validations
-        let mut team_member_ids = Vec::new();
-
         for _i in 0..num_members.min(people.len()) {
             let person = people.pop().unwrap();
-
-            team_member_ids.push(&person.id);
 
             let role = *roles.choose(&mut rng).unwrap();
 
@@ -403,6 +399,10 @@ pub fn pre_populate_db_schema() {
 
     let _res = generate_dummy_publications_and_contributors(&science_org_ids)
         .expect("Unable to create publications and contributors");
+
+    // Create dummy validatoins for capabilities
+    let _res = create_validations()
+        .expect("Unable to create validations");
 
 }
 

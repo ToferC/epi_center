@@ -80,6 +80,16 @@ impl CapabilityLevel {
             CapabilityLevel::Specialist => CapabilityLevel::Expert,
         }
     }
+
+    pub fn step_up(&self) -> CapabilityLevel {
+        match self {
+            CapabilityLevel::Desired => CapabilityLevel::Novice,
+            CapabilityLevel::Novice => CapabilityLevel::Experienced,
+            CapabilityLevel::Experienced => CapabilityLevel::Expert,
+            CapabilityLevel::Expert => CapabilityLevel::Specialist,
+            CapabilityLevel::Specialist => CapabilityLevel::Specialist,
+        }
+    }
 }
 
 // Graphql

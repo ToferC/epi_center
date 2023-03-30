@@ -116,6 +116,16 @@ impl Person {
         Ok(res)
     }
 
+    pub fn get_all_ids() -> Result<Vec<Uuid>> {
+        let mut conn = connection()?;
+
+        let res = persons::table
+            .select(persons::id)
+            .load::<Uuid>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_count(count: i64) -> Result<Vec<Person>> {
         let mut conn = connection()?;
 
