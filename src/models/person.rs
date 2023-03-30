@@ -177,6 +177,7 @@ impl Person {
         visible = "is_analyst",
     )]
      */
+    /// Returns the person's family or second name
     pub async fn family_name(&self) -> Result<String> {
         Ok(self.family_name.to_owned())
     }
@@ -187,10 +188,12 @@ impl Person {
         visible = "is_analyst",
     )]
      */
+    /// Returns the persons given or first name
     pub async fn given_name(&self) -> Result<String> {
         Ok(self.given_name.to_owned())
     }
 
+    /// Returns the person's organization
     pub async fn organization(&self) -> Result<Organization> {
         
         Organization::get_by_id(&self.organization_id)
@@ -237,10 +240,16 @@ impl Person {
         visible = "is_analyst",
     )]
      */
+    /// Returns the persons capabilities
     pub async fn capabilities(&self) -> Result<Vec<Capability>> {
         Capability::get_by_person_id(self.id)
     }
 
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Analyst)",
+        visible = "is_analyst",
+    )]
+    /// Returns a vector of the validations made by the person. Only available to analyst level access and above.
     pub async fn validations(&self) -> Result<Vec<Validation>> {
         Validation::get_by_validator_id(&self.id)
     }
@@ -253,6 +262,7 @@ impl Person {
         guard = "RoleGuard::new(UserRole::Analyst)",
         visible = "is_analyst",
     )]
+    /// Returns a vector of the language results for the person
     pub async fn language_data(&self) -> Result<Vec<LanguageData>> {
         LanguageData::get_by_person_id(self.id)
     }
