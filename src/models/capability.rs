@@ -16,6 +16,8 @@ use crate::{schema::*, database};
 
 use crate::models::{Person, Skill, Organization, SkillDomain, Validation};
 
+use super::ValidatedLevel;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject, Associations)]
 #[diesel(belongs_to(Person))]
 #[diesel(belongs_to(Skill))]
@@ -93,6 +95,12 @@ impl Capability {
 
     pub async fn skill(&self) -> Result<Skill> {
         Skill::get_by_id(&self.skill_id)
+    }
+
+    pub async fn validated_level(&self) -> Result<ValidatedLevel> {
+        let validations = Validation::get_by_capability_id(&self.id)?;
+
+        ValidatedLevel::return_validated_level(&validations)
     }
 
     pub async fn validations(&self) -> Result<Vec<Validation>> {

@@ -124,6 +124,59 @@ impl Validation {
     }
 }
 
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, SimpleObject)]
+pub struct ValidatedLevel {
+    capability_level: CapabilityLevel,
+    average: f32,
+}
+
+impl ValidatedLevel {
+    pub fn new(
+        capability_level: CapabilityLevel, 
+        average: f32,
+    ) -> Self {
+        ValidatedLevel { 
+            capability_level,
+            average,
+         }
+    }
+
+    pub fn return_validated_level(validations: &Vec<Validation>) -> Result<ValidatedLevel> {
+        let mut results = Vec::new();
+    
+        for v in validations {
+            let n = match v.validated_level {
+                CapabilityLevel::Desired => 0,
+                CapabilityLevel::Novice => 100,
+                CapabilityLevel::Experienced => 200,
+                CapabilityLevel::Expert => 300,
+                CapabilityLevel::Specialist => 400,
+            };
+            results.push(n);
+        };
+    
+        let average_value = results.iter().sum::<i64>() / results.len() as i64;
+    
+        let cap = match &average_value {
+            00..=080 => CapabilityLevel::Desired,
+            81..=180 => CapabilityLevel::Novice,
+            181..=280 => CapabilityLevel::Experienced,
+            281..=380 => CapabilityLevel::Expert,
+            381..=480 => CapabilityLevel::Specialist,
+            _ => CapabilityLevel::Desired,
+        };
+    
+        let res = ValidatedLevel::new(
+            cap,
+            average_value as f32 / 100.0,
+        );
+    
+        Ok(res)
+    }
+}
+
+
+
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
 /// Linked from HealthProfile
 /// Linked to Trip
