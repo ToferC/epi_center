@@ -1,16 +1,21 @@
 
+use diesel::RunQueryDsl;
 use rand::Rng;
 use rand::{seq::SliceRandom};
+use async_graphql::Error;
 
-use crate::database::create_validations;
+use crate::database::{create_validations, connection};
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
+use crate::schema::persons;
 
 use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors, generate_tasks};
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
-pub fn pre_populate_db_schema() {
+pub fn pre_populate_db_schema() -> Result<(), Error> {
+
+    let mut conn = connection()?;
 
     // Set up Organization
     println!("Creating Organization");
@@ -179,7 +184,7 @@ pub fn pre_populate_db_schema() {
 
     let mut rng = rand::thread_rng();
 
-    let mut people: Vec<Person> = Vec::new();
+    let mut new_people: Vec<NewPerson> = Vec::new();
 
     let path = "names.csv";
 
@@ -209,8 +214,19 @@ pub fn pre_populate_db_schema() {
             gen_rand_number(),
             gen_rand_number(),
         );
+        new_people.push(p);
+    }
 
-        let person = Person::create(&p).expect("Unable to create person");
+    // Insert people
+    println!("Inserting {} People", new_people.len());
+
+    for person in new_people {
+        let res = Person::create(&person);
+    }
+
+    let mut people = Person::get_all()?;
+
+    for person in &people {
 
         let science_org_id = &science_org_ids.choose(&mut rng).unwrap();
 
@@ -220,8 +236,6 @@ pub fn pre_populate_db_schema() {
             **science_org_id,
         )
             .expect("Unable to create capabilities for person");
-
-        people.push(person);
     } 
 
     // Set up Teams and roles data
@@ -403,6 +417,8 @@ pub fn pre_populate_db_schema() {
     // Create dummy validatoins for capabilities
     let _res = create_validations()
         .expect("Unable to create validations");
+
+    Ok(())
 
 }
 

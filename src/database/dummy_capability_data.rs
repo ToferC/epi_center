@@ -135,7 +135,7 @@ pub fn pre_populate_skills() -> Result<(), Error> {
     }
 
     let medical_skills: Vec<&str> = "
-        Pediatrics; Maternal Health; Respiratory Health; Cardiovascular Health; Dental Health; Nutration; Chronic Disease
+        Pediatrics; Maternal Health; Respiratory Health; Cardiovascular Health; Dental Health; Nutrition; Chronic Disease
     ".split("; ").collect();
 
     for s in medical_skills {

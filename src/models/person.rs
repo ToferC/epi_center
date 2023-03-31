@@ -278,7 +278,7 @@ impl Person {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
+#[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject, Queryable)]
 /// Referenced by Roles, TeamOwnership, OrgOwnership
 #[diesel(table_name = persons)]
 pub struct NewPerson {
