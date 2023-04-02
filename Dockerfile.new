@@ -1,0 +1,15 @@
+# Build stage
+FROM rust:1.68-slim AS build
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+# Final stage
+FROM debian:buster-slim
+RUN apt-get update && apt-get install -y ca-certificates libssl-dev && rm -rf /var/lib/apt/lists/*
+RUN groupadd -r rusty && useradd --no-log-init -r -g rusty rusty
+WORKDIR /app
+COPY --from=build /app/target/release/people_data_api .
+USER rusty
+EXPOSE 8080
+CMD ["./people_data_api"]

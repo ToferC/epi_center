@@ -27,5 +27,6 @@ It also includes :
     * ADMIN_PASSWORD=ADMINPASSWORD
     * ADMIN_NAME="Admin Name"
 * Change APP_NAME const in lib.rs to your app
+* `cargo install diesel_cli` # if not already installed
 * `diesel migration run`
 * `cargo run`

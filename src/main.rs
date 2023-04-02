@@ -38,12 +38,13 @@ async fn main() -> std::io::Result<()> {
 
     let _domain = host.clone();
 
-    println!("{}", env!("CARGO_MANIFEST_DIR"));
+    println!("Manifests dir: {}", env!("CARGO_MANIFEST_DIR"));
 
     println!("Serving on: {}:{}", &host, &port);
 
     // Create Schema
     let schema = web::Data::new(create_schema_with_context(POOL.clone()));
+    println!("Got schema");
 
     
     HttpServer::new(move || {
