@@ -16,8 +16,6 @@ use crate::{schema::*, database};
 
 use crate::models::{Person, Skill, Organization, SkillDomain, Validation};
 
-use super::ValidatedLevel;
-
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject, Associations)]
 #[diesel(belongs_to(Person))]
 #[diesel(belongs_to(Skill))]
@@ -35,11 +33,11 @@ pub struct Capability {
 
     #[graphql(visible = false)]
     pub person_id: Uuid, // Person
+    pub skill_id: Uuid, // Skill
     pub organization_id: Uuid, // Organization
 
-    #[graphql(visible = false)]
-    pub skill_id: Uuid, // Skill
     pub self_identified_level: CapabilityLevel,
+    pub validated_level: Option<CapabilityLevel>,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -105,12 +103,6 @@ impl Capability {
 
     pub async fn skill(&self) -> Result<Skill> {
         Skill::get_by_id(&self.skill_id)
-    }
-
-    pub async fn validated_level(&self) -> Result<ValidatedLevel> {
-        let validations = Validation::get_by_capability_id(&self.id)?;
-
-        ValidatedLevel::return_validated_level(&validations)
     }
 
     pub async fn validations(&self) -> Result<Vec<Validation>> {
@@ -271,9 +263,9 @@ impl Capability {
         let mut conn = database::connection()?;
 
         let res = diesel::update(capabilities::table)
-        .filter(capabilities::id.eq(&self.id))
-        .set(self)
-        .get_result(&mut conn)?;
+            .filter(capabilities::id.eq(&self.id))
+            .set(self)
+            .get_result(&mut conn)?;
         
         Ok(res)
     }
@@ -296,19 +288,24 @@ impl NewCapability {
     pub fn new(
         person_id: Uuid, // Person
         skill_id: Uuid, // Skill
-        organization_id: Uuid,
+        organization_id: Uuid, // Organization
         self_identified_level: CapabilityLevel,
     ) -> Self {
 
+        println!("Received skill ID: {}", &skill_id);
         let skill = Skill::get_by_id(&skill_id).expect("Unable to get skill");
 
+
+        println!("Returned skill: {} with ID: {}, PersonID: {} and OrgID: {}",
+            &skill.name_en, &skill.id, &person_id, &organization_id);
+        
         NewCapability {
             name_en: skill.name_en,
             name_fr: skill.name_fr,
             domain: skill.domain,
-            person_id,
-            skill_id,
-            organization_id,
+            person_id: person_id,
+            skill_id: skill.id,
+            organization_id: organization_id,
             self_identified_level,
         }
     }

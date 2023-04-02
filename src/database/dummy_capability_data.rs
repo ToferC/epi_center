@@ -190,10 +190,6 @@ pub fn pre_populate_skills() -> Result<(), Error> {
         let _res = Skill::create(&ns)?;
     }
 
-    // create tasks for each skill
-
-    let _skills = Skill::get_all();
-
     Ok(())
 
 }
@@ -257,7 +253,7 @@ pub fn create_fake_capabilities_for_person(
 
     let mut sds: Vec<SkillDomain> = Vec::new();
 
-    for _ in 0..3 {
+    for _ in 0..2 {
         let sd: SkillDomain = rand::random();
         if !sds.contains(&sd) {
             sds.push(sd);
@@ -300,8 +296,20 @@ pub fn create_fake_capabilities_for_person(
         let mut capability_level: CapabilityLevel = rand::random();
 
         for skill in selected_skills {
-            let nc = NewCapability::new(person_id, skill.id, org_id, capability_level);
-            let _res = Capability::create(&nc)?;
+
+            println!("Create Capability for skill: {} with ID: {}", &skill.name_en, &skill.id);
+
+            let nc = NewCapability::new(
+                person_id, 
+                skill.id, // Error here
+                org_id, 
+                capability_level,
+            );
+
+            let res = Capability::create(&nc)?;
+
+            println!("--> Created Capability: {} with skill ID: {}\n", &res.name_en, &res.skill_id);
+
             capability_level = capability_level.step_down();
         }
 
@@ -312,6 +320,7 @@ pub fn create_fake_capabilities_for_person(
 }
 
 pub fn create_validations() -> Result<(), Error> {
+
     println!("Adding validations to capabilities");
 
     let mut rng = rand::thread_rng();

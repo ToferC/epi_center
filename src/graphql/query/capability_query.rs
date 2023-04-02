@@ -12,13 +12,14 @@ pub struct CapabilityQuery;
 impl CapabilityQuery {
 
     // Capabilities
-    /// Returns all Capabilities in the system
+    /// Returns count number of Capabilities in the system
     pub async fn capabilities(
         &self, 
         _context: &Context<'_>,
+        count: i64,
     ) -> Result<Vec<Capability>> {
 
-        Capability::get_all()
+        Capability::get_count(count)
     }
 
     /// Returns a capability by its Uuid

@@ -11,7 +11,7 @@ use crate::schema::*;
 use crate::database::connection;
 use crate::models::{CapabilityLevel};
 
-use super::Person;
+use super::{Person, Capability};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[diesel(table_name = validations)]
@@ -43,9 +43,19 @@ impl Validation {
 
         let mut conn = connection()?;
 
-        let res = diesel::insert_into(validations::table)
-        .values(validation)
-        .get_result(&mut conn)?;
+        let res:Validation = diesel::insert_into(validations::table)
+            .values(validation)
+            .get_result(&mut conn)?;
+
+        // Update Capability with validation
+
+        let validated_level = ValidatedLevel::return_validated_level(&res.capability_id)?;
+
+        let mut capability = Capability::get_by_id(&res.capability_id)?;
+
+        capability.validated_level = Some(validated_level.capability_level);
+
+        let _update = capability.update()?;
         
         Ok(res)
     }
@@ -126,10 +136,18 @@ impl Validation {
 
         let mut conn = connection()?;
 
-        let res = diesel::update(validations::table)
-        .filter(validations::id.eq(&self.id))
-        .set(self)
-        .get_result(&mut conn)?;
+        let res: Validation = diesel::update(validations::table)
+            .filter(validations::id.eq(&self.id))
+            .set(self)
+            .get_result(&mut conn)?;
+
+        let validated_level = ValidatedLevel::return_validated_level(&res.capability_id)?;
+
+        let mut capability = Capability::get_by_id(&res.capability_id)?;
+
+        capability.validated_level = Some(validated_level.capability_level);
+
+        let _update = capability.update()?;
         
         Ok(res)
     }
@@ -152,7 +170,10 @@ impl ValidatedLevel {
          }
     }
 
-    pub fn return_validated_level(validations: &Vec<Validation>) -> Result<ValidatedLevel> {
+    pub fn return_validated_level(capability_id: &Uuid) -> Result<ValidatedLevel> {
+        
+        let validations = Validation::get_by_capability_id(&capability_id)?;
+
         let mut results = Vec::new();
     
         for v in validations {
