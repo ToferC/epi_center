@@ -19,10 +19,8 @@ RUN cargo build --release
 
 # Final stage
 FROM debian:buster-slim 
-# buster-slim works : 392MB
-# FROM debian:buster as final  # this works : 444MB
-# FROM rust:1.68 as final # this works : 1.98GB
 
+# Install dependencies (check that they are still all required)
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     libclang-dev \
@@ -31,22 +29,23 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Add 'rusty' user/group we wish the container to run as
-# RUN groupadd -r rusty && useradd --no-log-init -r -g rusty rusty
+RUN groupadd -r rusty && useradd --no-log-init -r -g rusty rusty
 
 WORKDIR /app
 
 # --chown=<user>:<group>
 COPY --from=builder /app/target/release/people_data_api .
 
-# perhaps templates will fix it? didn't fix it
-#  otherwise add libclang-dev/openssl to the final stage?
+# seed: These are needed in the final image for the image to seed the database
+COPY seeds seeds
+
 # templates: these are needed in the final image for rendering web pages
 COPY templates templates
-# COPY migrations migrations # for diesel migrate
-COPY seeds seeds
-# COPY *.csv .
 
-# USER rusty
+# migrations: these are needed in the final image if we want diesel migrations this image
+# COPY migrations migrations # for diesel migrate
+
+USER rusty
 EXPOSE 8080
-# CMD ["./target/release/people_data_api"]
+
 CMD ["./people_data_api"]

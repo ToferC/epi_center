@@ -9,6 +9,7 @@ This app is a learning project and attempt to create a data-centric model and Gr
 - [ ] Time-series modelling of changes to the organization over time as people change roles, learn and evolve.
 
 It also includes :
+
 - [x] User models
 - [x] Automated Admin Generation
 - [x] Authentication and sign-in
@@ -60,9 +61,16 @@ docker compose up
 - [x] Working: Dockerfile.slim try debian:buster-slim : (arm64:392MB amd64:447MB )
 - [x] Try again on codespaces (amd64)
   - [x] Rename Dockerfile.slim to Dockerfile.slim
+- [x] Docker as non root user (rusty)
 
+- [ ] Can I just copy src and Cargo.(toml|lock) into the image?
+  - [ ] If so, Fix Dockerfile.simple as well
+  - [ ] If so, remove the .dockerignore file
 - [ ] Accelerate build with rust crate cache?
+- [ ] Re-validate all dependencies in Dockerfile.slim
 - [ ] alpine base image (musl)
+  - [ ] [LogRocket Blog article](https://blog.logrocket.com/packaging-a-rust-web-service-using-docker/)
+    - [ ] [Associated Repo](https://github.com/zupzup/rust-docker-web/blob/main/debian/Dockerfile)
   - [ ] Working: Dockerfile.alpine (arm64: 1.98GB)
   - [ ] Working: Dockerfile.alpine (arm64: 1.98GB)
 - [x] http response type for index.html Content-Type: text/html; charset=UTF-8
@@ -78,10 +86,10 @@ docker compose up
 ## Container image sizes
 
 You can control the image you build by selecting the Dockerfile in the docker-compose.yml file.
-| Image              | arm64  | amd64 | description                                |
-|--------------------|--------|-------|--------------------------------------------|
-| rust:1.68          | 4.25GB |       | single stage (Dockerfile.simple)           |
-| rust:1.68          | 1.98GB |       | multi-stage                                |
-| debian:buster      | 444MB  |       | multi-stage                                |
-| debian:buster-slim | 392MB  | 447MB | multi-stage (Dockerfile.slim)              |
-| alpine:3.14        |        |       | multi-stage musl based (Dockerfile.alpine) |
+| Image              | arm64  | amd64                    | description                                |
+|--------------------|--------|--------------------------|--------------------------------------------|
+| rust:1.68          | 4.25GB |                          | single stage (Dockerfile.simple)           |
+| rust:1.68          | 1.98GB |                          | multi-stage                                |
+| debian:buster      | 444MB  |                          | multi-stage                                |
+| debian:buster-slim | 392MB  | 447MB (15 minutes build) | multi-stage (Dockerfile.slim)              |
+| alpine:3.14        |        |                          | multi-stage musl based (Dockerfile.alpine) |
