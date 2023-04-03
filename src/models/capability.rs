@@ -292,12 +292,7 @@ impl NewCapability {
         self_identified_level: CapabilityLevel,
     ) -> Self {
 
-        println!("Received skill ID: {}", &skill_id);
         let skill = Skill::get_by_id(&skill_id).expect("Unable to get skill");
-
-
-        println!("Returned skill: {} with ID: {}, PersonID: {} and OrgID: {}",
-            &skill.name_en, &skill.id, &person_id, &organization_id);
         
         NewCapability {
             name_en: skill.name_en,

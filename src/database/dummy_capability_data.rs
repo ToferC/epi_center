@@ -202,6 +202,8 @@ pub fn create_fake_capabilities_for_person(
 
     let mut rng = rand::thread_rng();
 
+    print!(".");
+
     // Create LanguageDatas
 
     let primary_language = vec![LanguageName::English, LanguageName::French]
@@ -297,8 +299,6 @@ pub fn create_fake_capabilities_for_person(
 
         for skill in selected_skills {
 
-            println!("Create Capability for skill: {} with ID: {}", &skill.name_en, &skill.id);
-
             let nc = NewCapability::new(
                 person_id, 
                 skill.id, // Error here
@@ -307,8 +307,6 @@ pub fn create_fake_capabilities_for_person(
             );
 
             let res = Capability::create(&nc)?;
-
-            println!("--> Created Capability: {} with skill ID: {}\n", &res.name_en, &res.skill_id);
 
             capability_level = capability_level.step_down();
         }
@@ -329,8 +327,14 @@ pub fn create_validations() -> Result<(), Error> {
 
     let capabilities = Capability::get_all()?;
 
-    for c in capabilities {
-        let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4).cloned().collect();
+    for (i, c) in capabilities.into_iter().enumerate() {
+        let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4)
+            .cloned()
+            .collect();
+
+        if i % 100 == 0 {
+            print!(".")
+        }
 
         for validator in validators {
 
