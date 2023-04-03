@@ -178,11 +178,11 @@ impl ValidatedLevel {
     pub fn get_capability_level_from_value(value: &i64) -> CapabilityLevel {
 
         let cap = match value {
-            00..=080 => CapabilityLevel::Desired,
-            81..=180 => CapabilityLevel::Novice,
-            181..=280 => CapabilityLevel::Experienced,
-            281..=380 => CapabilityLevel::Expert,
-            381..=480 => CapabilityLevel::Specialist,
+            00..=070 => CapabilityLevel::Desired,
+            71..=170 => CapabilityLevel::Novice,
+            171..=270 => CapabilityLevel::Experienced,
+            271..=370 => CapabilityLevel::Expert,
+            371..=470 => CapabilityLevel::Specialist,
             _ => CapabilityLevel::Desired,
         };
 
@@ -194,11 +194,11 @@ impl ValidatedLevel {
         let average_value = validation_values.iter().sum::<i64>() / validation_values.len() as i64;
     
         let cap = match &average_value {
-            00..=080 => CapabilityLevel::Desired,
-            81..=180 => CapabilityLevel::Novice,
-            181..=280 => CapabilityLevel::Experienced,
-            281..=380 => CapabilityLevel::Expert,
-            381..=480 => CapabilityLevel::Specialist,
+            00..=070 => CapabilityLevel::Desired,
+            71..=170 => CapabilityLevel::Novice,
+            171..=270 => CapabilityLevel::Experienced,
+            271..=370 => CapabilityLevel::Expert,
+            371..=470 => CapabilityLevel::Specialist,
             _ => CapabilityLevel::Desired,
         };
     
