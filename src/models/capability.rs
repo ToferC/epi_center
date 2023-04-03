@@ -44,6 +44,7 @@ pub struct Capability {
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
 
+    #[graphql(skip)]
     pub validation_values: Vec<Option<i64>>,
 }
 
@@ -108,6 +109,7 @@ impl Capability {
         Skill::get_by_id(&self.skill_id)
     }
 
+    /// Detailed view of validations for this capability
     pub async fn validations(&self) -> Result<Vec<Validation>> {
         Validation::get_by_capability_id(&self.id)
     }
