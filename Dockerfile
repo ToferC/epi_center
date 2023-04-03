@@ -26,8 +26,9 @@ COPY ./migrations ./migrations
 COPY ./templates ./templates
 
 # Copy dummy data
-COPY ./names.csv ./names.csv
-COPY ./org_structure.csv ./org_structure.csv
+# COPY ./names.csv ./names.csv
+# COPY ./org_structure.csv ./org_structure.csv
+COPY ./seeds ./seeds
 
 # This build to cache dependencies
 RUN cargo build --release
@@ -47,8 +48,9 @@ FROM rust:latest
 COPY --from=build /people_data_api/target/release/people_data_api .
 COPY --from=build /usr/local/cargo/bin/diesel .
 
-COPY --from=build /people_data_api/names.csv .
-COPY --from=build /people_data_api/org_structure.csv .
+# COPY --from=build /people_data_api/names.csv .
+# COPY --from=build /people_data_api/org_structure.csv .
+COPY --from=build /people_data_api/seeds seeds
 COPY --from=build /people_data_api/migrations migrations
 
 
