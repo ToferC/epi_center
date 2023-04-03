@@ -1,0 +1,9 @@
+target/
+bin/
+.env
+.gitignore
+.git/
+.github/
+.vscode/
+.devcontainer/
+*.ipynb

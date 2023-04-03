@@ -14,7 +14,11 @@ services:
   # https://stackoverflow.com/questions/35069027/docker-wait-for-postgresql-to-be-running
   # https://docs.docker.com/compose/startup-order/
   people-data-api:
-    build: .
+    build:
+      # dockerfile: "Dockerfile"
+      # dockerfile: "Dockerfile.simple"
+      dockerfile: "Dockerfile.new"
+      context: .
     restart: always
     environment:
       - HOST=0.0.0.0

@@ -2,6 +2,7 @@
 use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 use async_graphql::Error;
+use crate::progress::progress::ProgressLogger;
 
 use crate::models::{Affiliation, NewAffiliation, NewCapability, Capability, Skill, NewSkill, CapabilityLevel, SkillDomain, LanguageLevel, LanguageName, NewLanguageData, LanguageData, Person, NewValidation, Validation};
 
@@ -312,6 +313,7 @@ pub fn create_fake_capabilities_for_person(
 }
 
 pub fn create_validations() -> Result<(), Error> {
+
     println!("Adding validations to capabilities");
 
     let mut rng = rand::thread_rng();
@@ -319,6 +321,8 @@ pub fn create_validations() -> Result<(), Error> {
     let person_ids = Person::get_all_ids()?;
 
     let capabilities = Capability::get_all()?;
+
+    let mut progress = ProgressLogger::new("Adding validations to capabilities".to_owned(),capabilities.len());
 
     for c in capabilities {
         let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4).cloned().collect();
@@ -340,8 +344,11 @@ pub fn create_validations() -> Result<(), Error> {
     
             let _res = Validation::create(&v)
                 .expect("Unable to create validation");
+
         }
-    }
+        progress.increment();
+}
+    progress.done();
 
     Ok(())
 }

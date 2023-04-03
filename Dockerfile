@@ -56,4 +56,5 @@ EXPOSE 8080
 
 # Set startup command
 
-CMD ./diesel migration run && ./people_data_api
+# CMD ./diesel migration run && ./people_data_api
+CMD ./people_data_api

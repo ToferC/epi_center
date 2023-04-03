@@ -1,15 +1,52 @@
 # Build stage
-FROM rust:1.68-slim AS build
+#  Base rust image vaiant: rust:1.68-slim requires other dependencies
+FROM rust:1.68 as builder
+
+RUN apt-get -qq update && apt-get install -y -q \
+    libclang-dev \
+    libssl-dev
+# removed unnecessary packages: openssl clang llvm-dev cmake
+
+# RUN cargo install diesel_cli --no-default-features --features postgres
+
 WORKDIR /app
+
+# We simply copy all the files for simplicity
+# Files we wish to exclude are listed in the .dockerignore file
 COPY . .
+
 RUN cargo build --release
 
 # Final stage
-FROM debian:buster-slim
-RUN apt-get update && apt-get install -y ca-certificates libssl-dev && rm -rf /var/lib/apt/lists/*
-RUN groupadd -r rusty && useradd --no-log-init -r -g rusty rusty
+# FROM debian:buster-slim 
+# try if buster -not- slim helps the hang
+# FROM debian:buster # nope
+FROM rust:1.68 as final
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libclang-dev \
+    libpq-dev \
+    libssl-dev \ 
+    && rm -rf /var/lib/apt/lists/*
+
+# Add 'rusty' user/group we wish the container to run as
+# RUN groupadd -r rusty && useradd --no-log-init -r -g rusty rusty
+
 WORKDIR /app
-COPY --from=build /app/target/release/people_data_api .
-USER rusty
+
+# --chown=<user>:<group>
+COPY --from=builder /app/target/release/people_data_api .
+
+# perhaps templates will fix it? didn't fix it
+#  otherwise add libclang-dev/openssl to the final stage?
+# templates: these are needed in the final image for rendering web pages
+COPY templates templates
+# COPY migrations migrations # for diesel migrate
+COPY seeds seeds
+# COPY *.csv .
+
+# USER rusty
 EXPOSE 8080
+# CMD ["./target/release/people_data_api"]
 CMD ["./people_data_api"]

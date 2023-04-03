@@ -65,9 +65,7 @@ pub fn init() {
             let _res = pre_populate_skills().expect("error in populating skills");
 
             println!("Start Pre-populating database");
-            pre_populate_db_schema();
-            println!("Done Pre-populating database");
-
+            pre_populate_db_schema().expect("error in populating db schema");
             //populate_db_with_demo_data();
         }
     }

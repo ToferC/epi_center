@@ -1,4 +1,5 @@
 use std::env;
+use std::time::{Instant};
 use actix_web::{web, App, HttpServer, middleware};
 use tera::{Tera};
 use tera_text_filters::snake_case;
@@ -15,7 +16,10 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
 
+    println!("Starting DB initialization");
+    let now = Instant::now();
     database::init();
+    println!("DB initialization done in {}s.", now.elapsed().as_secs());
 
     let environment = env::var("ENVIRONMENT");
 
