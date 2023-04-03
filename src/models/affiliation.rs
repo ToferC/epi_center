@@ -6,7 +6,6 @@ use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMetho
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use rand::{Rng, thread_rng};
 
 use crate::{schema::*, database};
 use crate::models::{Person, Organization};

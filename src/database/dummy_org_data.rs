@@ -1,21 +1,19 @@
 
-use diesel::RunQueryDsl;
 use rand::Rng;
 use rand::{seq::SliceRandom};
 use async_graphql::Error;
 
-use crate::database::{create_validations, connection};
+use crate::database::{create_validations};
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
-use crate::schema::persons;
 
 use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors, generate_tasks};
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
 pub fn pre_populate_db_schema() -> Result<(), Error> {
 
-    let mut conn = connection()?;
+    //let mut conn = connection()?;
 
     // Set up Organization
     println!("Creating Organization");
@@ -221,7 +219,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     println!("Inserting {} People", new_people.len());
 
     for person in new_people {
-        let res = Person::create(&person);
+        let _res = Person::create(&person);
     }
 
     let mut people = Person::get_all()?;

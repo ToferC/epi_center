@@ -131,7 +131,7 @@ impl Publication {
         let mut conn = connection()?;
         let res: Vec<Uuid> = publication_contributors::table
             .filter(publication_contributors::contributor_id.eq(person_id))
-            .select((publication_contributors::publication_id))
+            .select(publication_contributors::publication_id)
             .load::<Uuid>(&mut conn)?;
 
         let publications = Publication::get_by_ids(&res)?;

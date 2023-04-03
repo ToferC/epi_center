@@ -4,7 +4,6 @@ use chrono::{prelude::*};
 use diesel_derive_enum::DbEnum;
 use rand::Rng;
 use rand::distributions::Standard;
-use diesel::dsl::sum;
 use rand::prelude::Distribution;
 use serde::{Deserialize, Serialize};
 use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
@@ -104,7 +103,7 @@ impl Work {
         let mut conn = connection()?;
         let res: Vec<Uuid> = works::table
             .filter(works::task_id.eq(task_id))
-            .select((works::role_id))
+            .select(works::role_id)
             .load::<Uuid>(&mut conn)?;
 
         Ok(res)

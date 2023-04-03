@@ -3,8 +3,7 @@ use crate::schema::*;
 
 use async_graphql::*;
 
-use crate::models::{Person, User, TeamOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityCount};
+use crate::models::{User};
 use uuid::Uuid;
 
 use crate::graphql::{get_connection_from_context};
