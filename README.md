@@ -42,23 +42,30 @@ brew link --force libpq
 
 cargo clean
 
-docker compose down; sleep 2; docker compose up -d db; sleep 2; diesel migration run
+docker compose down; sleep 2; docker compose up -d db; sleep 10; diesel migration run
+docker compose exec -it db psql -U christopherallison -W people_data_api
 docker compose logs -f
 
 time docker compose build people-data-api
+docker images | grep epi
 docker compose up
 ```
 
 ## TODO
 
-- [x] Working: Dockerfile.simple again: worked (4.25GB)
-- [x] Working: Dockerfile.new finally working with base rust-image (1.98GB)
-- [x] Working: Dockerfile.new try debian:buster (444MB)
-- [x] Working: Dockerfile.new try debian:buster-slim : (392MB)
-- [x] Try again on codespaces
+- [x] Working: Dockerfile.simple again: worked (arm64:4.25GB)
+- [x] Working: Dockerfile.new finally working with base rust-image (arm64:1.98GB)
+- [x] Working: Dockerfile.new try debian:buster (arm64:444MB)
+- [x] Working: Dockerfile.new try debian:buster-slim : (arm64:392MB amd64:447MB )
+- [ ] Try again on codespaces
 
+  - [ ] Rename Dockerfile.new to Dockerfile.multi-slim
 
 - [ ] replace openssl with libssl-dev in Dockerfile.simple
 - [ ] Add e2e tests
 - [x] progress indication with logging function
 - [ ] Where shall we run diesel migrations?
+  - Can use docker-compose to wait for db startup, and run migrations to completion
+  - Create a diesel container, with migrations folders mounted, and run migrations
+  - https://stackoverflow.com/questions/35069027/docker-wait-for-postgresql-to-be-running
+  - https://docs.docker.com/compose/startup-order/

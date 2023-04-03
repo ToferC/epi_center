@@ -4,8 +4,8 @@ FROM rust:1.68 as builder
 
 RUN apt-get -qq update && apt-get install -y -q \
     libclang-dev \
-    openssl
-# removed unnecessary packages: clang llvm-dev cmake
+    libssl-dev
+# removed unnecessary packages: openssl clang llvm-dev cmake
 
 WORKDIR /app
 
