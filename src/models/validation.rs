@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::iter::Sum;
 
 use chrono::{prelude::*};
 use serde::{Deserialize, Serialize};
@@ -11,7 +12,7 @@ use crate::schema::*;
 use crate::database::connection;
 use crate::models::{CapabilityLevel};
 
-use super::Person;
+use super::{Person, Capability};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[diesel(table_name = validations)]
@@ -43,9 +44,15 @@ impl Validation {
 
         let mut conn = connection()?;
 
-        let res = diesel::insert_into(validations::table)
-        .values(validation)
-        .get_result(&mut conn)?;
+        let res:Validation = diesel::insert_into(validations::table)
+            .values(validation)
+            .get_result(&mut conn)?;
+
+        // Update Capability with validation
+
+        let mut capability = Capability::get_by_id(&res.capability_id)?;
+
+        capability.update_from_validation(&res.validated_level)?;
         
         Ok(res)
     }
@@ -126,10 +133,14 @@ impl Validation {
 
         let mut conn = connection()?;
 
-        let res = diesel::update(validations::table)
-        .filter(validations::id.eq(&self.id))
-        .set(self)
-        .get_result(&mut conn)?;
+        let res: Validation = diesel::update(validations::table)
+            .filter(validations::id.eq(&self.id))
+            .set(self)
+            .get_result(&mut conn)?;
+
+        let mut capability = Capability::get_by_id(&res.capability_id)?;
+
+        capability.update_from_validation(&res.validated_level)?;
         
         Ok(res)
     }
@@ -152,28 +163,42 @@ impl ValidatedLevel {
          }
     }
 
-    pub fn return_validated_level(validations: &Vec<Validation>) -> Result<ValidatedLevel> {
-        let mut results = Vec::new();
-    
-        for v in validations {
-            let n = match v.validated_level {
+    pub fn get_value_from_capability_level(capability_level: &CapabilityLevel) -> i64 {
+            let n = match capability_level {
                 CapabilityLevel::Desired => 0,
                 CapabilityLevel::Novice => 100,
                 CapabilityLevel::Experienced => 200,
                 CapabilityLevel::Expert => 300,
                 CapabilityLevel::Specialist => 400,
             };
-            results.push(n);
+            
+            n
+    }
+
+    pub fn get_capability_level_from_value(value: &i64) -> CapabilityLevel {
+
+        let cap = match value {
+            00..=070 => CapabilityLevel::Desired,
+            71..=170 => CapabilityLevel::Novice,
+            171..=270 => CapabilityLevel::Experienced,
+            271..=370 => CapabilityLevel::Expert,
+            371..=470 => CapabilityLevel::Specialist,
+            _ => CapabilityLevel::Desired,
         };
+
+        cap
+    }
+
+    pub fn return_validated_level(validation_values: &Vec<i64>) -> Result<ValidatedLevel> {
     
-        let average_value = results.iter().sum::<i64>() / results.len() as i64;
+        let average_value = validation_values.iter().sum::<i64>() / validation_values.len() as i64;
     
         let cap = match &average_value {
-            00..=080 => CapabilityLevel::Desired,
-            81..=180 => CapabilityLevel::Novice,
-            181..=280 => CapabilityLevel::Experienced,
-            281..=380 => CapabilityLevel::Expert,
-            381..=480 => CapabilityLevel::Specialist,
+            00..=070 => CapabilityLevel::Desired,
+            71..=170 => CapabilityLevel::Novice,
+            171..=270 => CapabilityLevel::Experienced,
+            271..=370 => CapabilityLevel::Expert,
+            371..=470 => CapabilityLevel::Specialist,
             _ => CapabilityLevel::Desired,
         };
     

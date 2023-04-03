@@ -57,9 +57,11 @@ diesel::table! {
         skill_id -> Uuid,
         organization_id -> Uuid,
         self_identified_level -> CapabilityLevel,
+        validated_level -> Nullable<CapabilityLevel>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         retired_at -> Nullable<Timestamp>,
+        validation_values -> Array<Nullable<Int8>>,
     }
 }
 

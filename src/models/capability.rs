@@ -5,6 +5,7 @@ use rand::{distributions::{Distribution,Standard}, Rng};
 use serde::{Deserialize, Serialize};
 use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods, PgTextExpressionMethods};
 use diesel::dsl::count;
+use diesel::prelude::*;
 use diesel_derive_enum::{DbEnum};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
@@ -14,9 +15,7 @@ use crate::{database::connection};
 
 use crate::{schema::*, database};
 
-use crate::models::{Person, Skill, Organization, SkillDomain, Validation};
-
-use super::ValidatedLevel;
+use crate::models::{Person, Skill, Organization, SkillDomain, Validation, ValidatedLevel};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject, Associations)]
 #[diesel(belongs_to(Person))]
@@ -35,15 +34,18 @@ pub struct Capability {
 
     #[graphql(visible = false)]
     pub person_id: Uuid, // Person
+    pub skill_id: Uuid, // Skill
     pub organization_id: Uuid, // Organization
 
-    #[graphql(visible = false)]
-    pub skill_id: Uuid, // Skill
     pub self_identified_level: CapabilityLevel,
+    pub validated_level: Option<CapabilityLevel>,
 
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
+
+    #[graphql(skip)]
+    pub validation_values: Vec<Option<i64>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum, PartialOrd, Ord, Display)]
@@ -107,12 +109,7 @@ impl Capability {
         Skill::get_by_id(&self.skill_id)
     }
 
-    pub async fn validated_level(&self) -> Result<ValidatedLevel> {
-        let validations = Validation::get_by_capability_id(&self.id)?;
-
-        ValidatedLevel::return_validated_level(&validations)
-    }
-
+    /// Detailed view of validations for this capability
     pub async fn validations(&self) -> Result<Vec<Validation>> {
         Validation::get_by_capability_id(&self.id)
     }
@@ -265,15 +262,34 @@ impl Capability {
 
         Ok(counts)
     }
+
+    /// Updates a Capability based on a new validation
+    pub fn update_from_validation(&mut self, validated_level: &CapabilityLevel) -> Result<Self> {
+
+        self.validation_values.push(Some(ValidatedLevel::get_value_from_capability_level(validated_level)));
+
+        let values: Option<Vec<i64>> = self.validation_values.clone().into_iter().collect();
+
+        let values = values.unwrap();
+
+        let validation_average: i64 = values.iter().sum::<i64>() / values.len() as i64;
+
+        let validated_level = ValidatedLevel::get_capability_level_from_value(&validation_average);
+
+        self.validated_level = Some(validated_level);
+
+        self.update()
+    }
     
+    /// Updates a Capability based on changed data
     pub fn update(&self) -> Result<Self> {
 
         let mut conn = database::connection()?;
 
         let res = diesel::update(capabilities::table)
-        .filter(capabilities::id.eq(&self.id))
-        .set(self)
-        .get_result(&mut conn)?;
+            .filter(capabilities::id.eq(&self.id))
+            .set(self)
+            .get_result(&mut conn)?;
         
         Ok(res)
     }
@@ -289,6 +305,7 @@ pub struct NewCapability {
     pub skill_id: Uuid, // Skill
     pub organization_id: Uuid,
     pub self_identified_level: CapabilityLevel,
+    pub validation_values: Vec<i64>,
 }
 
 impl NewCapability {
@@ -296,20 +313,23 @@ impl NewCapability {
     pub fn new(
         person_id: Uuid, // Person
         skill_id: Uuid, // Skill
-        organization_id: Uuid,
+        organization_id: Uuid, // Organization
         self_identified_level: CapabilityLevel,
     ) -> Self {
 
         let skill = Skill::get_by_id(&skill_id).expect("Unable to get skill");
 
+        let self_identified_value: i64 = ValidatedLevel::get_value_from_capability_level(&self_identified_level);
+        
         NewCapability {
             name_en: skill.name_en,
             name_fr: skill.name_fr,
             domain: skill.domain,
-            person_id,
-            skill_id,
-            organization_id,
+            person_id: person_id,
+            skill_id: skill.id,
+            organization_id: organization_id,
             self_identified_level,
+            validation_values: vec![self_identified_value],
         }
     }
 }

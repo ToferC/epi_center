@@ -50,7 +50,7 @@ impl TaskQuery {
         Task::get_by_id(&id)
     }
 
-    #[graphql(name = "taskByTitle")]
+    #[graphql(name = "taskByName")]
     pub async fn task_by_name(
         &self, 
         _context: &Context<'_>,

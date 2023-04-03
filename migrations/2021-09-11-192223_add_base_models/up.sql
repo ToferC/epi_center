@@ -228,10 +228,14 @@ CREATE TABLE IF NOT EXISTS capabilities (
         REFERENCES organizations(id) ON DELETE RESTRICT,
 
     self_identified_level capability_level NOT NULL,
+    validated_level capability_level,
+
 
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    retired_at TIMESTAMP DEFAULT NULL
+    retired_at TIMESTAMP DEFAULT NULL,
+
+    validation_values BIGINT[] NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS affiliations (

@@ -191,10 +191,6 @@ pub fn pre_populate_skills() -> Result<(), Error> {
         let _res = Skill::create(&ns)?;
     }
 
-    // create tasks for each skill
-
-    let _skills = Skill::get_all();
-
     Ok(())
 
 }
@@ -206,6 +202,8 @@ pub fn create_fake_capabilities_for_person(
 ) -> Result<(), Error>{
 
     let mut rng = rand::thread_rng();
+
+    print!(".");
 
     // Create LanguageDatas
 
@@ -258,7 +256,7 @@ pub fn create_fake_capabilities_for_person(
 
     let mut sds: Vec<SkillDomain> = Vec::new();
 
-    for _ in 0..3 {
+    for _ in 0..2 {
         let sd: SkillDomain = rand::random();
         if !sds.contains(&sd) {
             sds.push(sd);
@@ -301,8 +299,16 @@ pub fn create_fake_capabilities_for_person(
         let mut capability_level: CapabilityLevel = rand::random();
 
         for skill in selected_skills {
-            let nc = NewCapability::new(person_id, skill.id, org_id, capability_level);
-            let _res = Capability::create(&nc)?;
+
+            let nc = NewCapability::new(
+                person_id, 
+                skill.id, // Error here
+                org_id, 
+                capability_level,
+            );
+
+            let res = Capability::create(&nc)?;
+
             capability_level = capability_level.step_down();
         }
 
@@ -323,9 +329,14 @@ pub fn create_validations() -> Result<(), Error> {
     let capabilities = Capability::get_all()?;
 
     let mut progress = ProgressLogger::new("Adding validations to capabilities".to_owned(),capabilities.len());
+    for (i, c) in capabilities.into_iter().enumerate() {
+        let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4)
+            .cloned()
+            .collect();
 
-    for c in capabilities {
-        let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4).cloned().collect();
+        if i % 100 == 0 {
+            print!(".")
+        }
 
         for validator in validators {
 

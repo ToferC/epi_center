@@ -55,11 +55,16 @@ impl CapabilityMutation {
             capability.self_identified_level = s;
         };
 
+        if let Some(s) = data.validated_level {
+            capability.validated_level = Some(s);
+        }
+
         if let Some(s) = data.retired_at {
             capability.retired_at = Some(s);
         };
+        
+        capability.update()
 
-        Ok(capability)
     }
 }
 
@@ -71,5 +76,6 @@ impl CapabilityMutation {
 pub struct CapabilityData {
     pub id: Uuid,
     pub self_identified_level: Option<CapabilityLevel>,
+    pub validated_level: Option<CapabilityLevel>,
     pub retired_at: Option<NaiveDateTime>,
 }
