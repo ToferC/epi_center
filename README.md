@@ -27,6 +27,38 @@ It also includes :
     * ADMIN_PASSWORD=ADMINPASSWORD
     * ADMIN_NAME="Admin Name"
 * Change APP_NAME const in lib.rs to your app
-* `cargo install diesel_cli` # if not already installed
 * `diesel migration run`
 * `cargo run`
+
+
+### Running on MacOS
+
+```bash
+cargo install diesel_cli --no-default-features --features postgres # if not already installed
+
+# MacOS only clean up when done
+brew install libpq
+brew link --force libpq
+
+cargo clean
+
+docker compose down; sleep 2; docker compose up -d db; sleep 2; diesel migration run
+docker compose logs -f
+
+time docker compose build people-data-api
+docker compose up
+```
+
+## TODO
+
+- [x] Working: Dockerfile.simple again: worked (4.25GB)
+- [x] Working: Dockerfile.new finally working with base rust-image (1.98GB)
+- [x] Working: Dockerfile.new try debian:buster (444MB)
+- [x] Working: Dockerfile.new try debian:buster-slim : (392MB)
+- [x] Try again on codespaces
+
+
+- [ ] replace openssl with libssl-dev in Dockerfile.simple
+- [ ] Add e2e tests
+- [x] progress indication with logging function
+- [ ] Where shall we run diesel migrations?

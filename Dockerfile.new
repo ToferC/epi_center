@@ -18,10 +18,10 @@ COPY . .
 RUN cargo build --release
 
 # Final stage
-# FROM debian:buster-slim 
-# try if buster -not- slim helps the hang
-# FROM debian:buster # nope
-FROM rust:1.68 as final
+FROM debian:buster-slim 
+# buster-slim works : 392MB
+# FROM debian:buster as final  # this works : 444MB
+# FROM rust:1.68 as final # this works : 1.98GB
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
