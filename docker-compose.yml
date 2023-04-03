@@ -15,7 +15,7 @@ services:
     build:
       # dockerfile: "Dockerfile"
       # dockerfile: "Dockerfile.simple"
-      dockerfile: "Dockerfile.new"
+      dockerfile: "Dockerfile.slim"
       context: .
     restart: always
     environment:

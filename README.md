@@ -55,12 +55,16 @@ docker compose up
 ## TODO
 
 - [x] Working: Dockerfile.simple again: worked (arm64:4.25GB)
-- [x] Working: Dockerfile.new finally working with base rust-image (arm64:1.98GB)
-- [x] Working: Dockerfile.new try debian:buster (arm64:444MB)
-- [x] Working: Dockerfile.new try debian:buster-slim : (arm64:392MB amd64:447MB )
-- [x] Try again on codespaces
-  - [ ] Rename Dockerfile.new to Dockerfile.slim
+- [x] Working: Dockerfile.slim finally working with base rust-image (arm64:1.98GB)
+- [x] Working: Dockerfile.slim try debian:buster (arm64:444MB)
+- [x] Working: Dockerfile.slim try debian:buster-slim : (arm64:392MB amd64:447MB )
+- [x] Try again on codespaces (amd64)
+  - [x] Rename Dockerfile.slim to Dockerfile.slim
 
+- [ ] Accelerate build with rust crate cache?
+- [ ] alpine base image (musl)
+  - [ ] Working: Dockerfile.alpine (arm64: 1.98GB)
+  - [ ] Working: Dockerfile.alpine (arm64: 1.98GB)
 - [x] http response type for index.html Content-Type: text/html; charset=UTF-8
 - [x] replace openssl with libssl-dev in Dockerfile.simple
 - [ ] Add e2e tests
