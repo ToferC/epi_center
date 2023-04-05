@@ -48,7 +48,7 @@ COPY seeds seeds
 # templates: these are needed in the final image for rendering web pages
 COPY templates templates
 
-# migrations: these are needed in the final image if we want diesel migrations this image
+# migrations: these are NOT needed in the final image, as they are embedded in the binary
 # COPY migrations migrations # for diesel migrate
 
 USER rusty

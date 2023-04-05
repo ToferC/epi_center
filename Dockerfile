@@ -21,13 +21,11 @@ WORKDIR /people_data_api
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
-# Copy over migrations
+# Copy over migrations and templates
 COPY ./migrations ./migrations
 COPY ./templates ./templates
 
-# Copy dummy data
-# COPY ./names.csv ./names.csv
-# COPY ./org_structure.csv ./org_structure.csv
+# Copy dummy data (.csv) files
 COPY ./seeds ./seeds
 
 # This build to cache dependencies
@@ -46,17 +44,15 @@ FROM rust:latest
 
 # Copy final build artifact
 COPY --from=build /people_data_api/target/release/people_data_api .
-COPY --from=build /usr/local/cargo/bin/diesel .
 
-# COPY --from=build /people_data_api/names.csv .
-# COPY --from=build /people_data_api/org_structure.csv .
+# Copy dummy data (.csv) files
 COPY --from=build /people_data_api/seeds seeds
-COPY --from=build /people_data_api/migrations migrations
+# Copy templates
+COPY --from=build /people_data_api/templates templates
 
 
 EXPOSE 8080
 
 # Set startup command
 
-# CMD ./diesel migration run && ./people_data_api
-CMD ./people_data_api
+CMD ["./people_data_api"]

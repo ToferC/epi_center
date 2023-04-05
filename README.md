@@ -33,6 +33,8 @@ It also includes :
 - `diesel migration run`
 - `cargo run`
 
+## Dan's notes
+
 ### Running on MacOS
 
 ```bash
@@ -53,7 +55,7 @@ docker images | grep epi
 docker compose up
 ```
 
-## TODO
+### WiP/TODO
 
 - [x] Working: Dockerfile.simple again: worked (arm64:4.25GB)
 - [x] Working: Dockerfile.slim finally working with base rust-image (arm64:1.98GB)
@@ -83,7 +85,7 @@ docker compose up
   - https://stackoverflow.com/questions/35069027/docker-wait-for-postgresql-to-be-running
   - https://docs.docker.com/compose/startup-order/
 
-## Container image sizes
+### Container image sizes
 
 You can control the image you build by selecting the Dockerfile.XX in the docker-compose.yml file.
 | Image              | arm64  | amd64                    | description                                |
@@ -94,7 +96,7 @@ You can control the image you build by selecting the Dockerfile.XX in the docker
 | debian:buster-slim | 392MB  | 447MB (15 minutes build) | multi-stage (Dockerfile.slim)              |
 | alpine:3.14        |        |                          | multi-stage musl based (Dockerfile.alpine) |
 
-## Caching the build
+### Caching the build
 
 To enable the caching of the compiling of the rust dependencies, you can modify the start of the Dockerfile.slim to add this:
 
@@ -102,8 +104,10 @@ To enable the caching of the compiling of the rust dependencies, you can modify 
 SNIPPET
 ```
 
+*measured on M2 Mac Mini:*
+
 | Image             | first | subsequent with only code change | description  |
 |-------------------|-------|----------------------------------|--------------|
-| Dockerfile.simple |       |                                  | single stage |
+| Dockerfile.simple | 238s  |                                  | single stage |
 | Dockerfile.slim   | 216s  |                                  | multi-stage  |
 | Dockerfile.fast   |       |                                  | multi-stage  |
