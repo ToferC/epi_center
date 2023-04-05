@@ -274,12 +274,12 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // set exec grp and level
 
         let (grp, lvl, num_members, title_str) = match ot.tier_level {
-            1 => (HrGroup::DM, 1, 3, "President"),
-            2 => (HrGroup::EX, 3, 3, "Vice President"),
-            3 => (HrGroup::EX, 2, 3, "Director General"),
-            4 => (HrGroup::EX, 1, 2, "Director"),
-            5 => (HrGroup::EC, 4, 5, "Manager"),
-            _ => (HrGroup::EC, 2, 5, "Special Advisor"),
+            1 => (HrGroup::DM, 1, 2, "President"),
+            2 => (HrGroup::EX, 3, 2, "Vice President"),
+            3 => (HrGroup::EX, 2, 2, "Director General"),
+            4 => (HrGroup::EX, 1, 1, "Director"),
+            5 => (HrGroup::EC, 4, 4, "Manager"),
+            _ => (HrGroup::EC, 2, 3, "Special Advisor"),
         };
 
         let owner = owner.update().expect("Unable to update person");
