@@ -11,9 +11,15 @@ RUN apt-get -qq update && apt-get install -y -q \
 
 WORKDIR /app
 
-# We simply copy all the files for simplicity
-# Files we wish to exclude are listed in the .dockerignore file
-COPY . .
+# We copy just the manifests to leverage Docker cache
+# Copying specific file/folders makes the .dockerignore file redundant in this Dockerfile
+# COPY . .
+COPY Cargo.toml Cargo.lock ./
+
+# Now the source code and migrations, both required for the build
+COPY src src
+# migrations are embeded database.rs:19:40
+COPY migrations migrations
 
 RUN cargo build --release
 
