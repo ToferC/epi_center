@@ -18,6 +18,7 @@ use diesel::r2d2::{self, ConnectionManager};
 pub mod models;
 pub mod handlers;
 pub mod errors;
+pub mod progress;
 pub mod schema;
 pub mod database;
 pub mod graphql;

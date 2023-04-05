@@ -1,0 +1,19 @@
+# Build stage
+#  Base rust image vaiant: rust:1.68-slim requires other dependencies
+FROM rust:1.68 as builder
+
+RUN apt-get -qq update && apt-get install -y -q \
+    libclang-dev \
+    libssl-dev
+# removed unnecessary packages: openssl clang llvm-dev cmake
+
+WORKDIR /app
+
+# We simply copy all the files for simplicity
+# Files we wish to exclude are listed in the .dockerignore file
+COPY . .
+
+RUN cargo build --release
+
+CMD ["./target/release/people_data_api"]
+

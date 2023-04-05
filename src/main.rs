@@ -1,4 +1,5 @@
 use std::env;
+use std::time::{Instant};
 use actix_web::{web, App, HttpServer, middleware};
 use tera::{Tera};
 use tera_text_filters::snake_case;
@@ -15,7 +16,10 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
 
+    println!("Starting DB initialization");
+    let now = Instant::now();
     database::init();
+    println!("DB initialization done in {}s.", now.elapsed().as_secs());
 
     let environment = env::var("ENVIRONMENT");
 
@@ -38,12 +42,13 @@ async fn main() -> std::io::Result<()> {
 
     let _domain = host.clone();
 
-    println!("{}", env!("CARGO_MANIFEST_DIR"));
+    println!("Manifests dir: {}", env!("CARGO_MANIFEST_DIR"));
 
     println!("Serving on: {}:{}", &host, &port);
 
     // Create Schema
     let schema = web::Data::new(create_schema_with_context(POOL.clone()));
+    println!("Got schema");
 
     
     HttpServer::new(move || {

@@ -80,7 +80,9 @@ impl OrgTier {
             Ok(p) => p,
             Err(e) => {
                 // OrgTier not found
-                println!("{:?}", e);
+                if e.to_string() == "NotFound" {
+                    println!("{:?}", e);
+                }
                 let p = OrgTier::create(org_tier).expect("Unable to create org_tier");
                 p
             }

@@ -1,18 +1,22 @@
-version: '3.9'
+version: "3.9"
 
 services:
-  db: 
+  db:
     image: postgres:latest
     restart: always
     environment:
       - POSTGRES_USER=christopherallison
-      - POSTGRES_PASSWORD=12345 
-      - POSTGRES_DB=people_data_api 
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=people_data_api
     ports:
       - 5432:5432
 
   people-data-api:
-    build: .
+    build:
+      # dockerfile: "Dockerfile"
+      # dockerfile: "Dockerfile.simple"
+      dockerfile: "Dockerfile.slim"
+      context: .
     restart: always
     environment:
       - HOST=0.0.0.0

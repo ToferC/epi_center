@@ -21,12 +21,12 @@ WORKDIR /people_data_api
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
-# Copy over migrations
+# Copy over migrations and templates
 COPY ./migrations ./migrations
 COPY ./templates ./templates
 
-# Copy dummy data
-COPY ./names.csv ./names.csv
+# Copy dummy data (.csv) files
+COPY ./seeds ./seeds
 
 # This build to cache dependencies
 RUN cargo build --release
@@ -44,7 +44,12 @@ FROM rust:latest
 
 # Copy final build artifact
 COPY --from=build /people_data_api/target/release/people_data_api .
-COPY --from=build /people_data_api/names.csv .
+
+# Copy dummy data (.csv) files
+COPY --from=build /people_data_api/seeds seeds
+# Copy templates
+COPY --from=build /people_data_api/templates templates
+
 
 EXPOSE 8080
 

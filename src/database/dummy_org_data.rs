@@ -1,8 +1,10 @@
 
+use diesel::RunQueryDsl;
 use rand::Rng;
 use rand::{seq::SliceRandom};
 use async_graphql::Error;
 
+use crate::progress::progress::ProgressLogger;
 use crate::database::{create_validations};
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
@@ -71,7 +73,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
     org_tiers.push(top_tier.clone());
 
-    let org_path = "org_structure.csv";
+    let org_path = "seeds/org_structure.csv";
 
     let mut reader = csv::Reader::from_path(org_path)
         .expect("Unable to load csv");
@@ -83,6 +85,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         let division: String = String::from(&record[0]);
         let centre: String = String::from(&record[1]);
         let branch: String = String::from(&record[2]);
+
+        println!("Creating Org Tiers for: {}", branch);
 
         // create org tiers if not already existing
         // Create branch and get id
@@ -96,6 +100,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     
         let adm_tier = OrgTier::get_or_create(&adm)
             .expect("Unable to get or create org_tier");
+
 
         org_tiers.push(adm_tier.clone());
 
@@ -127,6 +132,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
         org_tiers.push(div_tier.clone());
 
+
         // Create 3 teams per division
         for i in 1..=3 {
             let tm = NewOrgTier::new(
@@ -139,10 +145,10 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         
             let tm_tier = OrgTier::get_or_create(&tm)
                 .expect("Unable to get or create org_tier");
-            
+
+
             org_tiers.push(tm_tier);
         }
-
     }
 
     // Create Org Addresses
@@ -184,7 +190,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
     let mut new_people: Vec<NewPerson> = Vec::new();
 
-    let path = "names.csv";
+    let path = "seeds/names.csv";
 
     let mut reader = csv::Reader::from_path(path).unwrap();
 
@@ -216,13 +222,17 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     }
 
     // Insert people
-    println!("Inserting {} People", new_people.len());
+    let mut progress_people = ProgressLogger::new("Inserting People".to_owned(),new_people.len());
 
     for person in new_people {
         let _res = Person::create(&person);
+        progress_people.increment();
     }
+    progress_people.done();
 
     let mut people = Person::get_all()?;
+
+    let mut progress_cap = ProgressLogger::new("Inserting Capabilities".to_owned(),people.len());
 
     for person in &people {
 
@@ -234,10 +244,14 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             **science_org_id,
         )
             .expect("Unable to create capabilities for person");
+        progress_cap.increment();
     } 
+    progress_cap.done();
 
     // Set up Teams and roles data
     println!("Set up teams and roles");
+    let mut progress_tier = ProgressLogger::new("Inserting teams and roles".to_owned(),org_tiers.len());
+
 
     let roles: Vec<&str> = "
         Sr. Policy Analyst; Policy Analyst; Jr. Policy Analyst; Epidemiologist; Administrative Officer; Designer; 
@@ -251,7 +265,6 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         ".split("; ").collect();
 
     // Set up OrgTierOwnership
-
     for ot in org_tiers.clone() {
         // allocate people to org tiers - starting at the top
 
@@ -350,6 +363,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         let _to = TeamOwnership::create(&new_team_ownership).expect("Unable to create ownership");
 
         // Populate the rest of the team, assigning roles at random
+        // println!("Populate the rest of the team, assigning roles at random for {} people", num_members.min(people.len()));
 
         for _i in 0..num_members.min(people.len()) {
             let person = people.pop().unwrap();
@@ -372,8 +386,6 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             );
 
             let role_res = Role::create(&nr).unwrap();
-
-            print!(".");
 
             // Assign work to the roles based on the team's tasks
 
@@ -403,8 +415,12 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                 let _work = Work::create(&nw)
                     .expect("Unable to create work");
             }
-        }    
+        }
+
+        progress_tier.increment();
+
     }
+    progress_tier.done();
 
     // Create Publications and Assign Contributors
     println!("Pre-populating Publications and contributors");
