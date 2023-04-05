@@ -224,12 +224,12 @@ impl Capability {
 
         let skill_id = Skill::get_top_skill_id_by_name(name)?;
 
-        let res: Vec<(String, SkillDomain, CapabilityLevel, i64)> = capabilities::table
+        let res: Vec<(String, SkillDomain, Option<CapabilityLevel>, i64)> = capabilities::table
             .filter(capabilities::skill_id.eq(skill_id))
-            .group_by((capabilities::domain, capabilities::self_identified_level, capabilities::name_en))
-            .select((capabilities::name_en, capabilities::domain, capabilities::self_identified_level, count(capabilities::id)))
-            .order_by((capabilities::name_en, capabilities::self_identified_level))
-            .load::<(String, SkillDomain, CapabilityLevel, i64)>(&mut conn)?;
+            .group_by((capabilities::domain, capabilities::validated_level, capabilities::name_en))
+            .select((capabilities::name_en, capabilities::domain, capabilities::validated_level, count(capabilities::id)))
+            .order_by((capabilities::name_en, capabilities::validated_level))
+            .load::<(String, SkillDomain, Option<CapabilityLevel>, i64)>(&mut conn)?;
 
         // Convert res into CapabilityCountStruct
         let mut counts: Vec<CapabilityCount> = Vec::new();
@@ -245,12 +245,12 @@ impl Capability {
     pub fn get_level_counts_by_domain(domain: SkillDomain) -> Result<Vec<CapabilityCount>> {
         let mut conn = connection()?;
 
-        let res: Vec<(String, SkillDomain, CapabilityLevel, i64)> = capabilities::table
+        let res: Vec<(String, SkillDomain, Option<CapabilityLevel>, i64)> = capabilities::table
             .filter(capabilities::domain.eq(domain))
-            .group_by((capabilities::domain, capabilities::self_identified_level, capabilities::name_en))
-            .select((capabilities::name_en, capabilities::domain, capabilities::self_identified_level, count(capabilities::id)))
-            .order_by((capabilities::name_en, capabilities::self_identified_level))
-            .load::<(String, SkillDomain, CapabilityLevel, i64)>(&mut conn)?;
+            .group_by((capabilities::domain, capabilities::validated_level, capabilities::name_en))
+            .select((capabilities::name_en, capabilities::domain, capabilities::validated_level, count(capabilities::id)))
+            .order_by((capabilities::name_en, capabilities::validated_level))
+            .load::<(String, SkillDomain, Option<CapabilityLevel>, i64)>(&mut conn)?;
 
         // Convert res into CapabilityCountStruct
         let mut counts: Vec<CapabilityCount> = Vec::new();
@@ -342,12 +342,12 @@ pub struct CapabilityCount {
     pub counts: i64,
 }
 
-impl From<(String, SkillDomain, CapabilityLevel, i64)> for CapabilityCount {
-    fn from((name, domain, level, counts): (String, SkillDomain, CapabilityLevel, i64)) -> Self {
+impl From<(String, SkillDomain, Option<CapabilityLevel>, i64)> for CapabilityCount {
+    fn from((name, domain, level, counts): (String, SkillDomain, Option<CapabilityLevel>, i64)) -> Self {
         CapabilityCount {
             name,
             domain,
-            level: level.to_string(),
+            level: level.expect("Unable to translate Validated Level").to_string(),
             counts,
         }
     }

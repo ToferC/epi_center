@@ -1,25 +1,21 @@
 
-use std::io::prelude::*;                                                           
-use std::io;                                                                       
-
 use diesel::RunQueryDsl;
 use rand::Rng;
 use rand::{seq::SliceRandom};
 use async_graphql::Error;
 
 use crate::progress::progress::ProgressLogger;
-use crate::database::{create_validations, connection};
+use crate::database::{create_validations};
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
-use crate::schema::persons;
 
 use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors, generate_tasks};
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
 pub fn pre_populate_db_schema() -> Result<(), Error> {
 
-    let mut conn = connection()?;
+    //let mut conn = connection()?;
 
     // Set up Organization
     println!("Creating Organization");
@@ -279,11 +275,11 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
         let (grp, lvl, num_members, title_str) = match ot.tier_level {
             1 => (HrGroup::DM, 1, 3, "President"),
-            2 => (HrGroup::EX, 4, 3, "Vice President"),
-            3 => (HrGroup::EX, 3, 3, "Director General"),
+            2 => (HrGroup::EX, 3, 3, "Vice President"),
+            3 => (HrGroup::EX, 2, 3, "Director General"),
             4 => (HrGroup::EX, 1, 2, "Director"),
-            5 => (HrGroup::EC, 7, 5, "Manager"),
-            _ => (HrGroup::EC, 4, 5, "Special Advisor"),
+            5 => (HrGroup::EC, 4, 5, "Manager"),
+            _ => (HrGroup::EC, 2, 5, "Special Advisor"),
         };
 
         let owner = owner.update().expect("Unable to update person");

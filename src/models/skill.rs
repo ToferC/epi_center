@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
-use diesel::dsl::count;
 use diesel_derive_enum::DbEnum;
 use serde::{Serialize, Deserialize};
 use diesel::prelude::*;
@@ -100,7 +99,7 @@ impl Skill {
         let mut conn = connection()?;
 
         let res = skills::table.filter(skills::id.eq(id))
-            .select((skills::name_en))
+            .select(skills::name_en)
             .first(&mut conn)?;
 
         Ok(res)

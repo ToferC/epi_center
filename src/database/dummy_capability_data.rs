@@ -307,7 +307,7 @@ pub fn create_fake_capabilities_for_person(
                 capability_level,
             );
 
-            let res = Capability::create(&nc)?;
+            let _res = Capability::create(&nc)?;
 
             capability_level = capability_level.step_down();
         }

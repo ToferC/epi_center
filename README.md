@@ -85,7 +85,7 @@ docker compose up
 
 ## Container image sizes
 
-You can control the image you build by selecting the Dockerfile in the docker-compose.yml file.
+You can control the image you build by selecting the Dockerfile.XX in the docker-compose.yml file.
 | Image              | arm64  | amd64                    | description                                |
 |--------------------|--------|--------------------------|--------------------------------------------|
 | rust:1.68          | 4.25GB |                          | single stage (Dockerfile.simple)           |
@@ -93,3 +93,17 @@ You can control the image you build by selecting the Dockerfile in the docker-co
 | debian:buster      | 444MB  |                          | multi-stage                                |
 | debian:buster-slim | 392MB  | 447MB (15 minutes build) | multi-stage (Dockerfile.slim)              |
 | alpine:3.14        |        |                          | multi-stage musl based (Dockerfile.alpine) |
+
+## Caching the build
+
+To enable the caching of the compiling of the rust dependencies, you can modify the start of the Dockerfile.slim to add this:
+
+```dockerfile
+SNIPPET
+```
+
+| Image             | first | subsequent with only code change | description  |
+|-------------------|-------|----------------------------------|--------------|
+| Dockerfile.simple |       |                                  | single stage |
+| Dockerfile.slim   | 216s  |                                  | multi-stage  |
+| Dockerfile.fast   |       |                                  | multi-stage  |

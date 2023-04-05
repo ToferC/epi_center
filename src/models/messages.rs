@@ -1,3 +1,4 @@
+/* 
 use diesel::PgConnection;
 use diesel::{self, Insertable, Queryable};
 use diesel::{RunQueryDsl};
@@ -17,7 +18,6 @@ use crate::schema::*;
 use crate::models::{NewPerson, Person};
 
 // Code for messaging layer
-/* 
 
 #[derive(Debug, Clone, Serialize, Deserialize, SimpleObject, Queryable)]
 /// A struct representing the API response for a specific traveller

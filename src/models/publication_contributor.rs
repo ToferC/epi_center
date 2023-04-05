@@ -2,11 +2,10 @@ use std::fmt::Debug;
 
 use chrono::{prelude::*};
 use serde::{Deserialize, Serialize};
-use diesel::{self, Insertable, PgConnection, Queryable, ExpressionMethods, BoolExpressionMethods};
+use diesel::{self, Insertable, Queryable, ExpressionMethods, BoolExpressionMethods};
 use diesel::{RunQueryDsl, QueryDsl};
 use uuid::Uuid;
 use async_graphql::*;
-use rand::{Rng, thread_rng};
 
 use crate::schema::*;
 use crate::database::connection;
@@ -85,7 +84,7 @@ impl PublicationContributor {
         let mut conn = connection()?;
         let res: Vec<Uuid> = publication_contributors::table
             .filter(publication_contributors::publication_id.eq(publication_id))
-            .select((publication_contributors::contributor_id))
+            .select(publication_contributors::contributor_id)
             .load::<Uuid>(&mut conn)?;
 
         Ok(res)

@@ -1,7 +1,4 @@
-use std::collections::HashMap;
-
 use chrono::NaiveDateTime;
-use diesel::dsl::count;
 use diesel_derive_enum::DbEnum;
 use serde::{Serialize, Deserialize};
 use diesel::prelude::*;

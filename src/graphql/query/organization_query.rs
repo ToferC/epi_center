@@ -1,14 +1,10 @@
-use diesel::{RunQueryDsl};
-use crate::schema::*;
-
 use async_graphql::*;
 
-use crate::models::{Person, User, TeamOwnership,
-    Team, Organization, Role, OrgTier, Capability, Skill, CapabilityCount};
-use uuid::Uuid;
+use crate::models::{Organization, OrgTier};
 
-use crate::graphql::{get_connection_from_context};
+/*
 use crate::common_utils::{RoleGuard, is_admin, UserRole};
+*/
 
 #[derive(Default)]
 pub struct OrganizationQuery;
