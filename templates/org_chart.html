@@ -1,0 +1,448 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@2.6.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+
+    <div class="chart-container" style="height: 1200px"></div>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script>
+      var chart;
+      d3.csv(
+        'https://raw.githubusercontent.com/ToferC/epi_center/main/org_chart.csv'
+      ).then((dataFlattened) => {
+        dataFlattened.forEach((d) => {
+          const val = Math.round(d.name.length / 2);
+          d.progress = [...new Array(val)].map((d) => Math.random() * 25 + 5);
+        });
+        chart = new d3.OrgChart()
+          .container('.chart-container')
+          .svgHeight(window.innerHeight - 10)
+          .data(dataFlattened)
+          .nodeHeight((d) => 170)
+          .nodeWidth((d) => {
+            if (d.depth == 0) return 500;
+            return 330;
+          })
+          .childrenMargin((d) => 90)
+          .compactMarginBetween((d) => 65)
+          .compactMarginPair((d) => 100)
+          .neightbourMargin((a, b) => 50)
+          .siblingsMargin((d) => 100)
+          .buttonContent(({ node, state }) => {
+            return `<div style="color:#2CAAE5;border-radius:5px;padding:3px;font-size:10px;margin:auto auto;background-color:#040910;border: 1px solid #2CAAE5"> <span style="font-size:9px">${
+              node.children
+                ? `<i class="fas fa-angle-up"></i>`
+                : `<i class="fas fa-angle-down"></i>`
+            }</span> ${node.data._directSubordinates}  </div>`;
+          })
+          .linkUpdate(function (d, i, arr) {
+            d3.select(this)
+              .attr('stroke', (d) =>
+                d.data._upToTheRootHighlighted ? '#14760D' : '#2CAAE5'
+              )
+              .attr('stroke-width', (d) =>
+                d.data._upToTheRootHighlighted ? 15 : 1
+              );
+
+            if (d.data._upToTheRootHighlighted) {
+              d3.select(this).raise();
+            }
+          })
+          .nodeContent(function (d, i, arr, state) {
+            const svgStr = `<svg width=150 height=75  style="background-color:none"> <path d="M 0,15 L15,0 L135,0 L150,15 L150,60 L135,75 L15,75 L0,60" fill="#2599DD" stroke="#2599DD"/> </svg>`;
+            return `
+                          <div class="left-top" style="position:absolute;left:-10px;top:-10px">  ${svgStr}</div>
+                          <div class="right-top" style="position:absolute;right:-10px;top:-10px">  ${svgStr}</div>
+                          <div class="right-bottom" style="position:absolute;right:-10px;bottom:-14px">  ${svgStr}</div>
+                          <div class="left-bottom" style="position:absolute;left:-10px;bottom:-14px">  ${svgStr}</div>
+                          <div style="font-family: 'Inter'; background-color:#040910;sans-serif; position:absolute;margin-top:-1px; margin-left:-1px;width:${
+                            d.width
+                          }px;height:${d.height}px;border-radius:0px;border: 2px solid #2CAAE5">
+                             
+                             <div class="pie-chart-wrapper" style="margin-left:-10px;margin-top:5px;width:320px;height:300px"></div>
+                           
+                            <div style="color:#2CAAE5;position:absolute;right:15px;top:-20px;">
+                              <div style="font-size:15px;color:#2CAAE5;margin-top:32px"> ${
+                                d.data.name
+                              } </div>
+                              <div style="font-size:10px;"> ${
+                                d.data.positionName || ''
+                              } </div>
+                              <div style="font-size:10px;"> ${
+                                d.data.id || ''
+                              } </div>
+                              ${
+                                d.depth == 0
+                                  ? `                              <br/>
+                              <div style="max-width:200px;font-size:10px;">
+                                A corporate history of Ian is a chronological account of a business or other co-operative organization he founded.  <br><br>Usually it is produced in written format but it can also be done in audio or audiovisually  
+                              </div>`
+                                  : ''
+                              }
+
+                            </div>
+
+                            <div style="position:absolute;left:-5px;bottom:10px;">
+                              <div style="font-size:10px;color:#2CAAE5;margin-left:20px;margin-top:32px"> Progress </div>
+                              <div style="color:#2CAAE5;margin-left:20px;margin-top:3px;font-size:10px;"> 
+                                <svg width=150 height=30> ${d.data.progress
+                                  .map((h, i) => {
+                                    return `<rect  width=10 x="${
+                                      i * 12
+                                    }" height=${h}  y=${
+                                      30 - h
+                                    } fill="#B41425"/>`;
+                                  })
+                                  .join('')}  </svg>
+                                </div>
+                            </div>
+                          </div>
+                          
+  `;
+          })
+          .nodeUpdate(function (d, i, arr) {
+            d3.select(this)
+              .select('.node-rect')
+              .attr('stroke', (d) =>
+                d.data._highlighted || d.data._upToTheRootHighlighted
+                  ? '#14760D'
+                  : 'none'
+              )
+              .attr(
+                'stroke-width',
+                d.data._highlighted || d.data._upToTheRootHighlighted ? 40 : 1
+              );
+
+            const pieChartWrapperNode = d3
+              .select(this)
+              .select('.pie-chart-wrapper')
+              .node();
+            const val = (d.data.name.length * 5) % 100; // Dummy calc
+            // General pie chart invokation code
+            new PieChart()
+              .data([
+                { key: 'plan', color: '#6EC2EA', value: val },
+                { key: 'exec', color: '#0D5AAF', value: 100 - val },
+              ])
+              .container(pieChartWrapperNode)
+              .svgHeight(200)
+              .svgWidth(320)
+              .marginTop(40)
+              .image(d.data.imageUrl)
+              .backCircleColor('#1F72A7')
+              .defaultFont('Inter')
+              .render();
+          })
+          .render();
+
+        const url = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QMaAyMA1SdmlAAAAVRJREFUeNrt26FOw2AUhuFTElzrETNLMNPtJVRVVFbtlnYXKGQFqldANo3EoLDUITazzCxBTNBk53lv4M+XJ/ndKZ52L9uft9eP+Oeqbtgs8O7+cbWO36/PiIgmwd4ojsdIU9n2l7XzNBYZNj9Eos6oTRbcdMAZAwxYgAVYgAVYgAUYsAALsAALsAALMGABFmABFmABFmABBizAAqwFgZ/fv+slHl7q3aobNpn2proujIgo276ep/HgixZgARZgARZgAQYswAIswAIswAIswIAFWIAFWIAFWIABC7AAC7AAC7D+AHZdeN97XRf6ogVYgAVYgAVYgAELsAALsAALsAADFmABFmABFmABFmDAAizAAizAAqxrYNeF973XdaEvWoAFWIAFWIAFGLAAC7AAC7AACzBgARZgARZgARZgAQYswAIswAKsW0p1m1S2/WXtPI1Fhs0nxU1Jj2yxm2sAAAAASUVORK5CYII=`;
+        const replaced = url.replace(/(\r\n|\n|\r)/gm);
+        d3.select('.svg-chart-container')
+          .style(
+            'background',
+            'radial-gradient(circle at center, #04192B 0, #000B0E 100%) url("https://raw.githubusercontent.com/bumbeishvili/coronavirus.davidb.dev/master/glow.png")'
+          )
+          .style(
+            'background-image',
+            `url(${replaced}), radial-gradient(circle at center, #04192B 0, #000B0E 100%)`
+          );
+      });
+
+      function downloadPdf() {
+        chart.exportImg({
+          save: false,
+          onLoad: (base64) => {
+            var pdf = new jspdf.jsPDF();
+            var img = new Image();
+            img.src = base64;
+            img.onload = function () {
+              pdf.addImage(
+                img,
+                'JPEG',
+                5,
+                5,
+                595 / 3,
+                ((img.height / img.width) * 595) / 3
+              );
+              pdf.save('chart.pdf');
+            };
+          },
+        });
+      }
+    </script>
+    <script src="./static/pieChart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <style>
+      body {
+        background-color: #000c0e;
+      }
+    </style>
+
+    <script>
+      var index = 0;
+      var compact = 0;
+      var actNdCent = 0;
+    </script>
+
+    <style>
+      .btn {
+        margin: 3px;
+        color: inherit;
+        text-transform: uppercase;
+        word-wrap: break-word;
+        white-space: normal;
+        cursor: pointer;
+        border: 0;
+        border-radius: 0.125rem;
+        -webkit-box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%),
+          0 2px 10px 0 rgb(0 0 0 / 12%);
+        box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
+        -webkit-transition: color 0.15s ease-in-out,
+          background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
+          -webkit-box-shadow 0.15s ease-in-out;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+          border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+          border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+          border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+          -webkit-box-shadow 0.15s ease-in-out;
+        padding: 0.84rem 2.14rem;
+        font-size: 0.81rem;
+        display: inline-block;
+        font-weight: 400;
+        color: #212529;
+        text-align: center;
+        vertical-align: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        border: 1px solid transparent;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+      }
+
+      .btn-action-button {
+        text-transform: lowercase;
+        font-size: 11px !important;
+        border-radius: 7px !important;
+        color: white !important;
+        padding: 4px 5px !important;
+        background-color: #1d2643 !important;
+      }
+
+      .action-buttons {
+        position: absolute;
+        bottom: 10px;
+        right: 35px;
+      }
+
+      .svg-chart-container:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: radial-gradient(circle at center, #04192b 0, #000b0e 100%);
+      }
+    </style>
+
+    <div class="action-buttons">
+      <button
+        onclick='chart.setExpanded("O-6164").render()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-chevron-down"></i> Expand
+      </button>
+      <br />
+
+      <button
+        onclick='chart.setExpanded("O-6164",false).render()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-chevron-up"></i> Collapse</button
+      ><br />
+
+      <button
+        onclick='chart.addNode({imageUrl:"https:\/\/raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Organization%20Chart/cto.jpg",id:"root child",parentId:"O-6066",name:"test",progress:[25,20,15,10]})'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-folder-plus"></i> Add Node
+      </button>
+      <br />
+
+      <button
+        onclick='chart.removeNode("O-6067")'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-user-times"></i> remove</button
+      ><br />
+
+      <button
+        onclick="chart.fit()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-sync"></i> fit
+      </button>
+      <br />
+
+      <button
+        onclick='chart.layout(["right","bottom","left","top"][index++%4]).render().fit()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-retweet"></i> swap
+      </button>
+      <br />
+
+      <button
+        onclick="chart.compact(!!(compact++%2)).render().fit()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-sitemap"></i> compact
+      </button>
+      <br />
+
+      <button
+        onclick="chart.setActiveNodeCentered(!!(actNdCent++%2)).render()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-border-none"></i> center Active
+      </button>
+      <br />
+
+      <button
+        onclick='chart.setCentered("O-6162").render()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-compress-arrows-alt"></i> center
+      </button>
+      <br />
+      <button
+        onclick='chart.setHighlighted("O-6162").render()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-highlighter"></i> mark</button
+      ><br />
+      <button
+        onclick='chart.setUpToTheRootHighlighted("O-6162").render().fit()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-route"></i> mark root
+      </button>
+      <br />
+      <button
+        onclick="chart.clearHighlighting()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-eraser"></i> clear mark
+      </button>
+      <br />
+      <button
+        onclick="chart.fullscreen('body')"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-expand"></i> fullscreen</button
+      ><br />
+
+      <button
+        onclick="chart.exportImg()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="far fa-images"></i> export img
+      </button>
+      <br />
+
+      <button
+        onclick="chart.exportImg({full:true})"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="far fa-images"></i> export full img
+      </button>
+      <br />
+
+      <button
+        onclick="chart.exportSvg()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-file-download"></i> export svg
+      </button>
+      <br />
+      <button
+        onclick="chart.expandAll()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-angle-double-down"></i> expand all</button
+      ><br />
+
+      <button
+        onclick="chart.collapseAll()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-angle-double-up"></i> collapse all</button
+      ><br />
+
+      <button
+        onclick="downloadPdf()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="far fa-file-pdf"></i> export pdf
+      </button>
+      <br />
+
+      <button
+        onclick='chart.connections([{from:"O-6069",to:"O-6070",label:"Conflicts of interest"}]).render()'
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-project-diagram"></i> add link
+      </button>
+      <br />
+
+      <button
+        onclick="chart.zoomOut()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-minus"></i> zoom out</button
+      ><br />
+      <button
+        onclick="chart.zoomIn()"
+        class="btn btn-action-button waves-effect waves-light"
+      >
+        <i class="fas fa-plus"></i> zoom in
+      </button>
+      <br />
+    </div>
+
+    <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+    <script>
+      kofiWidgetOverlay.draw('bumbeishvili', {
+        type: 'floating-chat',
+        'floating-chat.donateButton.text': 'Tip Us',
+        'floating-chat.donateButton.background-color': '#00b9fe',
+        'floating-chat.donateButton.text-color': '#fff',
+      });
+    </script>
+  </body>
+</html>

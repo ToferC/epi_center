@@ -1,4 +1,4 @@
-use std::env;
+use std::{env};
 use std::time::{Instant};
 use actix_web::{web, App, HttpServer, middleware};
 use tera::{Tera};

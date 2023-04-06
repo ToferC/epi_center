@@ -14,6 +14,14 @@ pub async fn index(data: web::Data<AppData>, _req:HttpRequest) -> impl Responder
     HttpResponse::Ok().content_type("text/html; charset=utf-8").body(rendered)
 }
 
+#[get("/org_chart")]
+pub async fn org_chart(data: web::Data<AppData>, _req:HttpRequest) -> impl Responder {
+    let ctx = Context::new(); 
+    let rendered = data.tmpl.render("org_chart.html", &ctx).unwrap();
+    // Explicitly set the content type to text/html
+    HttpResponse::Ok().content_type("text/html; charset=utf-8").body(rendered)
+}
+
 #[get("/{lang}/api")]
 pub async fn api_base(
     data: web::Data<AppData>,
