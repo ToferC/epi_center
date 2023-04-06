@@ -48,6 +48,9 @@ COPY seeds seeds
 # templates: these are needed in the final image for rendering web pages
 COPY templates templates
 
+# static: needed for javascript and css
+COPY static static
+
 # migrations: these are NOT needed in the final image, as they are embedded in the binary
 # COPY migrations migrations # for diesel migrate
 
