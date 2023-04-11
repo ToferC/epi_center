@@ -128,6 +128,16 @@ impl OrgTier {
         Ok(res)
     }
 
+    pub fn get_by_org_id(id: &Uuid) -> Result<Vec<OrgTier>> {
+        let mut conn = connection()?;
+
+        let res = org_tiers::table
+            .filter(org_tiers::id.eq(id))
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Self>> {
         let mut conn = connection()?;
         let org_tier_ownership = org_tiers::table
