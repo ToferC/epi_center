@@ -16,6 +16,8 @@ use crate::schema::*;
 
 use crate::models::{CapabilityCount, CapabilityLevel, Affiliation, SkillDomain, Publication};
 
+use super::OrgTier;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, SimpleObject)]
 #[table_name = "organizations"]
 #[graphql(complex)]
@@ -43,6 +45,10 @@ impl Organization {
 
     pub async fn publications(&self) -> Result<Vec<Publication>> {
         Publication::get_by_publishing_organization_id(&self.id)
+    }
+
+    pub async fn org_tiers(&self) -> Result<Vec<OrgTier>> {
+        OrgTier::get_by_org_id(&self.id)
     }
     
     async fn get_capability_counts(&self) -> Result<Vec<CapabilityCount>> {

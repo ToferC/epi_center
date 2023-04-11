@@ -1,0 +1,60 @@
+# Build stage
+#  Base rust image vaiant: rust:1.68-slim requires other dependencies
+FROM rust:1.68 as builder
+
+RUN apt-get -qq update && apt-get install -y -q \
+    libclang-dev \
+    libssl-dev
+# removed unnecessary packages: openssl clang llvm-dev cmake
+
+# RUN cargo install diesel_cli --no-default-features --features postgres
+
+WORKDIR /app
+
+# We copy just the manifests to leverage Docker cache
+# Copying specific file/folders makes the .dockerignore file redundant in this Dockerfile
+# COPY . .
+COPY Cargo.toml Cargo.lock ./
+
+# Now the source code and migrations, both required for the build
+COPY src src
+# migrations are embeded database.rs:19:40
+COPY migrations migrations
+
+RUN cargo build --release
+
+# Final stage
+FROM debian:buster-slim 
+
+# Install dependencies (check that they are still all required)
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libclang-dev \
+    libpq-dev \
+    libssl-dev \ 
+    && rm -rf /var/lib/apt/lists/*
+
+# Add 'rusty' user/group we wish the container to run as
+RUN groupadd -r rusty && useradd --no-log-init -r -g rusty rusty
+
+WORKDIR /app
+
+# --chown=<user>:<group>
+COPY --from=builder /app/target/release/people_data_api .
+
+# seed: These are needed in the final image for the image to seed the database
+COPY seeds seeds
+
+# templates: these are needed in the final image for rendering web pages
+COPY templates templates
+
+# static: needed for javascript and css
+COPY static static
+
+# migrations: these are NOT needed in the final image, as they are embedded in the binary
+# COPY migrations migrations # for diesel migrate
+
+USER rusty
+EXPOSE 8080
+
+CMD ["./people_data_api"]

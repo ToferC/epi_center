@@ -1,0 +1,11 @@
+# Changess in the Dockerfile will make this redundant as specific files and directories are now copied
+# This was done to optimizer container layers.
+target/
+bin/
+.env
+.gitignore
+.git/
+.github/
+.vscode/
+.devcontainer/
+*.ipynb

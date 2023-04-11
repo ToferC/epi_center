@@ -80,7 +80,9 @@ impl OrgTier {
             Ok(p) => p,
             Err(e) => {
                 // OrgTier not found
-                println!("{:?}", e);
+                if e.to_string() == "NotFound" {
+                    println!("{:?}", e);
+                }
                 let p = OrgTier::create(org_tier).expect("Unable to create org_tier");
                 p
             }
@@ -121,6 +123,16 @@ impl OrgTier {
 
         let res = org_tiers::table
             .filter(org_tiers::name_en.ilike(&name).or(org_tiers::name_fr.ilike(format!("%{}%", name))))
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_org_id(id: &Uuid) -> Result<Vec<OrgTier>> {
+        let mut conn = connection()?;
+
+        let res = org_tiers::table
+            .filter(org_tiers::id.eq(id))
             .load::<OrgTier>(&mut conn)?;
 
         Ok(res)

@@ -65,7 +65,9 @@ impl Team {
             Ok(p) => p,
             Err(e) => {
                 // Team not found
-                println!("{:?}", e);
+                if e.to_string() == "NotFound" {
+                    println!("{:?}", e);
+                }
                 let p = Team::create(team).expect("Unable to create team");
                 p
             }
