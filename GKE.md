@@ -2,9 +2,9 @@
 
 - Luc is writing the yaml.
 
-## GKE Setup
+## GKE Setup / Provisioning
 
-In cloud shell:
+In cloud shell, to provision a GKE cluster; you will need to substitute your own values for the PROJECT_ID, PROJECT_NUMBER, and REGION variables,..
 
 ```bash
 export PROJECT_ID="pdcp-cloud-009-danl"
@@ -14,11 +14,13 @@ export REGION="northamerica-northeast1"
 gcloud config set project ${PROJECT_ID}
 gcloud config set run/region ${REGION}
 
+# Create an artifact registry
 gcloud artifacts repositories create epi-center-repo \
    --repository-format=docker \
    --location=${REGION} \
    --description="epi-center-repo"
 
+# Allow our service account to read from the registry
 gcloud artifacts repositories add-iam-policy-binding epi-center-repo \
     --location=${REGION} \
     --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
@@ -32,35 +34,17 @@ docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/epi-center-repo/hello-app:v1
 gcloud config set compute/region ${REGION}
 gcloud container clusters create-auto epi-cluster
 
+# TODO: I need to document the creation of a network and subnet first.
+#   This is required because of the constraints inside our GCP environment
+# Provision the GKS CLuster itself
 # where net-ca-1 and mtl are networs/subnets I have created before
 gcloud container --project ${PROJECT_ID} clusters create-auto "epi-cluster-1" --region ${REGION} --release-channel "regular" --network "projects/${PROJECT_ID}/global/networks/net-can-1" --subnetwork "projects/${PROJECT_ID}/regions/${REGION}/subnetworks/mtl" --cluster-ipv4-cidr "/17" --services-ipv4-cidr "/22"
 
+# Get you kubeconfig credentials to enable kubectl to work with your cluster
 gcloud container clusters get-credentials epi-cluster-1 --region ${REGION}
-kubectl create deployment hello-app --image=${REGION}-docker.pkg.dev/${PROJECT_ID}/epi-center-repo/hello-app:v1
-kubectl scale deployment hello-app --replicas=3
-kubectl autoscale deployment hello-app --cpu-percent=80 --min=1 --max=5
-kubectl get pods
 
-# Now a service
-kubectl expose deployment hello-app --name=hello-app-service --type=LoadBalancer --port 80 --target-port 8080
-kubectl get service
-
-kubectl delete service hello-app-service
-kubectl delete horizontalpodautoscaler.autoscaling/hello-app
-kubectl delete deployment hello-app
-
-```
-
-## Cloud Shell based demo
-
-```bash
-git clone https://github.com/GoogleCloudPlatform/kubernetes-engine-samples
-cd kubernetes-engine-samples/hello-app
-
-docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/epi-center-repo/hello-app:v1 .
-docker run --rm -p 8080:8080 ${REGION}-docker.pkg.dev/${PROJECT_ID}/epi-center-repo/hello-app:v1
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/epi-center-repo/hello-app:v1
-
+# Delete the cluster
+gcloud container clusters delete epi-cluster-1 --region ${REGION}
 ```
 
 ## References
