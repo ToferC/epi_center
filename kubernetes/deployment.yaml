@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: epicenter-server
+  name: epicenter-server
+  namespace: epicenter
+spec:
+  # replicas: 1
+  selector:
+    matchLabels:
+      app: epicenter-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: epicenter-server
+    spec:
+      containers:
+      - image: postgres:latest
+        name: db
+        volumeMounts:
+          - mountPath: "/var/lib/postgresql/data"
+            name: postgres-data-vol
+        ports:
+          - containerPort: 5432
+        env:
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+        envFrom:
+        - secretRef:
+            name: epicenter-db-secrets
+            # Secrets must include POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB
+      - image: belliveaul/epicenter:latest
+        name: epicenter-server
+        ports:
+          - containerPort: 8080
+        startupProbe:
+          failureThreshold: 180  # Wait up to 30 minutes
+          periodSeconds: 10
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 150
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 30
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 150
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 20
+        env:
+          - name: HOST
+            value: "0.0.0.0"
+          - name: PORT
+            value: "8080"
+        envFrom:
+        - secretRef:
+            name: epicenter-server-secrets
+            # Secrets must include DATABASE_URL, SECRET_KEY,
+            # PASSWORD_SECRET_KEY, JWT_SECRET_KEY, ADMIN_EMAIL, ADMIN_PASSWORD,
+            # and ADMIN_NAME.
+      volumes:
+        - name: postgres-data-vol
+          persistentVolumeClaim:
+            claimName: epicenter-postgres-pvc
+
+status: {}
