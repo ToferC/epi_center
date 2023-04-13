@@ -1,0 +1,184 @@
+# GKE deployment
+
+Luc is also writing the yaml manifests...
+I could not get those to run, so I wrote these. We can reconcile all that later.
+
+The service seems to be functioning correctly. The database seed still takes about 10 minutes to complete, be the server is up after that.
+
+I am still pulling the `api` (`people-data-api`) container that luc pushed to dockerhub (`belliveaul/epicenter:latest`), until our own pipeline is ready. Although I have scripts for cloudbuild we could integrate for CI, and the commands to provision the artifact registry are in the *GKE Setup* section below.
+
+I haven't yet managed to provision a persistent disk, so just as in Luc's manifests, the database is ephemeral.
+(i.e. it will be lost when the database pod is deleted, or re-created)
+
+In these manifests, I omitted the namespace, so we can deploy them into different namespaces, without modification
+
+## Deploying the manifests
+
+```bash
+export PROJECT_ID="pdcp-cloud-009-danl"
+export PROJECT_NUMBER="101744527752"
+export REGION="northamerica-northeast1"
+export CLUSTER_NAME="epi-cluster-1"
+
+gcloud container --project ${PROJECT_ID} clusters list
+
+# install the 'gke-gcloud-auth-plugin' for kubectl: only needed once on a host
+gcloud components install gke-gcloud-auth-plugin
+
+gcloud container clusters get-credentials "${CLUSTER_NAME}" --region ${REGION}
+
+kubectl create namespace epi
+
+# For the rest of the commands we assume the namespace epi is set
+kubens epi # set the namespace to epi - or add it to *all commands* as "-n epi"
+
+# Bring everything up at once, inspecting things along the way
+kubectl apply -f .
+
+## Or bring up each component individually
+
+# Bring up the database
+kubectl apply -f postgres.yaml
+# Connect to the database (exec) and run a psql command
+kubectl exec -it $(kubectl get pods -l app=postgres -o jsonpath='{.items[0].metadata.name}') -- psql -U christopherallison people_data_api
+
+# if you want to expose postgres to your local machine
+kubectl port-forward svc/postgres-service 5432:5432
+
+kubectl apply -f api-config.yaml
+kubectl apply -f api.yaml
+
+# get the logs from the api pod - as it seeds for a long time (like 10-15 minutes)
+kubectl logs -f $(kubectl get pods -l app=api -o jsonpath='{.items[0].metadata.name}')
+# or easier
+kubectl logs -f --all-containers -l app=api
+
+# and now the ingress
+kubectl apply -f ingress.yaml
+
+```
+
+## GKE Setup / Provisioning
+
+In cloud shell, to provision a GKE cluster; you will need to substitute your own values for the PROJECT_ID, PROJECT_NUMBER, and REGION variables,..
+
+```bash
+export PROJECT_ID="pdcp-cloud-009-danl"
+export PROJECT_NUMBER="101744527752"
+export REGION="northamerica-northeast1"
+export CLUSTER_NAME="epi-cluster-1"
+
+
+gcloud config set project ${PROJECT_ID}
+gcloud config set run/region ${REGION}
+gcloud config set compute/region ${REGION}
+
+# Create an artifact registry
+gcloud artifacts repositories create epi-center-repo \
+   --repository-format=docker \
+   --location=${REGION} \
+   --description="epi-center-repo"
+
+# Allow our service account to read from the registry
+gcloud artifacts repositories add-iam-policy-binding epi-center-repo \
+    --location=${REGION} \
+    --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+    --role="roles/artifactregistry.reader"
+
+gcloud auth configure-docker ${REGION}-docker.pkg.dev
+
+# docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/epi-center-repo/hello-app:v1
+
+# Creating a GKE cluster
+gcloud config set compute/region ${REGION}
+
+# List the available GKE clusters
+gcloud container --project ${PROJECT_ID} clusters list
+
+# TODO: I need to document the creation of a network and subnet first.
+#   This is required because of the constraints inside our GCP environment
+# Provision the GKS CLuster itself
+# where net-ca-1 and mtl are networs/subnets I have created before
+gcloud container --project ${PROJECT_ID} clusters create-auto "${CLUSTER_NAME}" --region ${REGION} --release-channel "regular" --network "projects/${PROJECT_ID}/global/networks/net-can-1" --subnetwork "projects/${PROJECT_ID}/regions/${REGION}/subnetworks/mtl" --cluster-ipv4-cidr "/17" --services-ipv4-cidr "/22"
+
+# Get you kubeconfig credentials to enable kubectl to work with your cluster
+gcloud container clusters get-credentials "${CLUSTER_NAME}" --region ${REGION}
+
+#  now create a disk for the postgres database
+#  Not yet working
+# gcloud compute disks create postgres-disk --size=10GB --zone=us-central1-a
+# gcloud compute --project ${PROJECT_ID}  disks create postgres-disk --size=10GB --region ${REGION}
+```
+
+## GKE Teardown
+
+```bash
+# Delete the cluster
+gcloud container clusters delete "${CLUSTER_NAME}" --region ${REGION}
+```
+
+## Preliminary Load testing
+
+With rakyll/hey:
+
+ ```bash
+hey -n 100 -c 10 -m POST -H "Accept-Encoding: gzip, deflate, br" -H "Content-Type: application/json" -H "Accept: application/json" -H "Connection: keep-alive" -H "DNT: 1" -H "Origin: http://34.111.128.163" -D payload.json http://34.111.128.163/graphql
+
+Summary:
+  Total:	5.2010 secs
+  Slowest:	1.0886 secs
+  Fastest:	0.1059 secs
+  Average:	0.4952 secs
+  Requests/sec:	19.2272
+  
+  Total data:	38659800 bytes
+  Size/request:	386598 bytes
+
+Response time histogram:
+  0.106 [1]	|■
+  0.204 [4]	|■■■■■■
+  0.302 [6]	|■■■■■■■■■
+  0.401 [20]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.499 [20]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.597 [27]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.696 [10]	|■■■■■■■■■■■■■■■
+  0.794 [4]	|■■■■■■
+  0.892 [2]	|■■■
+  0.990 [3]	|■■■■
+  1.089 [3]	|■■■■
+
+
+Latency distribution:
+  10% in 0.3004 secs
+  25% in 0.3671 secs
+  50% in 0.4982 secs
+  75% in 0.5449 secs
+  90% in 0.7234 secs
+  95% in 0.9547 secs
+  99% in 1.0886 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0007 secs, 0.1059 secs, 1.0886 secs
+  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0000 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0003 secs
+  resp wait:	0.3329 secs, 0.0392 secs, 0.5401 secs
+  resp read:	0.1614 secs, 0.0028 secs, 0.7079 secs
+
+Status code distribution:
+  [200]	100 responses
+
+```
+
+Just for fun, let's try with hyperfine:
+
+```bash
+$ hyperfine "curl -s 'http://34.111.128.163/graphql' -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Connection: keep-alive' -H 'DNT: 1' -H 'Origin: http://34.111.128.163' --data-binary '{\"query\":\"query {\n  allPeople {\n    email\n    workAddress\n  }\n}\n\"}' --compressed | jq '.data.allPeople | length'"
+
+Benchmark 1: curl -s ... | jq '.data.allPeople | length'
+  Time (mean ± σ):      79.5 ms ±   2.6 ms    [User: 24.9 ms, System: 6.4 ms]
+  Range (min … max):    74.0 ms …  89.6 ms    36 runs
+```
+
+## References
+
+- <https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app>
