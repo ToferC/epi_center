@@ -104,6 +104,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-cors"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b340e9cfa5b08690aae90fb61beb44e9b06f44fe3d0f93781aaa58cfba86245e"
+dependencies = [
+ "actix-utils 3.0.1",
+ "actix-web 4.3.1",
+ "derive_more",
+ "futures-util",
+ "log",
+ "once_cell",
+ "smallvec",
+]
+
+[[package]]
 name = "actix-files"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3048,6 +3063,7 @@ name = "people_data_api"
 version = "0.2.0"
 dependencies = [
  "Inflector",
+ "actix-cors",
  "actix-files",
  "actix-multipart",
  "actix-rt 2.8.0",
