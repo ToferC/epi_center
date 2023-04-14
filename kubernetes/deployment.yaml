@@ -32,6 +32,7 @@ spec:
             name: epicenter-db-secrets
             # Secrets must include POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB
       - image: belliveaul/epicenter:latest
+        imagePullPolicy: Always
         name: epicenter-server
         ports:
           - containerPort: 8080

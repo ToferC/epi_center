@@ -1,17 +1,17 @@
-use std::{env};
-use std::time::{Instant};
-use actix_web::{web, App, HttpServer, middleware};
-use tera::{Tera};
+use actix_cors::Cors;
+use actix_web::{http, middleware, web, App, HttpServer};
+use std::env;
+use std::time::Instant;
+use tera::Tera;
 use tera_text_filters::snake_case;
 
 use people_data_api::database::{self, POOL};
-use people_data_api::graphql::{create_schema_with_context};
-use people_data_api::AppData;
+use people_data_api::graphql::create_schema_with_context;
 use people_data_api::handlers;
+use people_data_api::AppData;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-
     dotenv::dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
@@ -50,18 +50,19 @@ async fn main() -> std::io::Result<()> {
     let schema = web::Data::new(create_schema_with_context(POOL.clone()));
     println!("Got schema");
 
-    
     HttpServer::new(move || {
-        
-        let mut tera = Tera::new(
-            "templates/**/*").unwrap();
-            
+        let cors = Cors::permissive();
+
+        let mut tera = Tera::new("templates/**/*").unwrap();
+
         tera.register_filter("snake_case", snake_case);
-        tera.full_reload().expect("Error running auto reload with Tera");
-        
-        let app_data = web::Data::new(AppData {tmpl: tera});
+        tera.full_reload()
+            .expect("Error running auto reload with Tera");
+
+        let app_data = web::Data::new(AppData { tmpl: tera });
 
         App::new()
+            .wrap(cors)
             //.data(POOL.clone())
             .configure(handlers::configure_services)
             .app_data(schema.clone())

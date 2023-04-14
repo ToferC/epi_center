@@ -2,3 +2,25 @@
 /bin
 .env
 .kafka_config
+
+# dependencies
+orgchart/node_modules
+orgchart/.pnp
+.pnp.js
+
+# testing
+orgchart/coverage
+
+# production
+orgchart/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+orgchart/npm-debug.log*
+orgchart/yarn-debug.log*
+orgchart/yarn-error.log*
