@@ -38,6 +38,8 @@ kubectl apply -f .
 
 ## Or bring up each component individually
 
+# Claim the storage
+kubectl apply -f postgres-volume.yaml
 # Bring up the database
 kubectl apply -f postgres.yaml
 # Connect to the database (exec) and run a psql command

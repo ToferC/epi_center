@@ -22,6 +22,11 @@ spec:
               value: "12345"
             - name: POSTGRES_DB
               value: "people_data_api"
+            # This tells postgres where to store its data
+            # We need a subdirectoy of /var/lib/postgresql/data
+            # because  /var/lib/postgresql/data contains a lost+found directory
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           ports:
             - containerPort: 5432
               name: postgres
@@ -30,6 +35,7 @@ spec:
             # - name: postgres-data
             #   mountPath: /var/lib/postgresql/data
             # this is for the PVC
+            # The mounted directory contains a lost+found directory: see env:PGDATA above
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
       volumes:
