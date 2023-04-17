@@ -151,11 +151,16 @@ gcloud container clusters get-credentials "${CLUSTER_NAME}" --region ${REGION}
 gcloud container clusters delete "${CLUSTER_NAME}" --region ${REGION}
 
 # delete the subnet
+gcloud compute networks subnets list
 gcloud compute networks subnets delete epi-subnet-mtl
+
 # delete the network
-gcloud compute networks delete epi-net-can-1 --project ${PROJECT_ID}
+gcloud compute networks list
+gcloud compute networks delete epi-net-can-1
 
 # delete the artifact registry
+gcloud artifacts repositories list
+gcloud artifacts repositories delete epi-center-repo --location=${REGION}
 ```
 
 ## Confirm the API is working
