@@ -16,7 +16,8 @@ In these manifests, I omitted the namespace, so we can deploy them into differen
 
 ```bash
 export PROJECT_ID="pdcp-cloud-009-danl"
-export PROJECT_NUMBER="101744527752"
+# Get the PROJECT_NUMBER from the PROJECT_ID
+export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 export REGION="northamerica-northeast1"
 export CLUSTER_NAME="epi-cluster-1"
 
@@ -64,7 +65,8 @@ In cloud shell, to provision a GKE cluster; you will need to substitute your own
 
 ```bash
 export PROJECT_ID="pdcp-cloud-009-danl"
-export PROJECT_NUMBER="101744527752"
+# Get the PROJECT_NUMBER from the PROJECT_ID
+export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 export REGION="northamerica-northeast1"
 export CLUSTER_NAME="epi-cluster-1"
 
