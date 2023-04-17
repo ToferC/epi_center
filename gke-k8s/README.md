@@ -97,11 +97,37 @@ gcloud config set compute/region ${REGION}
 # List the available GKE clusters
 gcloud container --project ${PROJECT_ID} clusters list
 
-# TODO: I need to document the creation of a network and subnet first.
-#   This is required because of the constraints inside our GCP environment
+# Creation of a network and subnet first.
+#  - Because of the constraints inside our GCP environment
+# The network:
+#  list existing networks
+gcloud compute networks list
+# create a new network - epi-net-can-1
+gcloud compute networks create epi-net-can-1 \
+  --project ${PROJECT_ID} \
+  --subnet-mode custom
+#  list existing networks - see if it worked
+gcloud compute networks list
+
+# now the subnetwork
+export SUBNETWORK_IP_RANGE="10.1.0.0/20"
+# This will give us a subnetwork with IP addresses ranging from 10.1.0.1 to 10.1.15.254.
+# Since your cluster and services CIDRs are /17 and /22, they won't overlap with this range, assuming they use different base addresses.
+
+# list existing subnets
+gcloud compute networks subnets list
+
+gcloud compute networks subnets create epi-subnet-mtl \
+  --project ${PROJECT_ID} \
+  --region ${REGION} \
+  --network epi-net-can-1 \
+  --range ${SUBNETWORK_IP_RANGE}
+# list existing subnets - see if it worked
+gcloud compute networks subnets list
+
 # Provision the GKS CLuster itself
 # where net-ca-1 and mtl are networs/subnets I have created before
-gcloud container --project ${PROJECT_ID} clusters create-auto "${CLUSTER_NAME}" --region ${REGION} --release-channel "regular" --network "projects/${PROJECT_ID}/global/networks/net-can-1" --subnetwork "projects/${PROJECT_ID}/regions/${REGION}/subnetworks/mtl" --cluster-ipv4-cidr "/17" --services-ipv4-cidr "/22"
+gcloud container --project ${PROJECT_ID} clusters create-auto "${CLUSTER_NAME}" --region ${REGION} --release-channel "regular" --network "projects/${PROJECT_ID}/global/networks/epi-net-can-1" --subnetwork "projects/${PROJECT_ID}/regions/${REGION}/subnetworks/epi-subnet-mtl" --cluster-ipv4-cidr "/17" --services-ipv4-cidr "/22"
 
 # Get you kubeconfig credentials to enable kubectl to work with your cluster
 gcloud container clusters get-credentials "${CLUSTER_NAME}" --region ${REGION}
@@ -117,6 +143,10 @@ gcloud container clusters get-credentials "${CLUSTER_NAME}" --region ${REGION}
 ```bash
 # Delete the cluster
 gcloud container clusters delete "${CLUSTER_NAME}" --region ${REGION}
+
+# delete the subnet
+# delete the net
+# delete the artifact registry
 ```
 
 ## Preliminary Load testing
