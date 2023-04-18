@@ -1,0 +1,3 @@
+{
+  "query": "query {\n  allPeople {\n    email\n    workAddress\n  }\n}\n"
+}

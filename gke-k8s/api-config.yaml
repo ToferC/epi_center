@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-configmap
+data:
+  HOST: "0.0.0.0"
+  PORT: "8080"
+  DATABASE_URL: "postgres://christopherallison:12345@postgres-service/people_data_api?sslmode=disable"
+  SECRET_KEY: "32CHARSECRETKEY"
+  PASSWORD_SECRET_KEY: "32CHARSECRETKEY"
+  JWT_SECRET_KEY: "32CHARSECRETKEY"
+  ADMIN_EMAIL: "some_admin@email.com "
+  ADMIN_PASSWORD: "ADMINPASSWORD"
+  ADMIN_NAME: "Admin Name"

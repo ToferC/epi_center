@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14
+          env:
+            - name: POSTGRES_USER
+              value: "christopherallison"
+            - name: POSTGRES_PASSWORD
+              value: "12345"
+            - name: POSTGRES_DB
+              value: "people_data_api"
+            # This tells postgres where to store its data
+            # We need a subdirectoy of /var/lib/postgresql/data
+            # because  /var/lib/postgresql/data contains a lost+found directory
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            # this was for the emptydir
+            # - name: postgres-data
+            #   mountPath: /var/lib/postgresql/data
+            # this is for the PVC
+            # The mounted directory contains a lost+found directory: see env:PGDATA above
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        # this is for the emptydir
+        # - name: postgres-data
+        #   emptyDir: {}
+        # this is for the PVC
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

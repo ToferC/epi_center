@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: belliveaul/epicenter
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: api-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  # annotations:
+  #   # Add annotations to enable LoadBalancer
+  #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  selector:
+    app: api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+  # LoadBalancer is not needed as we have an ingress
+  # type: LoadBalancer
+  type: ClusterIP

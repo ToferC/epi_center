@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # other storage classes:  kubectl get storageclasses
+  storageClassName: "standard-rwo"
+  resources:
+    requests:
+      storage: 50Gi
