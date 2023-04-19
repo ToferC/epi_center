@@ -225,8 +225,8 @@ impl Person {
     )]
      */
     /// Returns active or inactive roles depending on the active boolean of true or false
-    pub async fn roles(&self, active: bool) -> Result<Vec<Role>> {
-        Role::get_by_person_id(self.id, active)
+    pub async fn inactive_roles(&self) -> Result<Vec<Role>> {
+        Role::get_by_person_id(self.id, false)
     }
 
     /// Returns active role

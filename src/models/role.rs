@@ -24,7 +24,7 @@ use super::{Person, Team, Work};
 /// Referenced by Person
 pub struct Role {
     pub id: Uuid,
-    pub person_id: Uuid,
+    pub person_id: Option<Uuid>, // You can have an empty role on a team
     pub team_id: Uuid,
     pub title_en: String,
     pub title_fr: String,
@@ -43,7 +43,7 @@ pub struct Role {
 #[Object]
 impl Role {
     pub async fn person(&self) -> Result<Person> {
-        Person::get_by_id(&self.person_id)
+        Person::get_by_id(&self.person_id.expect("No person found for this role."))
     }
 
     pub async fn team(&self) -> Result<Team> {
@@ -221,7 +221,7 @@ impl Role {
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject)]
 #[diesel(table_name = roles)]
 pub struct NewRole {
-    pub person_id: Uuid,
+    pub person_id: Option<Uuid>,
     pub team_id: Uuid,
     pub title_en: String,
     pub title_fr: String,
@@ -237,7 +237,7 @@ pub struct NewRole {
 impl NewRole {
 
     pub fn new(
-        person_id: Uuid,
+        person_id: Option<Uuid>,
         team_id: Uuid,
         title_en: String,
         title_fr: String,

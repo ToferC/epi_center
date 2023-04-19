@@ -149,7 +149,7 @@ CREATE TYPE hr_group AS ENUM (
 CREATE TABLE IF NOT EXISTS roles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    person_id UUID NOT NULL,
+    person_id UUID,
     FOREIGN KEY(person_id)
         REFERENCES persons(id) ON DELETE RESTRICT,
 

@@ -181,7 +181,7 @@ diesel::table! {
 
     roles (id) {
         id -> Uuid,
-        person_id -> Uuid,
+        person_id -> Nullable<Uuid>,
         team_id -> Uuid,
         title_en -> Varchar,
         title_fr -> Varchar,

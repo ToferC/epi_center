@@ -297,7 +297,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // if owner, also set management role for team at that tier
 
         let nr = NewRole::new(
-            owner_id, 
+            Some(owner_id), 
             team.id, 
             format!("{} - {}", title_str, ot.name_en.clone()), 
             format!("{} - {}", title_str, ot.name_fr.clone()), 
@@ -369,7 +369,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             // Cover 3 years, 50% chance to move each year
 
             let mut nr = NewRole::new(
-                person_id, 
+                Some(person_id), 
                 team.id, 
                 role.trim().to_string(), 
                 format!("{}_FR", role.trim()), 
