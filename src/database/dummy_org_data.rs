@@ -1,4 +1,5 @@
 
+use actix_web::cookie::time::Duration;
 use diesel::RunQueryDsl;
 use rand::Rng;
 use rand::{seq::SliceRandom};
@@ -353,6 +354,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // println!("Populate the rest of the team, assigning roles at random for {} people", num_members.min(people.len()));
 
         for _i in 0..num_members.min(people_ids.len()) {
+
+            let mut role_vec = Vec::new();
             
             let person_id = people_ids.pop().unwrap();
 
@@ -360,7 +363,12 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
             let grp: HrGroup = rand::random();
 
-            let nr = NewRole::new(
+            let mut level = rng.gen_range(2..6);
+            let start_date = chrono::Utc::now().naive_utc();
+
+            // Cover 3 years, 50% chance to move each year
+
+            let mut nr = NewRole::new(
                 person_id, 
                 team.id, 
                 role.trim().to_string(), 
@@ -368,12 +376,33 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                 0.80, 
                 true,
                 grp,
-                rng.gen_range(2..8),
-                chrono::Utc::now().naive_utc(), 
+                level,
+                start_date, 
                 None
             );
 
             let role_res = Role::create(&nr).unwrap();
+
+            match rng.gen_range(0..10) {
+                0..=5 => continue,
+                6..=8 => {
+                    nr.active = false;
+                    nr.hr_level += 1;
+                    nr.start_datestamp -= chrono::Duration::days(365);
+                    role_vec.push(nr.clone())
+                },
+                9..=10 => {
+                    for i in 1..=2 {
+                        nr.active = false;
+                        nr.hr_level += 1;
+                        nr.start_datestamp -= chrono::Duration::days(365 * i as i64);
+                        role_vec.push(nr.clone())
+                    }
+                },
+                _ => continue,
+            }
+
+            let _r = Role::batch_create(role_vec)?;
 
             // Assign work to the roles based on the team's tasks
 

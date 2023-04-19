@@ -117,6 +117,16 @@ impl Role {
         
         Ok(res)
     }
+
+    pub fn batch_create(roles: Vec<NewRole>) -> Result<usize> {
+        let mut conn = connection()?;
+
+        let res = diesel::insert_into(roles::table)
+            .values(roles)
+            .execute(&mut conn)?;
+        
+        Ok(res)
+    }
     
     pub fn get_or_create(role: &NewRole) -> Result<Role> {
         let mut conn = connection()?;
@@ -138,15 +148,18 @@ impl Role {
         Ok(role)
     }
 
-    pub fn get_all() -> Result<Vec<Self>> {
+    pub fn get_all_active() -> Result<Vec<Self>> {
         let mut conn = connection()?;
-        let roles = roles::table.load::<Role>(&mut conn)?;
+        let roles = roles::table
+            .filter(roles::active.eq(true))
+            .load::<Role>(&mut conn)?;
         Ok(roles)
     }
 
-    pub fn get(count: i64) -> Result<Vec<Self>> {
+    pub fn get_active(count: i64) -> Result<Vec<Self>> {
         let mut conn = connection()?;
         let roles = roles::table
+            .filter(roles::active.eq(true))
             .limit(count)
             .load::<Role>(&mut conn)?;
         

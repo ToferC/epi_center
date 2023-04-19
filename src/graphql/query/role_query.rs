@@ -11,11 +11,11 @@ impl RoleQuery {
 
     // Roles
 
-    #[graphql(name = "roles")]
-    /// Accepts an argument of "count" and returns a vector of {count} role
-    pub async fn get_role(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
+    #[graphql(name = "activeRoles")]
+    /// Accepts an argument of "count" and returns a vector of {count} active role
+    pub async fn get_active_role(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
         
-        Role::get(count)
+        Role::get_active(count)
     }
 
     #[graphql(name = "allRoles")]
@@ -24,7 +24,7 @@ impl RoleQuery {
         &self, 
         _context: &Context<'_>,) -> Result<Vec<Role>> {
 
-        Role::get_all()
+        Role::get_all_active()
     }
 
     #[graphql(name = "roleById")]
@@ -38,8 +38,7 @@ impl RoleQuery {
     }
 
     #[graphql(name = "roleCount")]
-    /// Accepts argument of "count" and returns a vector of {count} persons ordered by
-    /// family name
+    /// returns a count of the total roles in the system
     pub async fn role_count(
         &self, 
         _context: &Context<'_>,
