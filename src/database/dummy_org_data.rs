@@ -10,7 +10,7 @@ use crate::models::{Person, Organization, NewPerson, NewOrganization,
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
     TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
 
-use super::{create_fake_capabilities_for_person, generate_dummy_publications_and_contributors, generate_tasks};
+use super::{create_fake_capabilities, generate_dummy_publications_and_contributors, generate_tasks};
 
 /// Creates basic Org, People, Teams, Roles, Work, etc in the database
 pub fn pre_populate_db_schema() -> Result<(), Error> {
@@ -232,18 +232,9 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
     let mut progress_cap = ProgressLogger::new("Inserting Capabilities".to_owned(),people_ids.len());
 
-    for person_id in &people_ids {
+    let r = create_fake_capabilities(&people_ids, org.id, &science_org_ids)?;
 
-        let science_org_id = &science_org_ids.choose(&mut rng).unwrap();
-
-        let _capabilities_for_person = create_fake_capabilities_for_person(
-            *person_id, 
-            org.id,
-            **science_org_id,
-        )
-            .expect("Unable to create capabilities for person");
-        progress_cap.increment();
-    } 
+    progress_cap.increment(); 
     progress_cap.done();
 
     // Set up Teams and roles data
@@ -267,7 +258,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // allocate people to org tiers - starting at the top
 
         // set org_tier_owner
-        let mut owner_id = people_ids.pop().unwrap();
+        let owner_id = people_ids.pop().unwrap();
         
         // set exec grp and level
 
@@ -386,6 +377,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
             // Assign work to the roles based on the team's tasks
 
+            let mut work = Vec::new();
+
             for _ in 0..rng.gen_range(2..=4) {
 
                 let task = tasks.choose(&mut rng).unwrap().clone();
@@ -409,9 +402,9 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                     task_status,
                 );
 
-                let _work = Work::create(&nw)
-                    .expect("Unable to create work");
+                work.push(nw);
             }
+            let _r = Work::batch_create(&work)?;
         }
 
         progress_tier.increment();

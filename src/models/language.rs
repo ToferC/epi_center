@@ -85,6 +85,16 @@ impl LanguageData {
         Ok(res)
     }
 
+    pub fn batch_create(language_datas: Vec<NewLanguageData>) -> Result<usize> {
+        let mut conn = connection()?;
+
+        let res = diesel::insert_into(language_datas::table)
+            .values(language_datas)
+            .execute(&mut conn)?;
+        
+        Ok(res)
+    }
+
     pub fn get_by_person_id(id: Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 

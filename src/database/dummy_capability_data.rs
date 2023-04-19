@@ -195,125 +195,144 @@ pub fn pre_populate_skills() -> Result<(), Error> {
 
 }
 
-pub fn create_fake_capabilities_for_person(
-    person_id: Uuid, 
+pub fn create_fake_capabilities(
+    people_ids: &Vec<Uuid>, 
     org_id: Uuid, 
-    science_org_id: Uuid,
+    science_org_ids: &Vec<Uuid>,
 ) -> Result<(), Error>{
 
     let mut rng = rand::thread_rng();
 
-    print!(".");
+    let mut capabilities = Vec::new();
+    let mut language_datas = Vec::new();
 
-    // Create LanguageDatas
+    for person_id in people_ids {
 
-    let primary_language = vec![LanguageName::English, LanguageName::French]
-        .choose(&mut rng).unwrap().clone();
+        let science_org_id = science_org_ids.choose(&mut rng).unwrap();
 
-    let secondary_language = match primary_language {
-        LanguageName::English => LanguageName::French,
-        LanguageName::French => LanguageName::English,
-        _ => LanguageName::English,
-    };
+        // Create LanguageDatas
 
-    let primary = NewLanguageData::new(
-        person_id, 
-        primary_language, 
-        Some(LanguageLevel::E),
-        Some(LanguageLevel::E),
-        Some(LanguageLevel::E)
-    );
+        let primary_language = vec![LanguageName::English, LanguageName::French]
+            .choose(&mut rng).unwrap().clone();
 
-    let _res = LanguageData::create(&primary)?;
-
-    if rng.gen_bool(0.5) {
-
-        let beginner = vec![LanguageLevel::B, LanguageLevel::A, LanguageLevel::A];
-        let intermediate = vec![LanguageLevel::C, LanguageLevel::B, LanguageLevel::B];
-        let professional = vec![LanguageLevel::C, LanguageLevel::B, LanguageLevel::C];
-        let fluent = vec![LanguageLevel::E, LanguageLevel::E, LanguageLevel::E];
-
-        let chosen = match rng.gen_range(0..=10) {
-            0..=3 => beginner,
-            4..=6 => intermediate,
-            7..=9 => professional,
-            10 => fluent,
-            _ => beginner,
+        let secondary_language = match primary_language {
+            LanguageName::English => LanguageName::French,
+            LanguageName::French => LanguageName::English,
+            _ => LanguageName::English,
         };
 
-        let secondary = NewLanguageData::new(
-            person_id, 
-            secondary_language, 
-            Some(chosen[0]),
-            Some(chosen[1]),
-            Some(chosen[2])
+        let primary = NewLanguageData::new(
+            *person_id, 
+            primary_language, 
+            Some(LanguageLevel::E),
+            Some(LanguageLevel::E),
+            Some(LanguageLevel::E)
         );
 
-        let _res = LanguageData::create(&secondary)?;
-    }
+        language_datas.push(primary);
 
-    // Choose three random domains from SkillDomain
+        if rng.gen_bool(0.5) {
 
-    let mut sds: Vec<SkillDomain> = Vec::new();
+            let beginner = vec![LanguageLevel::B, LanguageLevel::A, LanguageLevel::A];
+            let intermediate = vec![LanguageLevel::C, LanguageLevel::B, LanguageLevel::B];
+            let professional = vec![LanguageLevel::C, LanguageLevel::B, LanguageLevel::C];
+            let fluent = vec![LanguageLevel::E, LanguageLevel::E, LanguageLevel::E];
 
-    for _ in 0..2 {
-        let sd: SkillDomain = rand::random();
-        if !sds.contains(&sd) {
-            sds.push(sd);
+            let chosen = match rng.gen_range(0..=10) {
+                0..=3 => beginner,
+                4..=6 => intermediate,
+                7..=9 => professional,
+                10 => fluent,
+                _ => beginner,
+            };
+
+            let secondary = NewLanguageData::new(
+                *person_id, 
+                secondary_language, 
+                Some(chosen[0]),
+                Some(chosen[1]),
+                Some(chosen[2])
+            );
+
+            language_datas.push(secondary);
         }
-    }
 
-    // If person has Science domain, 20% chance to add an affiliation
+        // Choose three random domains from SkillDomain
 
-    if sds.contains(&SkillDomain::Scientific) && rng.gen_bool(0.2) {
-        let na = NewAffiliation::new(
-            person_id,
-            science_org_id,
-            "Research Affiliate".to_string(),
-            None,
-        );
+        let mut sds: Vec<SkillDomain> = Vec::new();
 
-        let _res = Affiliation::create(&na)?;
-    }
-
-    // Identify highest CapabilityLevel
-
-    for sd in sds {
-        let domain = sd;
-
-        // Choose 3-5 random skills from each domain
-
-        let skills_in_domain = Skill::get_by_domain(domain)?;
-
-        // Choose 3-5 random skills from domain
-
-        let mut selected_skills: Vec<Skill> = Vec::new();
-
-        for _ in 0..3 {
-            let skill = skills_in_domain.choose(&mut rng).unwrap();
-            if !selected_skills.contains(&skill) {
-                selected_skills.push(skill.clone());
+        for _ in 0..2 {
+            let sd: SkillDomain = rand::random();
+            if !sds.contains(&sd) {
+                sds.push(sd);
             }
         }
 
-        let mut capability_level: CapabilityLevel = rand::random();
+        // If person has Science domain, 20% chance to add an affiliation
 
-        for skill in selected_skills {
-
-            let nc = NewCapability::new(
-                person_id, 
-                skill.id, // Error here
-                org_id, 
-                capability_level,
+        if sds.contains(&SkillDomain::Scientific) && rng.gen_bool(0.2) {
+            let na = NewAffiliation::new(
+                *person_id,
+                *science_org_id,
+                "Research Affiliate".to_string(),
+                None,
             );
 
-            let _res = Capability::create(&nc)?;
-
-            capability_level = capability_level.step_down();
+            let _res = Affiliation::create(&na)?;
         }
 
-        // create work and tasks
+        // Identify highest CapabilityLevel
+
+        for sd in sds {
+            let domain = sd;
+
+            // Choose 3-5 random skills from each domain
+
+            let skills_in_domain = Skill::get_by_domain(domain)?;
+
+            // Choose 3-5 random skills from domain
+
+            let mut selected_skills: Vec<Skill> = Vec::new();
+
+            for _ in 0..3 {
+                let skill = skills_in_domain.choose(&mut rng).unwrap();
+                if !selected_skills.contains(&skill) {
+                    selected_skills.push(skill.clone());
+                }
+            }
+
+            let mut capability_level: CapabilityLevel = rand::random();
+
+            for skill in selected_skills {
+
+                let nc = NewCapability::new(
+                    *person_id, 
+                    skill.id, // Error here
+                    org_id, 
+                    capability_level,
+                );
+
+                capabilities.push(nc);
+
+                // respect limits for batch inserts
+                if capabilities.len() > 1000 {
+                    let _r = Capability::batch_create(&capabilities)?;
+                    println!("Inserted {} capabilities", &capabilities.len());
+                    capabilities = Vec::new();
+                }
+
+                capability_level = capability_level.step_down();
+            }
+
+            // create work and tasks
+        }
     }
+
+    // save language datas
+    let _r = LanguageData::batch_create(language_datas)?;
+
+    // save capabilities
+    let _r = Capability::batch_create(&capabilities)?;
 
     Ok(())
 }

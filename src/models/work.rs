@@ -61,6 +61,16 @@ impl Work {
         
         Ok(res)
     }
+
+    pub fn batch_create(works: &Vec<NewWork>) -> Result<usize> {
+        let mut conn = connection()?;
+
+        let res = diesel::insert_into(works::table)
+            .values(works)
+            .execute(&mut conn)?;
+        
+        Ok(res)
+    }
     
     pub fn get_or_create(work: &NewWork) -> Result<Work> {
         let mut conn = connection()?;

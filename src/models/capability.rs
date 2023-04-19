@@ -127,7 +127,7 @@ impl Capability {
         Ok(res)
     }
 
-    pub fn batch_create(capabilities: Vec<&NewCapability>) -> Result<usize> {
+    pub fn batch_create(capabilities: &Vec<NewCapability>) -> Result<usize> {
         let mut conn = connection()?;
 
         let res = diesel::insert_into(capabilities::table)
