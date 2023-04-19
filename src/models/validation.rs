@@ -55,6 +55,16 @@ impl Validation {
         
         Ok(res)
     }
+
+    pub fn batch_create(validations: Vec<NewValidation>) -> Result<usize> {
+        let mut conn = connection()?;
+
+        let res = diesel::insert_into(validations::table)
+            .values(validations)
+            .execute(&mut conn)?;
+        
+        Ok(res)
+    }
     
     pub fn get_or_create(validation: &NewValidation) -> Result<Validation> {
 

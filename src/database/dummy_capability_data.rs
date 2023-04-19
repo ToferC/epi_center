@@ -324,12 +324,15 @@ pub fn create_validations() -> Result<(), Error> {
 
     let mut rng = rand::thread_rng();
 
+    
     let person_ids = Person::get_all_ids()?;
-
+    
     let capabilities = Capability::get_all()?;
-
+    
     let mut progress = ProgressLogger::new("Adding validations to capabilities".to_owned(),capabilities.len());
     for (i, c) in capabilities.into_iter().enumerate() {
+        let mut validations = Vec::new();
+
         let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4)
             .cloned()
             .collect();
@@ -352,13 +355,13 @@ pub fn create_validations() -> Result<(), Error> {
                 c.id,
                 assessment,
             );
-    
-            let _res = Validation::create(&v)
-                .expect("Unable to create validation");
 
+            validations.push(v.clone());
+    
         }
+        let _r = Validation::batch_create(validations)?;
         progress.increment();
-}
+    }
     progress.done();
 
     Ok(())

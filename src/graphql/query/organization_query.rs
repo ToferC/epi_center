@@ -82,6 +82,8 @@ impl OrganizationQuery {
 
         let data = Vec::new();
 
+        let org_Tiers = OrgTier::get_by_org_id(&id)?;
+
         let query = "query {
             allOrgTiers {
               nameEn

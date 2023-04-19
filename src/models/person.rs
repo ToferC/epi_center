@@ -66,6 +66,16 @@ impl Person {
         
         Ok(res)
     }
+
+    pub fn batch_create(persons: Vec<NewPerson>) -> Result<usize> {
+        let mut conn = connection()?;
+
+        let res = diesel::insert_into(persons::table)
+            .values(persons)
+            .execute(&mut conn)?;
+        
+        Ok(res)
+    }
     
     pub fn get_or_create(person: &NewPerson) -> Result<Person> {
         let mut conn = connection()?;

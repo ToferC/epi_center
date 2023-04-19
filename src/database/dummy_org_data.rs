@@ -224,22 +224,20 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     // Insert people
     let mut progress_people = ProgressLogger::new("Inserting People".to_owned(),new_people.len());
 
-    for person in new_people {
-        let _res = Person::create(&person);
-        progress_people.increment();
-    }
+    let r = Person::batch_create(new_people)?;
+    println!("Inserted {} people.", r);
     progress_people.done();
 
-    let mut people = Person::get_all()?;
+    let mut people_ids = Person::get_all_ids()?;
 
-    let mut progress_cap = ProgressLogger::new("Inserting Capabilities".to_owned(),people.len());
+    let mut progress_cap = ProgressLogger::new("Inserting Capabilities".to_owned(),people_ids.len());
 
-    for person in &people {
+    for person_id in &people_ids {
 
         let science_org_id = &science_org_ids.choose(&mut rng).unwrap();
 
         let _capabilities_for_person = create_fake_capabilities_for_person(
-            person.id, 
+            *person_id, 
             org.id,
             **science_org_id,
         )
@@ -269,7 +267,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // allocate people to org tiers - starting at the top
 
         // set org_tier_owner
-        let mut owner = people.pop().unwrap();
+        let mut owner_id = people_ids.pop().unwrap();
         
         // set exec grp and level
 
@@ -282,10 +280,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             _ => (HrGroup::EC, 2, 3, "Special Advisor"),
         };
 
-        let owner = owner.update().expect("Unable to update person");
-
         let ownership = NewOrgOwnership::new(
-            owner.id,
+            owner_id,
             ot.id,
         );
 
@@ -309,7 +305,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // if owner, also set management role for team at that tier
 
         let nr = NewRole::new(
-            owner.id, 
+            owner_id, 
             team.id, 
             format!("{} - {}", title_str, ot.name_en.clone()), 
             format!("{} - {}", title_str, ot.name_fr.clone()), 
@@ -354,7 +350,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // Set team ownership
 
         let new_team_ownership = NewTeamOwnership::new(
-            owner.id,
+            owner_id,
             team.id,
             chrono::Utc::now().naive_utc(),
             None,
@@ -365,15 +361,16 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // Populate the rest of the team, assigning roles at random
         // println!("Populate the rest of the team, assigning roles at random for {} people", num_members.min(people.len()));
 
-        for _i in 0..num_members.min(people.len()) {
-            let person = people.pop().unwrap();
+        for _i in 0..num_members.min(people_ids.len()) {
+            
+            let person_id = people_ids.pop().unwrap();
 
             let role = *roles.choose(&mut rng).unwrap();
 
             let grp: HrGroup = rand::random();
 
             let nr = NewRole::new(
-                person.id, 
+                person_id, 
                 team.id, 
                 role.trim().to_string(), 
                 format!("{}_FR", role.trim()), 
