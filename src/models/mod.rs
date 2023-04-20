@@ -14,6 +14,7 @@ mod work;
 mod language;
 mod publication;
 mod publication_contributor;
+mod requirement;
 
 mod access_log;
 mod user;
@@ -36,6 +37,7 @@ pub use work::*;
 pub use language::*;
 pub use publication::*;
 pub use publication_contributor::*;
+pub use requirement::*;
 
 pub use self::access_log::*;
 pub use self::user::*;

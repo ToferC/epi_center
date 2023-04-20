@@ -177,6 +177,25 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
+    use super::sql_types::SkillDomain;
+    use super::sql_types::CapabilityLevel;
+
+    requirements (id) {
+        id -> Uuid,
+        name_en -> Varchar,
+        name_fr -> Varchar,
+        domain -> SkillDomain,
+        role_id -> Uuid,
+        skill_id -> Uuid,
+        required_level -> CapabilityLevel,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        retired_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
     use super::sql_types::HrGroup;
 
     roles (id) {
@@ -333,6 +352,8 @@ diesel::joinable!(publication_contributors -> persons (contributor_id));
 diesel::joinable!(publication_contributors -> publications (publication_id));
 diesel::joinable!(publications -> organizations (publishing_organization_id));
 diesel::joinable!(publications -> persons (lead_author_id));
+diesel::joinable!(requirements -> roles (role_id));
+diesel::joinable!(requirements -> skills (skill_id));
 diesel::joinable!(roles -> persons (person_id));
 diesel::joinable!(roles -> teams (team_id));
 diesel::joinable!(tasks -> roles (created_by_role_id));
@@ -356,6 +377,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     persons,
     publication_contributors,
     publications,
+    requirements,
     roles,
     skills,
     tasks,

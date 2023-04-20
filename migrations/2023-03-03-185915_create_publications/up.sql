@@ -93,3 +93,26 @@ CREATE TABLE IF NOT EXISTS validations (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS requirements (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    name_en VARCHAR(256) NOT NULL,
+    name_fr VARCHAR(256) NOT NULL,
+
+    domain skill_domain NOT NULL,
+
+    role_id UUID NOT NULL,
+    FOREIGN KEY(role_id)
+        REFERENCES roles(id) ON DELETE RESTRICT,
+
+    skill_id UUID NOT NULL,
+    FOREIGN KEY(skill_id)
+        REFERENCES skills(id) ON DELETE RESTRICT,
+
+    required_level capability_level NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    retired_at TIMESTAMP DEFAULT NULL
+);
