@@ -233,7 +233,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
     let mut progress_cap = ProgressLogger::new("Inserting Capabilities".to_owned(),people_ids.len());
 
-    let r = create_fake_capabilities(&people_ids, org.id, &science_org_ids)?;
+    let _r = create_fake_capabilities(&people_ids, org.id, &science_org_ids)?;
 
     progress_cap.increment(); 
     progress_cap.done();
@@ -364,7 +364,10 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             let grp: HrGroup = rand::random();
 
             let mut level = rng.gen_range(2..6);
+
+            
             let start_date = chrono::Utc::now().naive_utc();
+            let mut modifier = chrono::Duration::days(rng.gen_range(-300..300));
 
             // Cover 3 years, 50% chance to move each year
 
@@ -377,7 +380,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                 true,
                 grp,
                 level,
-                start_date, 
+                start_date + modifier, 
                 None
             );
 
@@ -388,14 +391,14 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                 6..=8 => {
                     nr.active = false;
                     nr.hr_level += 1;
-                    nr.start_datestamp -= chrono::Duration::days(365);
+                    nr.start_datestamp -= chrono::Duration::days(rng.gen_range(-300..-100));
                     role_vec.push(nr.clone())
                 },
                 9..=10 => {
                     for i in 1..=2 {
                         nr.active = false;
                         nr.hr_level += 1;
-                        nr.start_datestamp -= chrono::Duration::days(365 * i as i64);
+                        nr.start_datestamp -= chrono::Duration::days(rng.gen_range(-600..-150));
                         role_vec.push(nr.clone())
                     }
                 },

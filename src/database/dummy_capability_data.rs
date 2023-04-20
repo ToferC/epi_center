@@ -331,7 +331,7 @@ pub fn create_fake_capabilities(
     // save language datas
     let _r = LanguageData::batch_create(language_datas)?;
 
-    // save capabilities
+    // save remaining capabilities
     let _r = Capability::batch_create(&capabilities)?;
 
     Ok(())
