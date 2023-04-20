@@ -268,10 +268,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::SkillDomain;
+
     teams (id) {
         id -> Uuid,
         organization_id -> Uuid,
         org_tier_id -> Uuid,
+        primary_domain -> SkillDomain,
         name_en -> Varchar,
         name_fr -> Varchar,
         description_en -> Text,

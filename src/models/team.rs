@@ -13,7 +13,7 @@ use crate::config_variables::DATE_FORMAT;
 use crate::schema::*;
 use crate::database::connection;
 
-use super::{Role, Person, TeamOwnership};
+use super::{Role, Person, TeamOwnership, SkillDomain};
 
 
 #[derive(Debug, Clone, Deserialize, Serialize, Identifiable, Queryable, Insertable, AsChangeset)]
@@ -25,6 +25,7 @@ pub struct Team {
     pub id: Uuid,
     pub organization_id: Uuid,
     pub org_tier_id: Uuid,
+    pub primary_domain: SkillDomain,
 
     pub name_en: String,
     pub name_fr: String,
@@ -189,6 +190,7 @@ pub struct NewTeam {
 
     pub organization_id: Uuid,
     pub org_tier_id: Uuid,
+    pub primary_domain: SkillDomain,
     
     pub description_en: String,
     pub description_fr: String,
@@ -201,6 +203,7 @@ impl NewTeam {
         name_fr: String,
         organization_id: Uuid,
         org_tier_id: Uuid,
+        primary_domain: SkillDomain,
         description_en: String,
         description_fr: String,
     ) -> Self {
@@ -209,6 +212,7 @@ impl NewTeam {
             name_fr,
             organization_id,
             org_tier_id,
+            primary_domain,
             description_en,
             description_fr,
         }
