@@ -75,6 +75,10 @@ CREATE TABLE IF NOT EXISTS persons (
     retired_at TIMESTAMP
 );
 
+CREATE TYPE skill_domain as ENUM ('public_health', 'policy', 'data', 'information_technology', 
+    'human_resources', 'finance', 'communications', 'administration', 'scientific', 'medical', 
+    'management', 'leadership', 'partnerships');
+
 CREATE TABLE IF NOT EXISTS org_tiers (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
@@ -85,6 +89,8 @@ CREATE TABLE IF NOT EXISTS org_tiers (
     tier_level INT NOT NULL,
     name_en VARCHAR(256) UNIQUE NOT NULL,
     name_fr VARCHAR(256) UNIQUE NOT NULL,
+
+    primary_domain skill_domain NOT NULL,
 
     parent_tier UUID,
     FOREIGN KEY(parent_tier)
@@ -110,10 +116,6 @@ CREATE TABLE IF NOT EXISTS org_tier_ownerships (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     retired_at TIMESTAMP DEFAULT NULL
 );
-
-CREATE TYPE skill_domain as ENUM ('public_health', 'policy', 'data', 'information_technology', 
-    'human_resources', 'finance', 'communications', 'administration', 'scientific', 'medical', 
-    'management', 'leadership', 'partnerships');
 
 CREATE TABLE IF NOT EXISTS teams (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

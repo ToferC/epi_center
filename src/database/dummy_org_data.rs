@@ -66,6 +66,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             1, 
             "Office of the President and Chief Public Health Officer (OPCPHO)".to_string(), 
             "Office of the President and Chief Public Health Officer (OPCPHO)_FR".to_string(), 
+            SkillDomain::Leadership,
             None);
 
     let top_tier = OrgTier::create(&tt).unwrap();
@@ -84,6 +85,24 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         let division: String = String::from(&record[0]);
         let centre: String = String::from(&record[1]);
         let branch: String = String::from(&record[2]);
+        let domain: String = String::from(&record[3]);
+
+        let domain: SkillDomain = match domain.as_str() {
+            "FIN" => SkillDomain::Finance,
+            "HR" => SkillDomain::HumanResources,
+            "COMM" => SkillDomain::Communications,
+            "POL" => SkillDomain::Policy,
+            "PH" => SkillDomain::PublicHealth,
+            "PART" => SkillDomain::Partnerships,
+            "MGT" => SkillDomain::Management,
+            "LEAD" => SkillDomain::Leadership,
+            "ADMIN" => SkillDomain::Administration,
+            "DATA" => SkillDomain::Data,
+            "IT" => SkillDomain::InformationTechnology,
+            "SCI" => SkillDomain::Scientific,
+            "MED" => SkillDomain::Medical,
+            _ => SkillDomain::PublicHealth,
+        };
 
         println!("Creating Org Tiers for: {}", branch);
 
@@ -93,7 +112,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             org.id, 
             2, 
             branch.to_owned(), 
-            branch.to_owned(), 
+            branch.to_owned(),
+            SkillDomain::Leadership,
             Some(top_tier.id),
         );
     
@@ -108,7 +128,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             org.id, 
             3, 
             centre.to_owned(), 
-            centre.to_owned(), 
+            centre.to_owned(),
+            SkillDomain::Leadership,
             Some(adm_tier.id),
         );
     
@@ -122,7 +143,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             org.id, 
             4, 
             division.to_owned(), 
-            division.to_owned(), 
+            division.to_owned(),
+            domain,
             Some(ctr_tier.id),
         );
     
@@ -139,6 +161,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                 5, 
                 format!("{} Team {}", division.to_owned(), i), 
                 format!("{} Team {}", division.to_owned(), i),
+                domain,
                 Some(div_tier.id),
             );
         
@@ -280,14 +303,13 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         // create team at this level
 
         let team_name = ot.name_en.clone().trim().to_string();
-        let sd: SkillDomain = rand::random();
 
         let new_team = NewTeam::new(
             team_name.trim().to_string(), 
             format!("{}_FR", team_name.trim()),
             org.id, 
             ot.id,
-            sd,
+            ot.primary_domain,
             "Description_EN".to_string(), 
             "Description_FR".to_string()
         );

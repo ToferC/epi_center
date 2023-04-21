@@ -94,12 +94,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::SkillDomain;
+
     org_tiers (id) {
         id -> Uuid,
         organization_id -> Uuid,
         tier_level -> Int4,
         name_en -> Varchar,
         name_fr -> Varchar,
+        primary_domain -> SkillDomain,
         parent_tier -> Nullable<Uuid>,
         created_at -> Timestamp,
         updated_at -> Timestamp,

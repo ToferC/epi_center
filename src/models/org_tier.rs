@@ -10,7 +10,7 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use super::{Organization, Person, OrgOwnership};
+use super::{Organization, Person, OrgOwnership, SkillDomain};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -27,6 +27,7 @@ pub struct OrgTier {
     pub tier_level: i32,
     pub name_en: String,
     pub name_fr: String,
+    pub primary_domain: SkillDomain,
 
     #[graphql(visible = false)]
     pub parent_tier: Option<Uuid>, // Recursive reference to OrgTier
@@ -166,6 +167,7 @@ pub struct NewOrgTier {
     pub tier_level: i32,
     pub name_en: String,
     pub name_fr: String,
+    pub primary_domain: SkillDomain,
     pub parent_tier: Option<Uuid>, // Recursive reference to OrgTier
 }
 
@@ -176,6 +178,7 @@ impl NewOrgTier {
         tier_level: i32,
         name_en: String,
         name_fr: String,
+        primary_domain: SkillDomain,
         parent_tier: Option<Uuid>, // Recursive reference to OrgTier
     ) -> Self {
         NewOrgTier {
@@ -183,6 +186,7 @@ impl NewOrgTier {
             tier_level,
             name_en,
             name_fr,
+            primary_domain,
             parent_tier,
         }
     }
