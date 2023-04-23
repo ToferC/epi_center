@@ -14,7 +14,7 @@ use crate::config_variables::DATE_FORMAT;
 use crate::schema::*;
 use crate::database::connection;
 
-use super::{Person, Team, Work};
+use super::{Person, Team, Work, Requirement};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = roles)]
@@ -75,6 +75,10 @@ impl Role {
         } else {
             Ok("INACTIVE".to_string())
         }
+    }
+
+    pub async fn requirements(&self) -> Result<Vec<Requirement>> {
+        Requirement::get_by_role_id(self.id)
     }
 
     pub async fn hr_group(&self) -> Result<String> {

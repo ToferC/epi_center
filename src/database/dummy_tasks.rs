@@ -1,8 +1,8 @@
 use async_graphql::Error;
-use rand::{seq::SliceRandom, rngs::ThreadRng};
+use rand::{seq::SliceRandom, rngs::ThreadRng, Rng};
 use uuid::Uuid;
 
-use crate::models::{NewTask, Task, SkillDomain, WorkStatus};
+use crate::models::{NewTask, Task, SkillDomain, WorkStatus, NewRequirement, CapabilityLevel, Skill, HrGroup};
 
 /// Generate dummy tasks based on some baseline data about the org
 pub fn generate_tasks(
@@ -45,4 +45,34 @@ pub fn generate_tasks(
     let task = Task::create(&nt);
 
     task
+}
+
+/// Generate requirement for a role based on a provided skilldomain
+pub fn generate_requirement(role_id: Uuid, skill_id: Uuid, hr_group: HrGroup, hr_level: i32, rng: &mut impl Rng) -> NewRequirement {
+    // Add requirements for each role based on the team Primary Domain
+
+    let mut req_level: CapabilityLevel = CapabilityLevel::Desired;
+
+    if  hr_group == HrGroup::EX || hr_group == HrGroup::DM {
+        req_level = CapabilityLevel::Expert
+    } else {
+
+        // Allow for random changes
+        let hr_level = hr_level + rng.gen_range(-2..=2);
+
+        req_level = match hr_level {
+            0..=1 => CapabilityLevel::Desired,
+            2..=3 => CapabilityLevel::Novice,
+            4..=5 => CapabilityLevel::Experienced,
+            6..=7 => CapabilityLevel::Expert,
+            8..=10 => CapabilityLevel::Specialist,
+            _ => CapabilityLevel::Experienced,
+        };
+    }
+
+    NewRequirement::new(
+        role_id,
+        skill_id,
+        req_level,
+    )
 }

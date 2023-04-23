@@ -2,12 +2,15 @@
 use rand::Rng;
 use rand::{seq::SliceRandom};
 use async_graphql::Error;
+use uuid::Uuid;
 
 use crate::progress::progress::ProgressLogger;
-use crate::database::{create_validations};
+use crate::database::{create_validations, generate_requirement};
 use crate::models::{Person, Organization, NewPerson, NewOrganization, 
     Role, NewRole, Team, NewTeam, OrgTier, NewOrgTier, OrgOwnership, NewOrgOwnership,
-    TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work};
+    TeamOwnership, NewTeamOwnership, HrGroup, SkillDomain, Skill, NewWork, CapabilityLevel, WorkStatus, Work,
+    NewRequirement, Requirement,
+};
 
 use super::{create_fake_capabilities, generate_dummy_publications_and_contributors, generate_tasks};
 
@@ -60,6 +63,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     // Set up Org Tiers
 
     let mut org_tiers: Vec<OrgTier> = Vec::new();
+
+    let mut requirements_vec: Vec<NewRequirement> = Vec::new();
 
     let tt = NewOrgTier::new(
             org.id, 
@@ -281,10 +286,14 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
         // set org_tier_owner
         let owner_id = people_ids.pop().unwrap();
+
+        // get domain skills
+        let domain_skills = Skill::get_by_domain(ot.primary_domain)
+                .expect("Unable to get skills");
         
         // set exec grp and level
 
-        let (grp, lvl, num_members, title_str) = match ot.tier_level {
+        let (grp, level, num_members, title_str) = match ot.tier_level {
             1 => (HrGroup::DM, 1, 2, "President"),
             2 => (HrGroup::EX, 3, 2, "Vice President"),
             3 => (HrGroup::EX, 2, 2, "Director General"),
@@ -326,33 +335,40 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             0.80, 
             true,
             grp,
-            lvl,
+            level,
             chrono::Utc::now().naive_utc(), 
             None
         );
 
         let role_res = Role::create(&nr).unwrap();
 
+        // Create requirements for role
+        let skill_ids: Vec<Uuid> = domain_skills
+                    .choose_multiple(&mut rng, 3)
+                    .map(|x| x.id)
+                    .collect();
+
+        for skill_id in skill_ids {
+            let role_requirement = generate_requirement(role_res.id, skill_id, grp, level, &mut rng);
+            requirements_vec.push(role_requirement.clone());
+        }
+
         // Set up tasks from this manager
         // Could base this on the managers skills, but too much detail for now
-        let sd: SkillDomain = rand::random();
-
-        let subjects = Skill::get_by_domain(sd)
-                .expect("Unable to get skills");
 
         let mut tasks = Vec::new();
 
         // Generate tasks for team based on skills under chosen domain
         for _ in 0..=8 {
 
-            let subject = subjects
+            let subject = domain_skills
                 .choose(&mut rng)
                 .unwrap()
                 .clone();
 
             let task = generate_tasks(
                 &mut rng,
-                &sd,
+                &ot.primary_domain,
                 &subject.name_en, 
                 &role_res.id,
                 ot.tier_level
@@ -393,8 +409,16 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
             // Cover 3 years, 50% chance to move each year
 
+            // set 15% chance for role to be vacant
+
+            let p_id = if rng.gen_bool(0.85) {
+                Some(person_id)
+            } else {
+                None
+            };
+
             let mut nr = NewRole::new(
-                Some(person_id), 
+                p_id, 
                 team.id, 
                 role.trim().to_string(), 
                 format!("{}_FR", role.trim()), 
@@ -407,6 +431,17 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
             );
 
             let role_res = Role::create(&nr).unwrap();
+
+            // Create requirements for role
+            let skill_ids: Vec<Uuid> = domain_skills
+                    .choose_multiple(&mut rng, 3)
+                    .map(|x| x.id)
+                    .collect();
+
+            for skill_id in skill_ids {
+                let role_requirement = generate_requirement(role_res.id, skill_id, grp, level, &mut rng);
+                requirements_vec.push(role_requirement.clone());
+            }
 
             match rng.gen_range(0..10) {
                 0..=5 => continue,
@@ -425,12 +460,11 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                     }
                 },
                 _ => continue,
-            }
+            };
 
             let _r = Role::batch_create(role_vec)?;
 
             // Assign work to the roles based on the team's tasks
-
             let mut work = Vec::new();
 
             for _ in 0..rng.gen_range(2..=4) {
@@ -463,6 +497,11 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
         progress_tier.increment();
 
+        if requirements_vec.len() > 1000 {
+            let _res = Requirement::batch_create(&requirements_vec)?;
+            requirements_vec = Vec::new();
+        }
+
     }
     progress_tier.done();
 
@@ -475,6 +514,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     // Create dummy validatoins for capabilities
     let _res = create_validations()
         .expect("Unable to create validations");
+
+    let _res = Requirement::batch_create(&requirements_vec)?;
 
     Ok(())
 
