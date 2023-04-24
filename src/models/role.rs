@@ -42,8 +42,12 @@ pub struct Role {
 
 #[Object]
 impl Role {
-    pub async fn person(&self) -> Result<Person> {
-        Person::get_by_id(&self.person_id.expect("No person found for this role."))
+    pub async fn person(&self) -> Option<Person> {
+
+        match self.person_id {
+            Some(p) => Some(Person::get_by_id(&p).unwrap()),
+            None => None
+        }
     }
 
     pub async fn team(&self) -> Result<Team> {
@@ -191,6 +195,28 @@ impl Role {
 
         let res = roles::table
             .filter(roles::team_id.eq(id))
+            .load::<Role>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_occupied_by_team_id(id: Uuid) -> Result<Vec<Role>> {
+        let mut conn = connection()?;
+
+        let res = roles::table
+            .filter(roles::team_id.eq(id))
+            .filter(roles::person_id.is_not_null())
+            .load::<Role>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_vacant_by_team_id(id: Uuid) -> Result<Vec<Role>> {
+        let mut conn = connection()?;
+
+        let res = roles::table
+            .filter(roles::team_id.eq(id))
+            .filter(roles::person_id.is_null())
             .load::<Role>(&mut conn)?;
 
         Ok(res)

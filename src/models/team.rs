@@ -167,9 +167,19 @@ impl Team {
         Ok(self.updated_at.format(DATE_FORMAT).to_string())
     }
 
+    pub async fn filled_roles(&self) -> Result<Vec<Role>> {
+        Role::get_occupied_by_team_id(self.id)
+    }
+
+    pub async fn vacant_roles(&self) -> Result<Vec<Role>> {
+        Role::get_vacant_by_team_id(self.id)
+    }
+
     pub async fn roles(&self) -> Result<Vec<Role>> {
         Role::get_by_team_id(self.id)
     }
+
+
 
     pub async fn owner(&self) -> Result<Person> {
         let team_ownership = TeamOwnership::get_by_team_id(&self.id).unwrap();
