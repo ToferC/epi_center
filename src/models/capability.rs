@@ -301,6 +301,26 @@ impl Capability {
 
         self.update()
     }
+
+    /// Updates a Capability based on a vector of validations
+    pub fn update_from_batch_validations(&mut self, validated_levels: &Vec<CapabilityLevel>) -> Result<Self> {
+
+        for v in validated_levels {
+            self.validation_values.push(Some(ValidatedLevel::get_value_from_capability_level(v)));
+        };
+        
+        let values: Option<Vec<i64>> = self.validation_values.clone().into_iter().collect();
+        
+        let values = values.unwrap();
+
+        let validation_average: i64 = values.iter().sum::<i64>() / values.len() as i64;
+
+        let validated_level = ValidatedLevel::get_capability_level_from_value(&validation_average);
+
+        self.validated_level = Some(validated_level);
+
+        self.update()
+    }
     
     /// Updates a Capability based on changed data
     pub fn update(&self) -> Result<Self> {

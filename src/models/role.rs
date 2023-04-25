@@ -112,11 +112,11 @@ impl Role {
         Ok(self.updated_at.format(DATE_FORMAT).to_string())
     }
 
-    pub async fn find_matches(&self, num_requirements: u32) -> Result<Vec<Person>> {
+    pub async fn find_matches(&self) -> Result<Vec<Person>> {
 
         let requirements = Requirement::get_by_role_id(self.id)?;
 
-        find_people_by_requirements_met(requirements, num_requirements)
+        find_people_by_requirements_met(requirements)
     }
 }
 
@@ -345,42 +345,32 @@ impl Distribution<HrGroup> for Standard {
     }
 }
 
-pub fn find_people_by_requirements_met(requirements: Vec<Requirement>, num_requirements: u32) -> Result<Vec<Person>> {
+pub fn find_people_by_requirements_met(requirements: Vec<Requirement>) -> Result<Vec<Person>> {
 
     let mut people_ids = Vec::new();
 
-    println!("Requirements: {:?}", &requirements);
+    let num_matches_required = *&requirements.len() as i32;
 
     for req in requirements {
 
         let caps = Capability::get_by_skill_id_and_level(req.skill_id, req.required_level)?;
-
-        println!("Capabilities: {:?}", &caps);
 
         for c in caps {
             people_ids.push(c.person_id);
         };
     }
 
-    println!("People Ids: {:?}", &people_ids);
-
-    let mut id_counts: HashMap<Uuid, u32> = HashMap::new();
-
-    people_ids.iter().for_each(|person| {
-        if !people_ids.contains(person) {
-            id_counts.insert(*person, 0);
-        } else {
-            *id_counts.get_mut(person).unwrap() += 1;
-        }
-    });
-
-    println!("Id counts: {:?}", id_counts);
-
+    let id_counts: HashMap<Uuid, i32> =
+        people_ids.iter()
+            .fold(HashMap::new(), |mut map, id| {
+                *map.entry(*id).or_insert(0) += 1;
+                map
+            });
 
     let mut validated_ids: Vec<Uuid> = Vec::new();
 
     for (k, v) in id_counts {
-        if v >= num_requirements {
+        if v >= num_matches_required {
             validated_ids.push(k);
         }
     };

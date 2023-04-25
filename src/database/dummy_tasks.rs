@@ -61,11 +61,11 @@ pub fn generate_requirement(role_id: Uuid, skill_id: Uuid, hr_group: HrGroup, hr
         let hr_level = hr_level + rng.gen_range(-2..=2);
 
         req_level = match hr_level {
-            0..=2 => CapabilityLevel::Desired,
-            3..=5 => CapabilityLevel::Novice,
-            6..=7 => CapabilityLevel::Experienced,
-            8..=9 => CapabilityLevel::Expert,
-            10 => CapabilityLevel::Specialist,
+            0..=1 => CapabilityLevel::Desired,
+            2..=3 => CapabilityLevel::Novice,
+            4..=6 => CapabilityLevel::Experienced,
+            7..=8 => CapabilityLevel::Expert,
+            9..=10 => CapabilityLevel::Specialist,
             _ => CapabilityLevel::Experienced,
         };
     }

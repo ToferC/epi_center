@@ -343,13 +343,12 @@ pub fn create_validations() -> Result<(), Error> {
 
     let mut rng = rand::thread_rng();
 
-    
     let person_ids = Person::get_all_ids()?;
     
-    let capabilities = Capability::get_all()?;
+    let mut capabilities = Capability::get_all()?;
     
     let mut progress = ProgressLogger::new("Adding validations to capabilities".to_owned(),capabilities.len());
-    for (i, c) in capabilities.into_iter().enumerate() {
+    for (i, mut c) in capabilities.into_iter().enumerate() {
         let mut validations = Vec::new();
 
         let validators: Vec<Uuid> = person_ids.choose_multiple(&mut rng, 4)
@@ -360,6 +359,8 @@ pub fn create_validations() -> Result<(), Error> {
             print!(".")
         }
 
+        let mut validated_levels: Vec<CapabilityLevel> = Vec::new();
+
         for validator in validators {
 
             let assessment = match rng.gen_range(0..10) {
@@ -368,6 +369,8 @@ pub fn create_validations() -> Result<(), Error> {
                 7..=9 => c.self_identified_level.step_up(),
                 _ => c.self_identified_level.step_up(),
             };
+
+            validated_levels.push(assessment);
     
             let v = NewValidation::new(
                 validator,
@@ -376,9 +379,10 @@ pub fn create_validations() -> Result<(), Error> {
             );
 
             validations.push(v.clone());
-    
+            
         }
         let _r = Validation::batch_create(validations)?;
+        c.update_from_batch_validations(&validated_levels)?;
         progress.increment();
     }
     progress.done();

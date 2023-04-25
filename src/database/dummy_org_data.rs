@@ -232,8 +232,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         
         let p = NewPerson::new(
             uuid::Uuid::new_v4(),
-            famn.to_owned(),
-            gn.to_owned(),
+            famn.trim().to_owned(),
+            gn.trim().to_owned(),
             format!("{}.{}_{}@phac-aspc.gc.ca", &gn, &famn, rng.gen_range(0..9999)).to_lowercase(),
             gen_rand_number(),
             addr[0].to_owned(),
