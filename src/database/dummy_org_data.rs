@@ -497,7 +497,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
         progress_tier.increment();
 
-        if requirements_vec.len() > 1000 {
+        if requirements_vec.len() > 500 {
             let _res = Requirement::batch_create(&requirements_vec)?;
             requirements_vec = Vec::new();
         }

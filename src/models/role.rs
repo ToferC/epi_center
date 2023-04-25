@@ -207,34 +207,40 @@ impl Role {
         Ok(res)
     }
 
+    /// Returns active and occupied roles by a team_id
     pub fn get_occupied_by_team_id(id: Uuid) -> Result<Vec<Role>> {
         let mut conn = connection()?;
 
         let res = roles::table
             .filter(roles::team_id.eq(id))
+            .filter(roles::active.eq(true))
             .filter(roles::person_id.is_not_null())
             .load::<Role>(&mut conn)?;
 
         Ok(res)
     }
 
+    /// Returns vacant and active roles
     pub fn get_vacant(count: i64) -> Result<Vec<Role>> {
         let mut conn = connection()?;
 
         let res = roles::table
             .filter(roles::person_id.is_null())
+            .filter(roles::active.eq(true))
             .limit(count)
             .load::<Role>(&mut conn)?;
 
         Ok(res)
     }
 
+    /// Returns vacant and active roles by a team_id
     pub fn get_vacant_by_team_id(id: Uuid) -> Result<Vec<Role>> {
         let mut conn = connection()?;
 
         let res = roles::table
             .filter(roles::team_id.eq(id))
             .filter(roles::person_id.is_null())
+            .filter(roles::active.eq(true))
             .load::<Role>(&mut conn)?;
 
         Ok(res)
