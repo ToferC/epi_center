@@ -149,6 +149,17 @@ impl Requirement {
         Ok(res)
     }
 
+    pub fn get_by_skill_id_and_level(id: Uuid, level: CapabilityLevel) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = requirements::table
+            .filter(requirements::skill_id.eq(id))
+            .filter(requirements::required_level.ge(level))
+            .load::<Requirement>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_domain_and_level(domain: &SkillDomain, level: CapabilityLevel) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 

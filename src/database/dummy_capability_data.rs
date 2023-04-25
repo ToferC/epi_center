@@ -345,7 +345,7 @@ pub fn create_validations() -> Result<(), Error> {
 
     let person_ids = Person::get_all_ids()?;
     
-    let mut capabilities = Capability::get_all()?;
+    let capabilities = Capability::get_all()?;
     
     let mut progress = ProgressLogger::new("Adding validations to capabilities".to_owned(),capabilities.len());
     for (i, mut c) in capabilities.into_iter().enumerate() {

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 use chrono::{prelude::*};
@@ -18,7 +19,7 @@ use crate::schema::*;
 use crate::models::{Role, TeamOwnership, Team, OrgTier, OrgOwnership, Capability, Affiliation, LanguageData, 
     Publication};
 
-use super::Validation;
+use super::{Validation, Requirement};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -285,6 +286,10 @@ impl Person {
     pub async fn language_data(&self) -> Result<Vec<LanguageData>> {
         LanguageData::get_by_person_id(self.id)
     }
+
+    pub async fn find_matches(&self) -> Result<Vec<Role>> {
+        find_roles_by_requirements_met(self)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable, InputObject, Queryable)]
@@ -340,4 +345,37 @@ impl NewPerson {
             orcid_id,
         }
     }
+}
+
+pub fn find_roles_by_requirements_met(person: &Person) -> Result<Vec<Role>> {
+
+    let capabilities = Capability::get_by_person_id(person.id)?;
+
+    let mut role_ids: Vec<Uuid> = Vec::new();
+
+    for cap in capabilities {
+
+        let reqs = Requirement::get_by_skill_id_and_level(cap.skill_id, cap.validated_level.unwrap())?;
+
+        for r in reqs {
+            role_ids.push(r.role_id);
+        };
+    }
+
+    let id_counts: HashMap<Uuid, i32> =
+        role_ids.iter()
+            .fold(HashMap::new(), |mut map, id| {
+                *map.entry(*id).or_insert(0) += 1;
+                map
+            });
+
+    let mut validated_ids: Vec<Uuid> = Vec::new();
+
+    for (k, v) in id_counts {
+        if v >= 3 {
+            validated_ids.push(k);
+        }
+    };
+
+    Role::get_active_vacant_by_ids(&validated_ids)
 }

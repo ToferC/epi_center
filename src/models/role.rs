@@ -1,4 +1,4 @@
-use std::{fmt::Debug, collections::HashMap, num};
+use std::{fmt::Debug, collections::HashMap};
 
 use chrono::{prelude::*};
 use diesel_derive_enum::DbEnum;
@@ -195,6 +195,16 @@ impl Role {
         let mut conn = connection()?;
         let role = roles::table.filter(roles::id.eq(id)).first(&mut conn)?;
         Ok(role)
+    }
+
+    pub fn get_active_vacant_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+        let roles = roles::table
+            .filter(roles::id.eq_any(ids))
+            .filter(roles::active.eq(true))
+            .filter(roles::person_id.is_null())
+            .load::<Self>(&mut conn)?;
+        Ok(roles)
     }
 
     pub fn get_by_team_id(id: Uuid) -> Result<Vec<Role>> {
