@@ -271,14 +271,12 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
     let roles: Vec<&str> = "
         Sr. Policy Analyst; Policy Analyst; Jr. Policy Analyst; Epidemiologist; Administrative Officer; Designer; 
-        Sr. Data Analyst; Data Analyst; Jr. Data Analyst; Project Officer; Scientist; Researcher; 
-        ".split("; ").collect();
+        Sr. Data Analyst; Data Analyst; Jr. Data Analyst; Project Officer; Scientist; Researcher".split("; ").collect();
 
     let work_verbs: Vec<&str> = "
         design; write; revise; audit; draft; review; approve; present; 
         research; analyze data on; visualize data on; develop; plan; 
-        create mvp on; test; prototype; peer review on; 
-        ".split("; ").collect();
+        create mvp on; test; prototype; peer review on".split("; ").collect();
 
     // Set up OrgTierOwnership
     for ot in org_tiers.clone() {

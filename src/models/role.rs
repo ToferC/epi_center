@@ -344,8 +344,8 @@ impl Distribution<HrGroup> for Standard {
             8 => HrGroup::PE,
             9 => HrGroup::IS,
             10 => HrGroup::FI,
-            11 => HrGroup::RES,
-            12 => HrGroup::EX,
+            11..=12 => HrGroup::RES,
+            13 => HrGroup::EX,
             _ => HrGroup::DM,
         }
     }

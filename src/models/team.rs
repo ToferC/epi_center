@@ -167,7 +167,7 @@ impl Team {
         Ok(self.updated_at.format(DATE_FORMAT).to_string())
     }
 
-    pub async fn filled_roles(&self) -> Result<Vec<Role>> {
+    pub async fn occupied_roles(&self) -> Result<Vec<Role>> {
         Role::get_occupied_by_team_id(self.id)
     }
 
