@@ -18,6 +18,13 @@ impl RoleQuery {
         Role::get_active(count)
     }
 
+    #[graphql(name = "vacantRoles")]
+    /// Accepts an argument of "count" and returns a vector of {count} active role
+    pub async fn get_vacant_role(&self, _context: &Context<'_>, count: i64) -> Result<Vec<Role>> {
+        
+        Role::get_vacant(count)
+    }
+
     #[graphql(name = "allRoles")]
     /// Returns a vector of all persons ordered by family name
     pub async fn all_roles(

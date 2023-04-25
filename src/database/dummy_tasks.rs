@@ -2,7 +2,7 @@ use async_graphql::Error;
 use rand::{seq::SliceRandom, rngs::ThreadRng, Rng};
 use uuid::Uuid;
 
-use crate::models::{NewTask, Task, SkillDomain, WorkStatus, NewRequirement, CapabilityLevel, Skill, HrGroup};
+use crate::models::{NewTask, Task, SkillDomain, WorkStatus, NewRequirement, CapabilityLevel, HrGroup};
 
 /// Generate dummy tasks based on some baseline data about the org
 pub fn generate_tasks(
@@ -61,11 +61,11 @@ pub fn generate_requirement(role_id: Uuid, skill_id: Uuid, hr_group: HrGroup, hr
         let hr_level = hr_level + rng.gen_range(-2..=2);
 
         req_level = match hr_level {
-            0..=1 => CapabilityLevel::Desired,
-            2..=3 => CapabilityLevel::Novice,
-            4..=5 => CapabilityLevel::Experienced,
-            6..=7 => CapabilityLevel::Expert,
-            8..=10 => CapabilityLevel::Specialist,
+            0..=2 => CapabilityLevel::Desired,
+            3..=5 => CapabilityLevel::Novice,
+            6..=7 => CapabilityLevel::Experienced,
+            8..=9 => CapabilityLevel::Expert,
+            10 => CapabilityLevel::Specialist,
             _ => CapabilityLevel::Experienced,
         };
     }

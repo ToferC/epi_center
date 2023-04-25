@@ -177,11 +177,22 @@ impl Capability {
         Ok(res)
     }
 
-    pub fn get_single_by_skill_id(id: Uuid) -> Result<Vec<Self>> {
+    pub fn get_by_skill_id(id: Uuid) -> Result<Vec<Self>> {
         let mut conn = connection()?;
 
         let res = capabilities::table
             .filter(capabilities::skill_id.eq(id))
+            .load::<Capability>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_by_skill_id_and_level(id: Uuid, level: CapabilityLevel) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = capabilities::table
+            .filter(capabilities::skill_id.eq(id))
+            .filter(capabilities::validated_level.ge(level))
             .load::<Capability>(&mut conn)?;
 
         Ok(res)

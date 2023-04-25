@@ -13,12 +13,14 @@ use rand::{
 };
 
 use async_graphql::*;
+use crate::models::Capability;
 
 use crate::database::connection;
 use crate::schema::*;
 
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Identifiable, AsChangeset, SimpleObject, PartialEq)]
+#[graphql(complex)]
 #[table_name = "skills"]
 /// Should get this from an API or have standard data
 /// Now pre-loaded as prt of context
@@ -33,6 +35,13 @@ pub struct Skill {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub retired_at: Option<NaiveDateTime>,
+}
+
+#[ComplexObject]
+impl Skill {
+    pub async fn capabilities(&self) -> Result<Vec<Capability>> {
+        Capability::get_by_skill_id(self.id)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]

@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, collections::HashMap, num};
 
 use chrono::{prelude::*};
 use diesel_derive_enum::DbEnum;
@@ -14,7 +14,7 @@ use crate::config_variables::DATE_FORMAT;
 use crate::schema::*;
 use crate::database::connection;
 
-use super::{Person, Team, Work, Requirement};
+use super::{Person, Team, Work, Requirement, Capability};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = roles)]
@@ -111,6 +111,13 @@ impl Role {
     pub async fn updated_at(&self) -> Result<String> {
         Ok(self.updated_at.format(DATE_FORMAT).to_string())
     }
+
+    pub async fn find_matches(&self, num_requirements: u32) -> Result<Vec<Person>> {
+
+        let requirements = Requirement::get_by_role_id(self.id)?;
+
+        find_people_by_requirements_met(requirements, num_requirements)
+    }
 }
 
 
@@ -206,6 +213,17 @@ impl Role {
         let res = roles::table
             .filter(roles::team_id.eq(id))
             .filter(roles::person_id.is_not_null())
+            .load::<Role>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_vacant(count: i64) -> Result<Vec<Role>> {
+        let mut conn = connection()?;
+
+        let res = roles::table
+            .filter(roles::person_id.is_null())
+            .limit(count)
             .load::<Role>(&mut conn)?;
 
         Ok(res)
@@ -325,4 +343,48 @@ impl Distribution<HrGroup> for Standard {
             _ => HrGroup::DM,
         }
     }
+}
+
+pub fn find_people_by_requirements_met(requirements: Vec<Requirement>, num_requirements: u32) -> Result<Vec<Person>> {
+
+    let mut people_ids = Vec::new();
+
+    println!("Requirements: {:?}", &requirements);
+
+    for req in requirements {
+
+        let caps = Capability::get_by_skill_id_and_level(req.skill_id, req.required_level)?;
+
+        println!("Capabilities: {:?}", &caps);
+
+        for c in caps {
+            people_ids.push(c.person_id);
+        };
+    }
+
+    println!("People Ids: {:?}", &people_ids);
+
+    let mut id_counts: HashMap<Uuid, u32> = HashMap::new();
+
+    people_ids.iter().for_each(|person| {
+        if !people_ids.contains(person) {
+            id_counts.insert(*person, 0);
+        } else {
+            *id_counts.get_mut(person).unwrap() += 1;
+        }
+    });
+
+    println!("Id counts: {:?}", id_counts);
+
+
+    let mut validated_ids: Vec<Uuid> = Vec::new();
+
+    for (k, v) in id_counts {
+        if v >= num_requirements {
+            validated_ids.push(k);
+        }
+    };
+
+
+    Person::get_by_ids(&validated_ids)
 }
