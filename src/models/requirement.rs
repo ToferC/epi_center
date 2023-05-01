@@ -154,7 +154,8 @@ impl Requirement {
 
         let res = requirements::table
             .filter(requirements::skill_id.eq(id))
-            .filter(requirements::required_level.ge(level))
+            // the required level must be less than or equal to the provided level
+            .filter(requirements::required_level.le(level))
             .load::<Requirement>(&mut conn)?;
 
         Ok(res)
