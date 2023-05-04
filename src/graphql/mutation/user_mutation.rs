@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use async_graphql::*;
-
+use serde::{Deserialize, Serialize};
 use crate::models::{InsertableUser, LoginQuery,
     User, UserData, create_token, decode_token,
     verify_password, UserUpdate, hash_password};
@@ -12,6 +12,13 @@ use crate::common_utils::{UserRole,
 
 #[derive(Default)]
 pub struct UserMutation;
+
+#[derive(Debug, Serialize, Deserialize, SimpleObject)]
+pub struct UserResponse {
+    bearer: String,
+    role: String,
+    email: String,
+}
 
 // Mutation Example
 
@@ -122,7 +129,7 @@ impl UserMutation {
         &self,
         _context: &Context<'_>,
         input: LoginQuery,
-    ) -> Result<String, Error> {
+    ) -> Result<UserResponse, Error> {
         let maybe_user = User::get_by_email(&input.email).ok();
 
         if let Some(user) = maybe_user {
@@ -132,13 +139,20 @@ impl UserMutation {
                     let role = UserRole::from_str(user.role.as_str())
                         .expect("Cannot convert &str to UserRole");
 
-                    // Return the token which would be accepted by the ArriveCan 
+                    // Return the token which would be accepted by the Epicenter 
                     // app and used to authenticate actions
                     let token = create_token(user.id.to_string(), role);
 
+                    let res = UserResponse {
+                        email: user.email.to_owned(),
+                        bearer: token.to_owned(),
+                        role: user.role,
+                    };
+
+
                     println!("JWT: {}\nData{:?}", &token, decode_token(&token));
 
-                    return Ok(token);
+                    return Ok(res);
                 }
             }
         }
