@@ -445,14 +445,14 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                 0..=5 => continue,
                 6..=8 => {
                     nr.active = false;
-                    nr.hr_level += 1;
+                    nr.hr_level -= 1;
                     nr.start_datestamp -= chrono::Duration::days(rng.gen_range(-300..-100));
                     role_vec.push(nr.clone())
                 },
                 9..=10 => {
                     for _i in 1..=2 {
                         nr.active = false;
-                        nr.hr_level += 1;
+                        nr.hr_level -= 1;
                         nr.start_datestamp -= chrono::Duration::days(rng.gen_range(-600..-150));
                         role_vec.push(nr.clone())
                     }

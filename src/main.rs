@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{http, middleware, web, App, HttpServer};
+use actix_web::{middleware, web, App, HttpServer};
 use std::env;
 use std::time::Instant;
 use tera::Tera;
