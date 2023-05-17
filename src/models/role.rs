@@ -42,6 +42,11 @@ pub struct Role {
 
 #[Object]
 impl Role {
+
+    pub async fn id(&self) -> Uuid {
+        self.id
+    }
+
     pub async fn person(&self) -> Option<Person> {
 
         match self.person_id {
