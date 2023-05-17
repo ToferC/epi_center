@@ -128,6 +128,10 @@ impl Team {
 
 #[Object]
 impl Team {
+    pub async fn id(&self) -> Uuid {
+        self.id
+    }
+
     pub async fn organization(&self) -> Result<Organization> {
         Organization::get_by_id(&self.organization_id)
     }
@@ -179,13 +183,10 @@ impl Team {
         Role::get_by_team_id(self.id)
     }
 
-
-
     pub async fn owner(&self) -> Result<Person> {
         let team_ownership = TeamOwnership::get_by_team_id(&self.id).unwrap();
 
         Person::get_by_id(&team_ownership.person_id)
-
     }
     
 }

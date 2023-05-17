@@ -8,6 +8,7 @@ use uuid::Uuid;
 use async_graphql::*;
 
 use crate::schema::*;
+use crate::common_utils::{RoleGuard, UserRole, is_admin};
 use crate::database::connection;
 use crate::models::{CapabilityLevel};
 
@@ -22,7 +23,10 @@ use super::{Person, Capability};
 /// Other people's validations of an individuals Capability
 pub struct Validation {
     pub id: Uuid,
-    #[graphql(skip)]
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Admin)",
+        visible = "is_admin",
+    )]
     pub validator_id: Uuid, // Person
     pub capability_id: Uuid, // Capability
     pub validated_level: CapabilityLevel,

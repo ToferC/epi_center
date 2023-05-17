@@ -11,7 +11,7 @@ use async_graphql::*;
 use crate::models::{Organization};
 
 use crate::common_utils::{
-    is_analyst, RoleGuard, UserRole};
+    is_analyst, RoleGuard, UserRole, is_admin};
 
 use crate::database::connection;
 use crate::schema::*;
@@ -31,6 +31,11 @@ use super::{Validation, Requirement};
 /// Will break out address and contact info soon
 pub struct Person {
     pub id: Uuid,
+
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Admin)",
+        visible = "is_admin",
+    )]
     pub user_id: Uuid,
     #[graphql(skip)]
     pub family_name: String,
@@ -47,7 +52,10 @@ pub struct Person {
     pub country: String,
 
     pub organization_id: Uuid, // Organization 
-    #[graphql(visible = false)]
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Admin)",
+        visible = "is_admin",
+    )]
     pub peoplesoft_id: String,
     pub orcid_id: String,
 
