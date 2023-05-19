@@ -223,15 +223,15 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
         let record = r.unwrap();
 
-        let gn: String = String::from(&record[0]);
-        let famn: String = String::from(&record[1]);
+        let gn: String = record[0].trim().to_owned();
+        let famn: String = record[1].trim().to_owned();
 
         let addr = addresses.choose(&mut rng).unwrap();
         
         let p = NewPerson::new(
             uuid::Uuid::new_v4(),
-            famn.trim().to_owned(),
-            gn.trim().to_owned(),
+            famn.to_owned(),
+            gn.to_owned(),
             format!("{}.{}_{}@phac-aspc.gc.ca", &gn, &famn, rng.gen_range(0..9999)).to_lowercase(),
             gen_rand_number(),
             addr[0].to_owned(),
