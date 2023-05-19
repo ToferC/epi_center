@@ -39,6 +39,16 @@ impl OrganizationQuery {
         Organization::get_by_name(name)
     }
 
+    #[graphql(name = "organizationById")]
+    pub async fn organization_by_id(
+        &self, 
+        _context: &Context<'_>,
+        id: Uuid,
+    ) -> Result<Organization> {
+
+        Organization::get_by_id(&id)
+    }
+
     // OrgTiers
 
     #[graphql(name = "allOrgTiers")]

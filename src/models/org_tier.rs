@@ -133,7 +133,7 @@ impl OrgTier {
         let mut conn = connection()?;
 
         let res = org_tiers::table
-            .filter(org_tiers::id.eq(id))
+            .filter(org_tiers::organization_id.eq(id))
             .load::<OrgTier>(&mut conn)?;
 
         Ok(res)
