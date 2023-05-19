@@ -27,7 +27,7 @@ pub struct Organization {
     pub id: Uuid,
     pub name_en: String,
     pub name_fr: String,
-    pub acroynm_en: String,
+    pub acronym_en: String,
     pub acronym_fr: String,
     pub org_type: String,
     pub url: String,
