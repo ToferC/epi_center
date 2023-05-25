@@ -10,7 +10,7 @@ use async_graphql::*;
 use crate::database::connection;
 use crate::schema::*;
 
-use super::{Organization, Person, OrgOwnership, SkillDomain};
+use super::{Organization, Person, OrgOwnership, SkillDomain, Team};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -54,6 +54,10 @@ impl OrgTier {
         let org_tier_ownership = OrgOwnership::get_by_org_tier_id(&self.id).unwrap();
 
         Person::get_by_id(&org_tier_ownership.owner_id)
+    }
+
+    pub async fn teams(&self) -> Result<Vec<Team>> {
+        Team::get_by_org_tier_id(&self.id)
     }
 }
 

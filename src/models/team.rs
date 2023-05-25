@@ -103,6 +103,16 @@ impl Team {
         Ok(res)
     }
 
+    pub fn get_by_org_tier_id(id: &Uuid) -> Result<Vec<Self>> {
+        let mut conn = connection()?;
+
+        let res = teams::table
+            .filter(teams::org_tier_id.eq(id))
+            .load::<Team>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_by_ids(ids: &Vec<Uuid>) -> Result<Vec<Self>> {
 
         let mut conn = connection()?;
