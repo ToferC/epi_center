@@ -50,6 +50,10 @@ impl OrgTier {
         }
     }
 
+    pub async fn child_organization_tier(&self) -> Result<Vec<OrgTier>> {
+        OrgTier::get_child_org_tiers(&self.id)
+    }
+
     pub async fn owner(&self) -> Result<Person> {
         let org_tier_ownership = OrgOwnership::get_by_org_tier_id(&self.id).unwrap();
 
@@ -138,6 +142,16 @@ impl OrgTier {
 
         let res = org_tiers::table
             .filter(org_tiers::organization_id.eq(id))
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    pub fn get_child_org_tiers(id: &Uuid) -> Result<Vec<OrgTier>> {
+        let mut conn = connection()?;
+
+        let res: Vec<Self> = org_tiers::table
+            .filter(org_tiers::parent_tier.eq(id))
             .load::<OrgTier>(&mut conn)?;
 
         Ok(res)
