@@ -71,6 +71,16 @@ impl OrganizationQuery {
         OrgTier::get_count(count)
     }
 
+    #[graphql(name = "orgTierById")]
+    pub async fn org_tier_by_id(
+        &self, 
+        _context: &Context<'_>,
+        id: Uuid,
+    ) -> Result<OrgTier> {
+
+        OrgTier::get_by_id(&id)
+    }
+
     #[graphql(name = "orgTierByName")]
     pub async fn org_tier_by_name(
         &self, 
