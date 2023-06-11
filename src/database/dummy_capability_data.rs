@@ -274,6 +274,7 @@ pub fn create_fake_capabilities(
             let na = NewAffiliation::new(
                 *person_id,
                 *science_org_id,
+                org_id,
                 "Research Affiliate".to_string(),
                 None,
             );

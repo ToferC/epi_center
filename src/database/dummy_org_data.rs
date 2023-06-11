@@ -35,6 +35,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
 
     let org = Organization::create(&o).expect("Unable to create new organization");
 
+    science_org_ids.push(org.id);
+
     // Set up Science Orgs for Affiliations
 
     let places = vec![("British Columbia", "UBC"), ("Manitoba", "UM"), ("Toronto", "UofT"), ("Quebec", "UQAM"),

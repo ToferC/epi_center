@@ -253,6 +253,10 @@ CREATE TABLE IF NOT EXISTS affiliations (
     FOREIGN KEY(organization_id)
         REFERENCES organizations(id) ON DELETE RESTRICT,
 
+    home_org_id UUID NOT NULL,
+    FOREIGN KEY(organization_id)
+        REFERENCES organizations(id) ON DELETE RESTRICT,
+
     affiliation_role VARCHAR(256) NOT NULL,
 
     start_datestamp TIMESTAMP NOT NULL DEFAULT NOW(),

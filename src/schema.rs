@@ -35,6 +35,7 @@ diesel::table! {
         id -> Uuid,
         person_id -> Uuid,
         organization_id -> Uuid,
+        home_org_id -> Uuid,
         affiliation_role -> Varchar,
         start_datestamp -> Timestamp,
         end_date -> Nullable<Timestamp>,
@@ -346,7 +347,6 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(affiliations -> organizations (organization_id));
 diesel::joinable!(affiliations -> persons (person_id));
 diesel::joinable!(capabilities -> organizations (organization_id));
 diesel::joinable!(capabilities -> persons (person_id));

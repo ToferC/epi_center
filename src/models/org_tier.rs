@@ -147,6 +147,17 @@ impl OrgTier {
         Ok(res)
     }
 
+    pub fn get_top_by_org_id(id: &Uuid) -> Result<Vec<OrgTier>> {
+        let mut conn = connection()?;
+
+        let res = org_tiers::table
+            .filter(org_tiers::organization_id.eq(id))
+            .filter(org_tiers::parent_tier.is_null())
+            .load::<OrgTier>(&mut conn)?;
+
+        Ok(res)
+    }
+
     pub fn get_child_org_tiers(id: &Uuid) -> Result<Vec<OrgTier>> {
         let mut conn = connection()?;
 

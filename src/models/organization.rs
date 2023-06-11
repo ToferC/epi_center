@@ -39,8 +39,8 @@ pub struct Organization {
 #[ComplexObject]
 impl Organization {
 
-    async fn get_affiliations(&self) -> Result<Vec<Affiliation>> {
-        Affiliation::get_by_organization_id(self.id)
+    async fn affiliations(&self) -> Result<Vec<Affiliation>> {
+        Affiliation::get_by_home_organization_id(self.id)
     }
 
     pub async fn publications(&self) -> Result<Vec<Publication>> {
@@ -50,8 +50,12 @@ impl Organization {
     pub async fn org_tiers(&self) -> Result<Vec<OrgTier>> {
         OrgTier::get_by_org_id(&self.id)
     }
+
+    pub async fn top_org_tier(&self) -> Result<Vec<OrgTier>> {
+        OrgTier::get_top_by_org_id(&self.id)
+    }
     
-    async fn get_capability_counts(&self) -> Result<Vec<CapabilityCount>> {
+    async fn capability_counts(&self) -> Result<Vec<CapabilityCount>> {
         let mut conn = connection().unwrap();
 
         let res: Vec<(String, SkillDomain, Option<CapabilityLevel>, i64)> = capabilities::table

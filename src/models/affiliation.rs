@@ -17,6 +17,7 @@ pub struct Affiliation {
     pub id: Uuid,
     pub person_id: Uuid,
     pub organization_id: Uuid,
+    pub home_org_id: Uuid,
     pub affiliation_role: String,
 
     pub start_datestamp: NaiveDateTime,
@@ -33,6 +34,10 @@ impl Affiliation {
 
     pub async fn organization(&self) -> Result<Organization> {
         Organization::get_by_id(&self.organization_id)
+    }
+
+    pub async fn home_organization(&self) -> Result<Organization> {
+        Organization::get_by_id(&self.home_org_id)
     }
 }
 
@@ -94,6 +99,14 @@ impl Affiliation {
             .load::<Affiliation>(&mut conn)?;
         Ok(res)
     }
+
+    pub fn get_by_home_organization_id(organization_id: Uuid) -> Result<Vec<Self>> {
+        let mut conn = database::connection()?;
+        let res = affiliations::table
+            .filter(affiliations::home_org_id.eq(organization_id))
+            .load::<Affiliation>(&mut conn)?;
+        Ok(res)
+    }
     
     pub fn update(&self) -> Result<Self> {
         let mut conn = database::connection()?;
@@ -112,6 +125,7 @@ impl Affiliation {
 pub struct NewAffiliation {
     pub person_id: Uuid,
     pub organization_id: Uuid,
+    pub home_org_id: Uuid,
     pub affiliation_role: String,
     pub end_date: Option<NaiveDateTime>
 }
@@ -121,12 +135,14 @@ impl NewAffiliation {
     pub fn new(
         person_id: Uuid,
         organization_id: Uuid,
+        home_org_id: Uuid,
         affiliation_role: String,
         end_date: Option<NaiveDateTime>,
     ) -> Self {
         NewAffiliation {
             person_id,
             organization_id,
+            home_org_id,
             affiliation_role,
             end_date,
         }
