@@ -79,7 +79,7 @@ impl Affiliation {
         Ok(res)
     }
 
-    pub fn get(id: Uuid) -> Result<Self> {
+    pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = database::connection()?;
         let res = affiliations::table.filter(affiliations::id.eq(id))
             .first(&mut conn)?;

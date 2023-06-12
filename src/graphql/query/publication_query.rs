@@ -1,6 +1,7 @@
 use async_graphql::*;
 
 use crate::models::{Publication};
+use uuid::Uuid;
 
 /*
 use crate::common_utils::{RoleGuard, is_admin, UserRole};
@@ -37,5 +38,16 @@ impl PublicationQuery {
     ) -> Result<Vec<Publication>> {
 
         Publication::get_by_title_or_subject(&title)
+    }
+
+    #[graphql(name = "publicationById")]
+    /// Accepts id and returns a publications
+    pub async fn publication_by_id(
+        &self, 
+        _context: &Context<'_>,
+        id: Uuid,
+    ) -> Result<Publication> {
+
+        Publication::get_by_id(&id)
     }
 }
