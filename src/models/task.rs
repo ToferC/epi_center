@@ -12,7 +12,7 @@ use crate::database::connection;
 
 use crate::models::{SkillDomain, WorkStatus};
 
-use super::Work;
+use super::{Work, Role};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Queryable, Insertable, AsChangeset, SimpleObject)]
 #[graphql(complex)]
@@ -42,6 +42,10 @@ impl Task {
 
     pub async fn effort(&self) -> Result<i32> {
         Work::sum_task_effort(&self.id)
+    }
+
+    pub async fn created_by(&self) -> Result<Role> {
+        Role::get_by_id(&self.created_by_role_id)
     }
 }
 
