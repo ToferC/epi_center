@@ -91,6 +91,7 @@ impl OrganizationQuery {
         OrgTier::get_by_name(&name)
     }
 
+    // Not done this yet
     #[graphql(name = "orgChart")]
     pub async fn org_chart(
         &self,
@@ -102,9 +103,9 @@ impl OrganizationQuery {
 
         let data = Vec::new();
 
-        let org_Tiers = OrgTier::get_by_org_id(&id)?;
+        let _org_tiers = OrgTier::get_by_org_id(&id)?;
 
-        let query = "query {
+        let _query = "query {
             allOrgTiers {
               nameEn
               owner {

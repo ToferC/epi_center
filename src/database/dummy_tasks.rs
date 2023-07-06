@@ -51,7 +51,7 @@ pub fn generate_tasks(
 pub fn generate_requirement(role_id: Uuid, skill_id: Uuid, hr_group: HrGroup, hr_level: i32, rng: &mut impl Rng) -> NewRequirement {
     // Add requirements for each role based on the team Primary Domain
 
-    let mut req_level: CapabilityLevel;
+    let req_level: CapabilityLevel;
 
     if  hr_group == HrGroup::EX || hr_group == HrGroup::DM {
         req_level = CapabilityLevel::Expert

@@ -450,7 +450,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
                     role_vec.push(nr.clone())
                 },
                 9..=10 => {
-                    for _i in 1..=2 {
+                    for _i in 1..=3 {
                         nr.active = false;
                         nr.hr_level -= 1;
                         nr.start_datestamp -= chrono::Duration::days(rng.gen_range(-600..-150));
