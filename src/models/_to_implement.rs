@@ -30,11 +30,20 @@ pub struct DataAccess {
 }
 
 pub struct IntersectionalData {
+    pub id: Uuid,
+    pub person_id: Uuid,
     pub birth_date: NaiveDate,
     pub gender: String,
     pub sexuality: String,
-    pub disability: bool,
+    pub disability: String,
     pub ethnicity: String,
+    pub family_status: String,
+    pub education_level: String,
+    pub economic_background: String,
+    pub linguistic_background: String,
+    pub nationality: String,
+    pub created_at: NaiveDate,
+    pub updated_at: NaiveDate,
 }
 
 pub struct WorkSkillRequirement {
