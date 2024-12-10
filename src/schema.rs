@@ -1,31 +1,31 @@
 // @generated automatically by Diesel CLI.
 
 pub mod sql_types {
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "capability_level"))]
     pub struct CapabilityLevel;
 
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "hr_group"))]
     pub struct HrGroup;
 
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "language_level"))]
     pub struct LanguageLevel;
 
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "language_name"))]
     pub struct LanguageName;
 
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "publication_status"))]
     pub struct PublicationStatus;
 
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "skill_domain"))]
     pub struct SkillDomain;
 
-    #[derive(diesel::sql_types::SqlType)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "work_status"))]
     pub struct WorkStatus;
 }
@@ -36,6 +36,7 @@ diesel::table! {
         person_id -> Uuid,
         organization_id -> Uuid,
         home_org_id -> Uuid,
+        #[max_length = 256]
         affiliation_role -> Varchar,
         start_datestamp -> Timestamp,
         end_date -> Nullable<Timestamp>,
@@ -51,7 +52,9 @@ diesel::table! {
 
     capabilities (id) {
         id -> Uuid,
+        #[max_length = 256]
         name_en -> Varchar,
+        #[max_length = 256]
         name_fr -> Varchar,
         domain -> SkillDomain,
         person_id -> Uuid,
@@ -102,7 +105,9 @@ diesel::table! {
         id -> Uuid,
         organization_id -> Uuid,
         tier_level -> Int4,
+        #[max_length = 256]
         name_en -> Varchar,
+        #[max_length = 256]
         name_fr -> Varchar,
         primary_domain -> SkillDomain,
         parent_tier -> Nullable<Uuid>,
@@ -115,11 +120,17 @@ diesel::table! {
 diesel::table! {
     organizations (id) {
         id -> Uuid,
+        #[max_length = 256]
         name_en -> Varchar,
+        #[max_length = 256]
         name_fr -> Varchar,
+        #[max_length = 16]
         acronym_en -> Varchar,
+        #[max_length = 16]
         acronym_fr -> Varchar,
+        #[max_length = 32]
         org_type -> Varchar,
+        #[max_length = 256]
         url -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -133,12 +144,19 @@ diesel::table! {
         user_id -> Uuid,
         family_name -> Varchar,
         given_name -> Varchar,
+        #[max_length = 128]
         email -> Varchar,
+        #[max_length = 32]
         phone -> Varchar,
+        #[max_length = 256]
         work_address -> Varchar,
+        #[max_length = 128]
         city -> Varchar,
+        #[max_length = 128]
         province -> Varchar,
+        #[max_length = 16]
         postal_code -> Varchar,
+        #[max_length = 128]
         country -> Varchar,
         organization_id -> Uuid,
         peoplesoft_id -> Varchar,
@@ -154,6 +172,7 @@ diesel::table! {
         id -> Uuid,
         publication_id -> Uuid,
         contributor_id -> Uuid,
+        #[max_length = 256]
         contributor_role -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -168,10 +187,14 @@ diesel::table! {
         id -> Uuid,
         publishing_organization_id -> Uuid,
         lead_author_id -> Uuid,
+        #[max_length = 256]
         title -> Varchar,
+        #[max_length = 256]
         subject_text -> Varchar,
         publication_status -> PublicationStatus,
+        #[max_length = 256]
         url_string -> Nullable<Varchar>,
+        #[max_length = 256]
         publishing_id -> Nullable<Varchar>,
         submitted_date -> Nullable<Timestamp>,
         published_datestamp -> Nullable<Timestamp>,
@@ -187,7 +210,9 @@ diesel::table! {
 
     requirements (id) {
         id -> Uuid,
+        #[max_length = 256]
         name_en -> Varchar,
+        #[max_length = 256]
         name_fr -> Varchar,
         domain -> SkillDomain,
         role_id -> Uuid,
@@ -207,7 +232,9 @@ diesel::table! {
         id -> Uuid,
         person_id -> Nullable<Uuid>,
         team_id -> Uuid,
+        #[max_length = 256]
         title_en -> Varchar,
+        #[max_length = 256]
         title_fr -> Varchar,
         effort -> Float8,
         active -> Bool,
@@ -226,7 +253,9 @@ diesel::table! {
 
     skills (id) {
         id -> Uuid,
+        #[max_length = 256]
         name_en -> Varchar,
+        #[max_length = 256]
         name_fr -> Varchar,
         description_en -> Text,
         description_fr -> Text,
@@ -245,11 +274,15 @@ diesel::table! {
     tasks (id) {
         id -> Uuid,
         created_by_role_id -> Uuid,
+        #[max_length = 144]
         title -> Varchar,
         domain -> SkillDomain,
+        #[max_length = 1256]
         intended_outcome -> Varchar,
+        #[max_length = 1256]
         final_outcome -> Nullable<Varchar>,
         approval_tier -> Int4,
+        #[max_length = 256]
         url -> Varchar,
         start_datestamp -> Timestamp,
         target_completion_date -> Timestamp,
@@ -281,7 +314,9 @@ diesel::table! {
         organization_id -> Uuid,
         org_tier_id -> Uuid,
         primary_domain -> SkillDomain,
+        #[max_length = 256]
         name_en -> Varchar,
+        #[max_length = 256]
         name_fr -> Varchar,
         description_en -> Text,
         description_fr -> Text,
@@ -294,13 +329,19 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Uuid,
+        #[max_length = 255]
         hash -> Varchar,
+        #[max_length = 128]
         email -> Varchar,
+        #[max_length = 64]
         role -> Varchar,
+        #[max_length = 256]
         name -> Varchar,
+        #[max_length = 64]
         access_level -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        #[max_length = 256]
         access_key -> Varchar,
         approved_by_user_uid -> Nullable<Uuid>,
     }
@@ -308,6 +349,7 @@ diesel::table! {
 
 diesel::table! {
     valid_roles (role) {
+        #[max_length = 64]
         role -> Varchar,
     }
 }
@@ -336,7 +378,9 @@ diesel::table! {
         id -> Uuid,
         task_id -> Uuid,
         role_id -> Uuid,
+        #[max_length = 256]
         work_description -> Varchar,
+        #[max_length = 256]
         url -> Nullable<Varchar>,
         domain -> SkillDomain,
         capability_level -> CapabilityLevel,

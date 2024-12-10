@@ -44,7 +44,7 @@ impl Skill {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum, QueryId)]
 #[ExistingTypePath = "crate::schema::sql_types::SkillDomain"]
 pub enum SkillDomain {
     PublicHealth,
