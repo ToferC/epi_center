@@ -1,6 +1,6 @@
 # Build stage
 #  Base rust image vaiant: rust:1.68-slim requires other dependencies
-FROM rust:1.68 as builder
+FROM rust:1.85 as builder
 
 RUN apt-get -qq update && apt-get install -y -q \
     libclang-dev \
@@ -24,7 +24,7 @@ COPY migrations migrations
 RUN cargo build --release
 
 # Final stage
-FROM debian:buster-slim 
+FROM debian:bookworm-slim 
 
 # Install dependencies (check that they are still all required)
 RUN apt-get update && apt-get install -y \

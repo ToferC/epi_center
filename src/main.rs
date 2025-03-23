@@ -37,7 +37,7 @@ async fn main() -> std::io::Result<()> {
             .expect("Unable to convert string to u16");
         (env::var("HOST").unwrap(), p)
     } else {
-        (String::from("0.0.0.0"), 8080)
+        (String::from("0.0.0.0"), 8088)
     };
 
     let _domain = host.clone();
