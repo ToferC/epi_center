@@ -171,7 +171,8 @@ impl From<UserData> for InsertableUser {
         } = user_data;
         
         let hash = hash_password(&password)
-            .expect("Unable to hash password");
+            .expect("Unable to hash password")
+            .to_string();
 
         Self {
             email,

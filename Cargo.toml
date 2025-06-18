@@ -17,8 +17,7 @@ actix-files = "0.6.6"
 async-graphql = { version = "7.0.17", features = ["uuid", "chrono", "chrono-tz", "graphiql"] }
 async-graphql-actix-web = "7.0.17"
 
-argon2rs = "0.2"
-argonautica = "0.2.0"
+argon2 = "0.5.3"
 jsonwebtoken = "7.2.0"
 strum = "0.23.0"
 strum_macros = "0.23.1"

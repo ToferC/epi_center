@@ -113,7 +113,7 @@ impl UserMutation {
         };
 
         if let Some(s) = user_data.password {
-            target_user.hash = hash_password(&s)?;
+            target_user.hash = hash_password(&s)?.to_string();
         };
 
         if let Some(s) = user_data.role {
@@ -134,7 +134,7 @@ impl UserMutation {
 
         if let Some(user) = maybe_user {
 
-            if let Ok(matching) = verify_password(&user.hash.to_string(), &input.password) {
+            if let Ok(matching) = verify_password(user.hash.to_string(), &input.password) {
                 if matching {
                     let role = UserRole::from_str(user.role.as_str())
                         .expect("Cannot convert &str to UserRole");

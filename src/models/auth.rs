@@ -1,12 +1,16 @@
 use std::str::FromStr;
 
 use actix_web::{HttpRequest, Result};
+use argon2::password_hash::{PasswordHashString, SaltString};
 use chrono::{Duration, Local};
 use jsonwebtoken::{decode, DecodingKey, TokenData, Validation};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
-use argonautica::{Hasher, Verifier};
+use argon2::{
+    Argon2,
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier},
+};
 use jsonwebtoken::errors::*;
 
 use crate::common_utils::UserRole;
@@ -89,21 +93,33 @@ pub fn decode_token(token: &str) -> Result<TokenData<Claims>, jsonwebtoken::erro
     )?)
 }
 
-pub fn hash_password(password: &str) -> Result<String, argonautica::Error> {
-    Hasher::default()
-        .with_password(password)
-        .with_secret_key(PASSWORD_SECRET_KEY.as_str())
-        .hash()
+pub fn hash_password(password: &str) -> Result<PasswordHashString, argon2::password_hash::Error> {
+    let argon2 = Argon2::default();
+
+    let pwd = password.as_bytes();
+
+    let salt = SaltString::from_b64(&PASSWORD_SECRET_KEY).expect("Unable to generate salt").to_owned();
+
+    let result = argon2.hash_password(
+        pwd,
+        &salt,
+    )?
+    .serialize();
+
+    Ok(result)
 }
 
-pub fn verify_password(hash: &str, password: &str) -> Result<bool, argonautica::Error> {
-    Verifier::default()
-        .with_hash(hash)
-        .with_password(password)
-        .with_secret_key(PASSWORD_SECRET_KEY.as_str())
-        .verify()
+pub fn verify_password(hash_string: String, password: &str) -> Result<bool, argon2::password_hash::Error> {
+    
+    let pwd = password.as_bytes();
+
+    let hash = PasswordHashString::from_str(&hash_string)?;
+    
+    let result = Argon2::default().verify_password(pwd, &hash.password_hash());
+
+    if result == Ok(()) {
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
-
-
-
-
