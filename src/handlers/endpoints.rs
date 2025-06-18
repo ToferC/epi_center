@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse, HttpRequest, Result};
-use async_graphql::http::{GraphQLPlaygroundConfig, playground_source};
+use async_graphql::http::{GraphiQLSource};
 use async_graphql::Schema;
 
 use async_graphql_actix_web::{GraphQLSubscription,
@@ -12,9 +12,7 @@ use crate::graphql::{AppSchema};
 pub async fn playground_handler() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(playground_source(
-            GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
-        ))
+        .body(GraphiQLSource::build().endpoint("/graphql").finish())
 }
 
 pub async fn graphql(

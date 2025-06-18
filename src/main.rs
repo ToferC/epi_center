@@ -13,7 +13,6 @@ use people_data_api::AppData;
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
 
     println!("Starting DB initialization");

@@ -22,7 +22,6 @@ impl RoleGuard {
     }
 }
 
-#[async_trait::async_trait]
 impl Guard for RoleGuard {
     async fn check(&self, context: &Context<'_>) -> Result<(), async_graphql::Error> {
         
