@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 
 use async_graphql::Guard;
 use async_graphql::*;
-use async_trait::async_trait;
 
 #[derive(Eq, PartialEq, Display, EnumString, Copy, Clone, PartialOrd, Ord)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]

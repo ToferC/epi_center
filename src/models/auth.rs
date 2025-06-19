@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
 use argon2::{
     Argon2,
-    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier},
+    password_hash::{PasswordHasher, PasswordVerifier},
 };
 use jsonwebtoken::errors::*;
 
