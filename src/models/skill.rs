@@ -47,38 +47,38 @@ impl Skill {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, Enum)]
 #[ExistingTypePath = "crate::schema::sql_types::SkillDomain"]
 pub enum SkillDomain {
-    PublicHealth,
-    Policy,
-    Data,
+    Combat,
+    Strategy,
+    Intelligence,
     InformationTechnology,
     HumanResources,
     Finance,
     Communications,
     Administration,
-    Scientific,
+    Engineering,
     Medical,
     Management,
     Leadership,
-    Partnerships,
+    JointOperations,
 }
 
 impl Distribution<SkillDomain> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> SkillDomain {
         match rng.gen_range(0..20) {
-            0..=3 => SkillDomain::PublicHealth,
-            4..=5 => SkillDomain::Policy,
-            6 => SkillDomain::Data,
+            0..=3 => SkillDomain::Combat,
+            4..=5 => SkillDomain::Strategy,
+            6 => SkillDomain::Intelligence,
             7 => SkillDomain::InformationTechnology,
             8 => SkillDomain::HumanResources,
             9 => SkillDomain::Finance,
             10 => SkillDomain::Communications,
             11 => SkillDomain::Administration,
-            12..=14 => SkillDomain::Scientific,
+            12..=14 => SkillDomain::Engineering,
             15..=16 => SkillDomain::Medical,
             17 => SkillDomain::Management,
             18 => SkillDomain::Leadership,
-            19 => SkillDomain::Partnerships,
-            _ => SkillDomain::Policy,
+            19 => SkillDomain::JointOperations,
+            _ => SkillDomain::Strategy,
         }
     }
 }

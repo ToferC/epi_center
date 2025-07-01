@@ -25,12 +25,12 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     let mut science_org_ids: Vec<uuid::Uuid> = Vec::new();
 
     let o = NewOrganization::new(
-        "Public Health Agency of Canada".to_string(),
-        "Agence de Sante Public de Canada".to_string(),
-        "PHAC".to_string(),
-        "ASPC".to_string(),
-        "Government".to_string(),
-        "some_url".to_string(),
+        "Canadian Armed Forces".to_string(),
+        "Forces armées canadiennes".to_string(),
+        "CAF".to_string(),
+        "FAC".to_string(),
+        "Military".to_string(),
+        "somehttps://www.canada.ca/en/department-national-defence.html_url".to_string(),
     );
 
     let org = Organization::create(&o).expect("Unable to create new organization");
@@ -69,8 +69,8 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     let tt = NewOrgTier::new(
             org.id, 
             1, 
-            "Office of the President and Chief Public Health Officer (OPCPHO)".to_string(), 
-            "Office of the President and Chief Public Health Officer (OPCPHO)_FR".to_string(), 
+            "Office of the Chief of Defence Staff".to_string(), 
+            "Bureau de chef d’état-major de la Défense".to_string(), 
             SkillDomain::Leadership,
             None);
 
@@ -95,18 +95,18 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
         let domain: SkillDomain = match domain.as_str() {
             "FIN" => SkillDomain::Finance,
             "HR" => SkillDomain::HumanResources,
-            "COMM" => SkillDomain::Communications,
-            "POL" => SkillDomain::Policy,
-            "PH" => SkillDomain::PublicHealth,
-            "PART" => SkillDomain::Partnerships,
-            "MGT" => SkillDomain::Management,
+            "COM" => SkillDomain::Communications,
+            "STR" => SkillDomain::Strategy,
+            "CMB" => SkillDomain::Combat,
+            "JOP" => SkillDomain::JointOperations,
+            "MAN" => SkillDomain::Management,
             "LEAD" => SkillDomain::Leadership,
-            "ADMIN" => SkillDomain::Administration,
-            "DATA" => SkillDomain::Data,
+            "ADM" => SkillDomain::Administration,
+            "INT" => SkillDomain::Intelligence,
             "IT" => SkillDomain::InformationTechnology,
-            "SCI" => SkillDomain::Scientific,
+            "ENG" => SkillDomain::Engineering,
             "MED" => SkillDomain::Medical,
-            _ => SkillDomain::PublicHealth,
+            _ => SkillDomain::Combat,
         };
 
         println!("Creating Org Tiers for: {}", branch);

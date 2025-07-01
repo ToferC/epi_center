@@ -12,7 +12,7 @@ pub fn generate_dummy_publications_and_contributors(science_org_ids: &Vec<Uuid>)
 
     let mut rng = rand::thread_rng();
 
-    let scientist_capabilities = Capability::get_by_domain_and_level(&SkillDomain::Scientific, CapabilityLevel::Expert)?;
+    let scientist_capabilities = Capability::get_by_domain_and_level(&SkillDomain::Engineering, CapabilityLevel::Expert)?;
 
     let mut scientist_ids = Vec::new();
     for capability in &scientist_capabilities {

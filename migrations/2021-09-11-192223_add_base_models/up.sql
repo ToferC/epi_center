@@ -75,9 +75,9 @@ CREATE TABLE IF NOT EXISTS persons (
     retired_at TIMESTAMP
 );
 
-CREATE TYPE skill_domain as ENUM ('public_health', 'policy', 'data', 'information_technology', 
-    'human_resources', 'finance', 'communications', 'administration', 'scientific', 'medical', 
-    'management', 'leadership', 'partnerships');
+CREATE TYPE skill_domain as ENUM ('combat', 'strategy', 'intelligence', 'information_technology', 
+    'human_resources', 'finance', 'communications', 'administration', 'engineering', 'medical', 
+    'management', 'leadership', 'joint_operations');
 
 CREATE TABLE IF NOT EXISTS org_tiers (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

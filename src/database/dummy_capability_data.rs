@@ -8,44 +8,44 @@ use crate::models::{Affiliation, NewAffiliation, NewCapability, Capability, Skil
 
 pub fn pre_populate_skills() -> Result<(), Error> {
 
-    let public_health_skills: Vec<&str> = "
-        Epidemiology; One Health; Community Health; Mental Health; Health Inequalities; Multi-sectoral Partnerships; Drug Use; Vaccines; 
-        Risk Assessment; Surveillance
+    let military_combat_skills: Vec<&str> = "
+        Infantry Operations; Armor Operations; Artillery Operations; Close Quarters Combat; Marksmanship; Small Unit Tactics; 
+        Battlefield Awareness; Weapons Systems; Urban Combat
     ".split("; ").collect();
 
-    for s in public_health_skills {
+    for s in military_combat_skills {
         let ns = NewSkill::new(
             s.trim().to_string(),
             format!("{}_FR", s.trim().to_string()),
-            SkillDomain::PublicHealth,
+            SkillDomain::Combat,
         );
 
         let _res = Skill::create(&ns)?;
     }
     
-    let policy_skills: Vec<&str> = "
-        Policy Development; Policy Measurement; Policy Implementation; Strategic Policy; Evaluation; MC & TBsub Writing; Governance
+    let military_strategy_skills: Vec<&str> = "
+        Strategic Planning; Military Doctrine; Operational Planning; Tactical Analysis; Force Structure Planning; Intelligence Analysis; Mission Planning
     ".split("; ").collect();
 
-    for s in policy_skills {
+    for s in military_strategy_skills {
         let ns = NewSkill::new(
             s.trim().to_string(),
             format!("{}_FR", s.trim().to_string()),
-            SkillDomain::Policy,
+            SkillDomain::Strategy,
         );
 
         let _res = Skill::create(&ns)?;
     }
 
-    let data_skills: Vec<&str> = "
-        Data Access; Data Collection; Data Analysis; Data Management; Public Health Infomatics; Bioinfomatics; Data Visualization
+    let military_intelligence_skills: Vec<&str> = "
+        Intelligence Gathering; Reconnaissance; Surveillance; Signal Intelligence; Human Intelligence; Threat Assessment; Data Analysis
     ".split("; ").collect();
 
-    for s in data_skills {
+    for s in military_intelligence_skills {
         let ns = NewSkill::new(
             s.trim().to_string(),
             format!("{}_FR", s.trim().to_string()),
-            SkillDomain::Data,
+            SkillDomain::Intelligence,
         );
 
         let _res = Skill::create(&ns)?;
@@ -121,25 +121,25 @@ pub fn pre_populate_skills() -> Result<(), Error> {
         let _res = Skill::create(&ns)?;
     }
 
-    let scientific_skills: Vec<&str> = "
-        Anti-Microbial Resistance; Whole Genome Sequencing; Genomics; Modelling; Climate Change
+    let military_engineering_skills: Vec<&str> = "
+        Explosive Ordnance Disposal; Combat Engineering; Fortification Design; Bridge Construction; Demolitions; Mine Warfare; Technical Intelligence
     ".split("; ").collect();
 
-    for s in scientific_skills {
+    for s in military_engineering_skills {
         let ns = NewSkill::new(
             s.trim().to_string(),
             format!("{}_FR", s.trim().to_string()),
-            SkillDomain::Scientific,
+            SkillDomain::Engineering,
         );
 
         let _res = Skill::create(&ns)?;
     }
 
-    let medical_skills: Vec<&str> = "
-        Pediatrics; Maternal Health; Respiratory Health; Cardiovascular Health; Dental Health; Nutrition; Chronic Disease
+    let combat_medical_skills: Vec<&str> = "
+        Combat Medicine; Battlefield Trauma Care; Field Surgery; Emergency Medicine; Triage; Medical Evacuation; Chemical Biological Treatment
     ".split("; ").collect();
 
-    for s in medical_skills {
+    for s in combat_medical_skills {
         let ns = NewSkill::new(
             s.trim().to_string(),
             format!("{}_FR", s.trim().to_string()),
@@ -177,15 +177,15 @@ pub fn pre_populate_skills() -> Result<(), Error> {
         let _res = Skill::create(&ns)?;
     }
 
-    let partnership_skills: Vec<&str> = "
-        Cross-sectoral Partnerships; International Partnerships; Inter-governmental Partnerships; Community Partnerships
+    let joint_operations_skills: Vec<&str> = "
+        Joint Operations; Coalition Warfare; Multinational Coordination; Interoperability; Combined Arms; Allied Integration; International Military Cooperation
     ".split("; ").collect();
 
-    for s in partnership_skills {
+    for s in joint_operations_skills {
         let ns = NewSkill::new(
             s.trim().to_string(),
             format!("{}_FR", s.trim().to_string()),
-            SkillDomain::Partnerships,
+            SkillDomain::JointOperations,
         );
 
         let _res = Skill::create(&ns)?;
@@ -270,7 +270,7 @@ pub fn create_fake_capabilities(
 
         // If person has Science domain, 20% chance to add an affiliation
 
-        if sds.contains(&SkillDomain::Scientific) && rng.gen_bool(0.2) {
+        if sds.contains(&SkillDomain::Engineering) && rng.gen_bool(0.2) {
             let na = NewAffiliation::new(
                 *person_id,
                 *science_org_id,
